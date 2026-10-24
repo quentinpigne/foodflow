@@ -17,7 +17,6 @@ a été consignée (ADR, spec).
 | Q9 | Open Food Facts : appel à la demande, ou copie locale filtrée ? | Appel à la demande au scan, résultat mis en cache dans la base | ADR-0007, `ALI` |
 | Q10 | Prix : saisis article par article aux courses, ou total du ticket seulement ? | Prix par article facultatif ; total de la session obligatoire pour le rapprochement avec Cashflow | `COU`, `CSH` |
 | Q12 | IA : quel modèle, quel format d'échange, quel garde-fou de coût ? | API Claude, désactivée par défaut ; réponse structurée contrôlée par le domaine | ADR-0007, `PLA` |
-| Q17 | Batch cooking : une préparation à l'avance par recette entière et par sous-recette suffit-elle, ou faut-il descendre à l'étape ? | Recette entière et sous-recettes | ADR-0011 |
 | Q18 | Temps disponible par défaut de la semaine type | Semaine : petit-déjeuner 10 min, déjeuner 0 (hors foyer), dîner 30 min ; week-end : 20 / 60 / 45 min ; session de préparation le dimanche de 15 h à 18 h | ADR-0011, `PLA` |
 | Q13 | Créneaux de repas par défaut (petit-déjeuner, déjeuner, goûter, dîner) et part de l'objectif journalier de chacun | 4 créneaux, 25 / 35 / 10 / 30 % | `PLA`, `NUT` |
 
@@ -32,6 +31,7 @@ a été consignée (ADR, spec).
 
 | # | Question | Réponse | Où |
 |---|---|---|---|
+| Q17 | Granularité du batch cooking | Recette entière et sous-recettes, pas d'étape (2026-10-25) | ADR-0011 |
 | Q8 | HTTPS pour la PWA | Domaine personnel, Let's Encrypt par challenge DNS-01, certificat renouvelé hors du binaire (2026-10-25) | ADR-0009 |
 | Q11 | Revue des ADR 0001 à 0010 | Tous acceptés (2026-10-25) | adr/ |
 | Q1 | Comment compter les convives ? | En équivalents adulte ; invités et absents réglables par repas (2026-10-24) | ADR-0004 |
