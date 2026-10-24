@@ -1,6 +1,6 @@
 # ADR-0003 — Aliments, familles d'aliments et produits
 
-- **Statut** : Proposé
+- **Statut** : Accepté (2026-10-25)
 - **Date** : 2026-10-24
 - **Concerne** : `ALI`, `STK`, `REC`, `COU`, `PLA`, modèle de données
 

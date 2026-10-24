@@ -7,13 +7,13 @@ a été consignée (ADR, spec).
 
 | # | Question | Proposition par défaut | Où |
 |---|---|---|---|
-| Q8 | HTTPS pour la PWA : autorité de certification interne (certificat à installer sur chaque appareil) ou domaine personnel avec Let's Encrypt par challenge DNS ? Tranche aussi Q15 de Cashflow | Domaine personnel, si tu en as un dont le DNS a une API | ADR-0009 |
-| Q11 | Revue des ADR 0001 à 0010 (statut `Proposé`) | — | adr/ |
+| — | *Aucune.* | — | — |
 
 ## À trancher avant la phase concernée
 
 | # | Question | Proposition par défaut | Où |
 |---|---|---|---|
+| Q16 | Fournisseur DNS du domaine (pour le plugin ACME) et choix entre enregistrement DNS public vers l'adresse privée ou DNS local | Enregistrement public, DNS local si le routeur le bloque | ADR-0009, phase 1 |
 | Q9 | Open Food Facts : appel à la demande, ou copie locale filtrée ? | Appel à la demande au scan, résultat mis en cache dans la base | ADR-0007, `ALI` |
 | Q10 | Prix : saisis article par article aux courses, ou total du ticket seulement ? | Prix par article facultatif ; total de la session obligatoire pour le rapprochement avec Cashflow | `COU`, `CSH` |
 | Q12 | IA : quel modèle, quel format d'échange, quel garde-fou de coût ? | API Claude, désactivée par défaut ; réponse structurée contrôlée par le domaine | ADR-0007, `PLA` |
@@ -30,6 +30,8 @@ a été consignée (ADR, spec).
 
 | # | Question | Réponse | Où |
 |---|---|---|---|
+| Q8 | HTTPS pour la PWA | Domaine personnel, Let's Encrypt par challenge DNS-01, certificat renouvelé hors du binaire (2026-10-25) | ADR-0009 |
+| Q11 | Revue des ADR 0001 à 0010 | Tous acceptés (2026-10-25) | adr/ |
 | Q1 | Comment compter les convives ? | En équivalents adulte ; invités et absents réglables par repas (2026-10-24) | ADR-0004 |
 | Q2 | Structure de la journée | Créneaux de repas paramétrables (2026-10-24) | vision, `PLA` |
 | Q3 | Lien avec Cashflow | Foodflow lit Cashflow par son API, en lecture seule (2026-10-24) | ADR-0010 |

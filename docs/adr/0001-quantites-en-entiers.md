@@ -1,6 +1,6 @@
 # ADR-0001 — Quantités, nutriments et prix stockés en entiers
 
-- **Statut** : Proposé
+- **Statut** : Accepté (2026-10-25)
 - **Date** : 2026-10-24
 - **Concerne** : modèle de données, `ALI`, `STK`, `REC`, `COU`
 

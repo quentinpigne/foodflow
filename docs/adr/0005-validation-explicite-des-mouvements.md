@@ -1,6 +1,6 @@
 # ADR-0005 — Validation explicite des mouvements et des imports
 
-- **Statut** : Proposé
+- **Statut** : Accepté (2026-10-25)
 - **Date** : 2026-10-24
 - **Concerne** : `STK`, `COU`, `PLA`, `REC`, ADR-0002
 

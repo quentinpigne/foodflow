@@ -1,6 +1,6 @@
 # ADR-0009 — Stack et déploiement : ceux de Cashflow, plus une PWA
 
-- **Statut** : À décider (HTTPS)
+- **Statut** : Accepté (2026-10-25)
 - **Date** : 2026-10-24
 - **Concerne** : architecture, toutes les specs
 
@@ -47,9 +47,25 @@ deux applications.
 - **PWA** (`@angular/service-worker`) pour l'installation sur le téléphone et le **mode magasin hors
   connexion** : la liste de courses en cours est gardée sur l'appareil, les articles cochés hors ligne
   sont envoyés au retour du réseau.
-- HTTPS : **à décider** entre les options 2 et 3 (Q8).
+- **HTTPS dès la V1, option 3** (décidée le 2026-10-25) : un sous-domaine du domaine personnel
+  (`foodflow.<domaine>`) avec un certificat Let's Encrypt obtenu par **challenge DNS-01**.
+  - Le certificat est obtenu et renouvelé **hors du binaire**, par un outil ACME (lego ou certbot avec le
+    plugin du fournisseur DNS) planifié sur ubuntu01, qui écrit le certificat dans le volume.
+    Le binaire le lit au démarrage et le recharge quand le fichier change, sans redémarrage.
+  - axum sert le HTTPS lui-même (`rustls`), sans reverse proxy, comme le prévoyait Cashflow (ADR-0015).
+  - Le nom résout vers l'adresse locale du serveur : enregistrement DNS public pointant vers une adresse
+    privée, ou DNS local. Le serveur reste injoignable depuis Internet ; seul le fournisseur DNS est
+    contacté, pour le challenge.
+  - Cookie de session `Secure`, en plus de `HttpOnly` et `SameSite=Strict`.
+- Les conventions de modèle de Cashflow sont reprises : identifiants UUIDv7, dates calendaires sans
+  fuseau, horodatages UTC réservés à l'audit (ADR-0011 et ADR-0012 de Cashflow).
 
 ## Conséquences
+
+- Le même mécanisme de certificat pourra servir à Cashflow (Q15 de Cashflow) : un sous-domaine de plus.
+- Certains routeurs bloquent les réponses DNS publiques contenant une adresse privée (protection contre
+  le « DNS rebinding ») : si c'est le cas, une entrée DNS locale (routeur, `/etc/hosts`) est nécessaire.
+- Le jeton d'API du fournisseur DNS est un secret du serveur, hors du dépôt et hors de l'image.
 
 - La synchronisation hors connexion est limitée à la liste de courses (cocher, ajouter un article) :
   le reste de l'application exige le réseau local.

@@ -1,6 +1,6 @@
 # ADR-0008 — Export complet dans un format ouvert
 
-- **Statut** : Proposé
+- **Statut** : Accepté (2026-10-25)
 - **Date** : 2026-10-24
 - **Concerne** : architecture, ADR-0009
 

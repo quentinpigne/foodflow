@@ -1,6 +1,6 @@
 # ADR-0006 — Mono-utilisateur
 
-- **Statut** : Proposé
+- **Statut** : Accepté (2026-10-25)
 - **Date** : 2026-10-24
 - **Concerne** : architecture, ADR-0004, ADR-0009
 

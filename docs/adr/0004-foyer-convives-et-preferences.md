@@ -1,6 +1,6 @@
 # ADR-0004 — Foyer, convives et préférences
 
-- **Statut** : Proposé
+- **Statut** : Accepté (2026-10-25)
 - **Date** : 2026-10-24
 - **Concerne** : `PLA`, `NUT`, `REC`, `COU`, modèle de données, ADR-0006
 

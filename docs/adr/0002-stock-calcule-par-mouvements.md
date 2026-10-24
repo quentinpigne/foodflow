@@ -1,6 +1,6 @@
 # ADR-0002 — Stock calculé à partir d'un journal de mouvements
 
-- **Statut** : Proposé
+- **Statut** : Accepté (2026-10-25)
 - **Date** : 2026-10-24
 - **Concerne** : `STK`, `COU`, `PLA`, `GAS`, modèle de données
 

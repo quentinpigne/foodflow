@@ -1,6 +1,6 @@
 # ADR-0010 — Foodflow lit Cashflow par son API
 
-- **Statut** : Proposé
+- **Statut** : Accepté (2026-10-25)
 - **Date** : 2026-10-24
 - **Concerne** : `CSH`, `COU`, `TDB`, ADR-0007, ADR-0009 ; Cashflow (authentification, API)
 

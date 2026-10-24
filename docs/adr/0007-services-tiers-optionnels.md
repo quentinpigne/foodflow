@@ -1,6 +1,6 @@
 # ADR-0007 — Services tiers explicites et optionnels
 
-- **Statut** : Proposé
+- **Statut** : Accepté (2026-10-25)
 - **Date** : 2026-10-24
 - **Concerne** : `ALI`, `REC`, `PLA`, ADR-0009, ADR-0010
 
