@@ -147,11 +147,12 @@ Liste de référence, fournie par une migration.
 | `expiry_kind` | `USE_BY` \| `BEST_BEFORE` \| `NONE` | |
 | `expiry_date` | `Date` ? | requis sauf `NONE` |
 | `opened_on`, `frozen_on`, `thawed_on` | `Date` ? | dérivés des mouvements, recopiés pour la lecture |
+| `checked_until` | `Date` ? | nouvelle date limite du dernier `CHECKED` (R-STK-37), recopiée pour la lecture |
 | `unit_price` | `Money` ? | prix payé pour le lot (spec `COU`) |
 | `needs_review` | booléen | écart à vérifier (R-STK-3) |
 
 La **quantité** et l'**état de présence** ne sont pas des colonnes : ils se calculent depuis le journal
-(ADR-0002). `opened_on`, `frozen_on` et `thawed_on` sont des copies de lecture, remises à jour par le
+(ADR-0002). `opened_on`, `frozen_on`, `thawed_on` et `checked_until` sont des copies de lecture, remises à jour par le
 service à chaque mouvement concerné, et vérifiées par un test de cohérence avec le journal.
 
 ### `StockMovement`
@@ -162,7 +163,8 @@ service à chaque mouvement concerné, et vérifiées par un test de cohérence 
 | `lot_id` | `Id` | FK `StockLot` |
 | `date` | `Date` | ≤ aujourd'hui ; ≥ date du dernier `INVENTORY` du lot (R-STK-14) |
 | `kind` | `MovementKind` | |
-| `amount` | `Amount` ? | signé ; requis en `QUANTITY` ; quantité constatée pour `INVENTORY` ; `NULL` pour `OPENED` |
+| `amount` | `Amount` ? | signé ; requis en `QUANTITY` ; quantité constatée pour `INVENTORY` ; `NULL` pour `OPENED` et `CHECKED` |
+| `checked_until` | `Date` ? | requis si `CHECKED` ; > `date` |
 | `presence` | `PresenceState` ? | requis en `PRESENCE` pour `PURCHASE`, `ADJUSTMENT`, `INVENTORY` |
 | `shortfall` | `Amount` ? | quantité demandée non disponible (R-STK-3), ou écart d'inventaire (R-STK-40) |
 | `waste_reason` | `EXPIRED` \| `SPOILED` \| `OTHER` ? | requis si `WASTE` |

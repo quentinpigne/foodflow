@@ -39,7 +39,7 @@ Application personnelle, auto-hébergée sur le même serveur que Cashflow, avec
    L'équilibre se mesure en calories, en macronutriments, en groupes d'aliments (repères PNNS) et en
    variété. Ses critères sont réglables et changent dans le temps. Le menu tient compte du **temps
    disponible** à chaque repas et peut s'organiser autour d'une **session de préparation**
-   (batch cooking, le dimanche par exemple) où l'on cuisine à l'avance des recettes ou des éléments de
+   (batch cooking), ajoutée à une semaine quand on sait qu'on aura le temps, où l'on cuisine à l'avance des recettes ou des éléments de
    recettes pour la semaine (ADR-0011).
 3. **Acheter juste ce qui manque** : une liste de courses calculée à partir des repas prévus moins le
    stock, utilisable en magasin sur le téléphone, même sans réseau.

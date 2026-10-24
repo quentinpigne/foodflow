@@ -1,14 +1,23 @@
 # ADR-0011 — Temps disponible et préparation à l'avance (batch cooking)
 
-- **Statut** : Proposé
+- **Statut** : Accepté (2026-10-25)
 - **Date** : 2026-10-25
 - **Concerne** : `REC`, `PLA`, `STK`, ADR-0002, ADR-0004, ADR-0005
+
+Valeurs par défaut de la semaine type (Q18, 2026-10-25) :
+
+| | Petit-déjeuner | Déjeuner | Dîner |
+|---|---|---|---|
+| Lundi à vendredi | 10 min | 20 min | 30 min |
+| Samedi, dimanche | 20 min | 30 min | 45 min |
+
+Aucune session de préparation par défaut.
 
 ## Contexte
 
 Un menu équilibré ne sert à rien s'il est impossible à cuisiner : le temps disponible varie selon le jour
 et le repas (20 minutes un mardi soir, une heure le samedi midi). Pour tenir la semaine, on peut aussi
-cuisiner **à l'avance** pendant une longue session, souvent le dimanche : soit des recettes entières
+cuisiner **à l'avance** pendant une longue session, quand on sait qu'on en aura le temps : soit des recettes entières
 (un chili pour mardi et jeudi), soit des **éléments** de recettes (la sauce, la pâte, les légumes
 taillés), qu'il ne reste qu'à finir le jour même.
 
@@ -43,9 +52,9 @@ Temps actif et temps passif ; préparation à l'avance par recette entière et p
 ### Temps disponible (spec `PLA`)
 - La **semaine type** définit, pour chaque jour et chaque créneau de repas, un **temps actif disponible**
   et une **heure limite** (le repas doit être prêt à 19 h 30). Un jour précis peut être surchargé.
-- Elle définit aussi zéro, une ou plusieurs **sessions de préparation** (par défaut : dimanche
-  après-midi, 3 h), avec leur temps disponible ; une session peut être ajoutée ou supprimée sur une
-  semaine donnée.
+- Les **sessions de préparation** ne font **pas** partie de la semaine type : on les ajoute à une semaine
+  donnée, quand on sait qu'on aura le temps (jour, heure de début, temps disponible). Une semaine peut en
+  avoir zéro, une ou plusieurs.
 
 ### Préparation à l'avance
 - Un repas planifié est cuisiné **sur place** (temps actif de la recette et de ses sous-recettes), ou

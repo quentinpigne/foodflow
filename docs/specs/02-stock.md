@@ -1,6 +1,6 @@
 # Spec 02 — Stock
 
-Statut : **Brouillon** (2026-10-25)
+Statut : **Validée** (2026-10-25)
 Modèle : [Location, StockLot, StockMovement](../modele-de-donnees.md#stock--spec-02)
 Décisions : ADR-0001 (entiers), ADR-0002 (journal de mouvements), ADR-0003 (mode de suivi),
 ADR-0005 (validation explicite)
@@ -33,12 +33,12 @@ Emplacement « Frigo » (FRIDGE)
 
 | Mention | Nature (`ExpiryKind`) | Une fois dépassée |
 |---|---|---|
-| « À consommer jusqu'au » (DLC) | `USE_BY` | Périmé : à jeter |
-| « À consommer de préférence avant » (DDM) | `BEST_BEFORE` | Encore consommable, signalé |
+| « À consommer jusqu'au » (DLC) | `USE_BY` | Périmé : on demande s'il est encore utilisable ou à jeter (R-STK-37) |
+| « À consommer de préférence avant » (DDM) | `BEST_BEFORE` | Encore consommable, signalé ; même question (R-STK-37) |
 | Aucune (fruits, légumes, vrac) | `NONE` | Durée de conservation par défaut de l'aliment, si elle existe |
 
 La **date limite effective** d'un lot tient compte de son ouverture, de sa congélation et de sa
-décongélation (R-STK-30 à R-STK-34).
+décongélation (R-STK-30 à R-STK-34), et de ta décision de le garder malgré une date dépassée (R-STK-37).
 
 ## Règles
 
@@ -63,7 +63,7 @@ décongélation (R-STK-30 à R-STK-34).
 ### Mouvements
 
 - **R-STK-10** — Types de mouvements : `PURCHASE`, `COOKED`, `LEFTOVER`, `PREPARED`, `WASTE`, `MOVE`, `ADJUSTMENT`,
-  `INVENTORY`, `OPENED` (ADR-0002). Chaque mouvement a une date, un type, une quantité signée (ou un état
+  `INVENTORY`, `OPENED`, `CHECKED` (ADR-0002). Chaque mouvement a une date, un type, une quantité signée (ou un état
   pour un lot en `PRESENCE`) et, s'il y a lieu, son origine : session de courses, repas, mouvement annulé.
 - **R-STK-11** — Un mouvement validé n'est **ni modifié ni supprimé**. On l'annule par un mouvement
   inverse qui le référence ; un mouvement ne peut être annulé qu'une fois.
@@ -92,13 +92,14 @@ décongélation (R-STK-30 à R-STK-34).
 - **R-STK-30** — Un aliment (ou sa famille, R-ALI-2) peut définir des **durées de conservation** :
   après achat sans date (`NONE`), après ouverture, au congélateur, après décongélation.
 - **R-STK-31** — Date limite effective d'un lot = la plus proche entre sa date de péremption et, s'il est
-  ouvert, la date d'ouverture + la durée après ouverture.
+  ouvert, la date d'ouverture + la durée après ouverture. Si le lot a été **jugé encore bon**
+  (R-STK-37), c'est la date fixée par ce jugement.
 - **R-STK-32** — Déplacer un lot vers un emplacement `FREEZER` le **congèle** : sa date limite effective
   devient la date de congélation + la durée au congélateur ; la date d'origine est conservée.
   Une congélation après la date limite effective est refusée.
 - **R-STK-33** — Sortir un lot d'un emplacement `FREEZER` le **décongèle** : date limite effective = date
   de décongélation + durée après décongélation. Un lot décongelé ne peut pas être recongelé (sauf
-  après cuisson, qui crée un lot de restes).
+  après cuisson, qui crée un lot de préparation).
 - **R-STK-34** — Un lot de préparation a pour date limite la date où il a été cuisiné + la conservation
   au frigo de sa recette (à défaut, réglage général : 3 jours) ; rangé au congélateur, R-STK-32
   s'applique, et seulement si la recette est congelable.
@@ -109,6 +110,17 @@ décongélation (R-STK-30 à R-STK-34).
 - **R-STK-36** — Lorsqu'une sortie ne désigne pas de lot (repas, sortie rapide), elle puise dans les lots
   de l'aliment **dont la date limite effective est la plus proche** (premier périmé, premier sorti),
   les lots ouverts en premier à date égale.
+- **R-STK-37** — Une date dépassée **ne signifie pas qu'on jette** : c'est l'utilisateur qui décide.
+  Un lot `EXPIRED` ou `PAST_BEST_BEFORE` est présenté avec la question « encore utilisable ? » :
+  - **à jeter** : un mouvement `WASTE` de motif `EXPIRED` épuise le lot ;
+  - **encore bon** : un mouvement `CHECKED` enregistre le jugement et une nouvelle date limite
+    (par défaut le lendemain, modifiable) ; le lot redevient utilisable jusqu'à cette date, puis la
+    question se repose.
+
+  La question est posée sur le tableau de bord, dans la vue du stock, et lors d'une sortie (repas
+  cuisiné, sortie rapide) qui puiserait dans ce lot. Tant qu'elle n'a pas de réponse, le lot reste dans
+  le stock mais n'est **ni proposé par la planification ni pris d'office par une sortie** (R-STK-36) :
+  la sortie le propose avec la question.
 
 ### Inventaire et stock minimum
 
@@ -148,5 +160,9 @@ décongélation (R-STK-30 à R-STK-34).
 - Étant donné deux lots de crème, l'un à DLC le 28/10, l'autre le 05/11, quand un repas sort 20 cL de
   crème, alors elle est prise dans le lot du 28/10 (R-STK-36).
 - Étant donné un lot décongelé, alors le déplacer vers le congélateur est refusé (R-STK-33).
+- Étant donné un yogourt dont la DLC est dépassée d'un jour, quand je valide un repas qui en demande,
+  alors la validation me demande s'il est encore utilisable ; si je réponds « encore bon », il est
+  utilisé et un mouvement `CHECKED` est enregistré ; sinon, il est jeté (`WASTE`, `EXPIRED`) et la sortie
+  puise dans le lot suivant (R-STK-37).
 - Étant donné une validation de courses qui a créé 12 lots, quand je l'annule, alors les 12 mouvements
   `PURCHASE` sont annulés ensemble et les lots sont épuisés (R-STK-11, R-STK-12).

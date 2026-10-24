@@ -36,6 +36,7 @@ emplacement ; une date de péremption éventuelle). Chaque lot porte un **journa
 | `ADJUSTMENT` | Correction manuelle | ± |
 | `INVENTORY` | Inventaire : constat de la quantité réelle | point de contrôle |
 | `OPENED` | Ouverture d'un lot (raccourcit sa conservation) | aucun |
+| `CHECKED` | Lot jugé encore bon malgré une date dépassée, avec une nouvelle date limite | aucun |
 
 - **La quantité d'un lot se calcule** : somme des mouvements depuis le dernier inventaire, plus la
   quantité constatée par cet inventaire.

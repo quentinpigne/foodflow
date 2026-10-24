@@ -37,7 +37,7 @@ Langage commun du projet. Chaque terme métier a **un seul** nom français (docu
 | Lot de préparation | `prepared lot` | Lot contenant une recette cuisinée (en portions ou en quantité) : restes d'un repas ou préparation à l'avance. |
 | Restes | `leftovers` | Ce qui reste d'un repas cuisiné, remis en stock comme lot de préparation. |
 | Mouvement | `StockMovement` | Entrée, sortie ou constat daté sur un lot. Jamais modifié : on l'annule par un mouvement inverse. |
-| Type de mouvement | `MovementKind` | `PURCHASE`, `COOKED`, `LEFTOVER`, `PREPARED`, `WASTE`, `MOVE`, `ADJUSTMENT`, `INVENTORY`, `OPENED`. |
+| Type de mouvement | `MovementKind` | `PURCHASE`, `COOKED`, `LEFTOVER`, `PREPARED`, `WASTE`, `MOVE`, `ADJUSTMENT`, `INVENTORY`, `OPENED`, `CHECKED`. |
 | Inventaire | `INVENTORY` | Mouvement qui constate la quantité réelle d'un lot et conserve l'écart avec la quantité calculée. |
 | Mode de suivi | `TrackingMode` | `QUANTITY` (quantité exacte) ou `PRESENCE` (état seulement), réglé par aliment. |
 | État de présence | `PresenceState` | `AVAILABLE`, `LOW`, `OUT`. |
@@ -45,7 +45,8 @@ Langage commun du projet. Chaque terme métier a **un seul** nom français (docu
 | Nature de la péremption | `ExpiryKind` | `USE_BY` (DLC, « à consommer jusqu'au »), `BEST_BEFORE` (DDM, « de préférence avant »), `NONE`. |
 | Date limite effective | `effective expiry` | Date limite d'un lot compte tenu de son ouverture, de sa congélation et de sa décongélation. |
 | Durée de conservation | `shelf life` | Nombre de jours de conservation d'un aliment : sans date, après ouverture, au congélateur, après décongélation. |
-| État de péremption | `ExpiryStatus` | `OK`, `SOON`, `EXPIRED`, `PAST_BEST_BEFORE`. |
+| État de péremption | `ExpiryStatus` | `OK`, `SOON`, `EXPIRED`, `PAST_BEST_BEFORE`. Une date dépassée n'impose pas de jeter : l'utilisateur décide. |
+| Jugé encore bon | `CHECKED` | Décision de garder un lot dont la date est dépassée, avec une nouvelle date limite. |
 | Premier périmé, premier sorti | `FEFO` | Règle de choix des lots lors d'une sortie : la date limite effective la plus proche d'abord. |
 | Stock minimum | `minimum stock` | Seuil en dessous duquel un aliment est proposé pour les courses. |
 
@@ -67,10 +68,10 @@ Langage commun du projet. Chaque terme métier a **un seul** nom français (docu
 | Temps passif | `passive time` | Temps d'attente d'une recette (cuisson au four, repos, marinade), pendant lequel on est libre. |
 | Sous-recette | `sub-recipe` | Recette utilisée comme ingrédient d'une autre (sauce tomate maison, pâte brisée). |
 | Temps de finition | `finishing time` | Temps actif restant le jour du repas pour une recette préparée à l'avance (réchauffer, assembler). |
-| Semaine type | `WeekTemplate` | Créneaux de repas, temps disponible et heure limite par jour et créneau, sessions de préparation. |
+| Semaine type | `WeekTemplate` | Créneaux de repas, temps disponible et heure limite par jour et créneau. Les sessions de préparation n'en font pas partie. |
 | Créneau de repas | `MealSlot` | Repas de la journée (petit-déjeuner, déjeuner, goûter, dîner), paramétrable. |
 | Temps disponible | `available time` | Temps actif dont on dispose pour un créneau ou une session de préparation. |
-| Session de préparation | `PrepSession` | Moment dédié à cuisiner à l'avance pour plusieurs repas de la semaine (batch cooking). |
+| Session de préparation | `PrepSession` | Moment dédié à cuisiner à l'avance pour plusieurs repas (batch cooking), ajouté à une semaine donnée. |
 | Préparation à l'avance | `make-ahead` | Recette ou sous-recette cuisinée dans une session de préparation pour un repas ultérieur. |
 
 ## Transverse

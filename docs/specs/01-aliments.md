@@ -1,6 +1,6 @@
 # Spec 01 — Aliments
 
-Statut : **Brouillon** (2026-10-25)
+Statut : **Validée** (2026-10-25)
 Modèle : [FoodGroup, Food, Product, Nutrient, Unit](../modele-de-donnees.md#aliments--spec-01)
 Décisions : ADR-0001 (entiers), ADR-0003 (familles, aliments, produits), ADR-0007 (services tiers)
 
