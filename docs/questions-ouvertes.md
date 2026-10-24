@@ -17,6 +17,8 @@ a été consignée (ADR, spec).
 | Q9 | Open Food Facts : appel à la demande, ou copie locale filtrée ? | Appel à la demande au scan, résultat mis en cache dans la base | ADR-0007, `ALI` |
 | Q10 | Prix : saisis article par article aux courses, ou total du ticket seulement ? | Prix par article facultatif ; total de la session obligatoire pour le rapprochement avec Cashflow | `COU`, `CSH` |
 | Q12 | IA : quel modèle, quel format d'échange, quel garde-fou de coût ? | API Claude, désactivée par défaut ; réponse structurée contrôlée par le domaine | ADR-0007, `PLA` |
+| Q19 | Import par URL : JSON-LD seulement en V1, échec franc sinon (pas d'extraction approximative) ? | Oui ; extraction par IA en V2 (REC-14) | spec 03 |
+| Q20 | Prix de référence d'un aliment (pour le coût des recettes) : dernier prix payé, moyenne des N derniers achats, ou prix du produit habituel ? | Dernier prix payé du produit habituel, sinon de n'importe quel produit de l'aliment | `COU`, spec 03 |
 | Q13 | Créneaux de repas par défaut (petit-déjeuner, déjeuner, goûter, dîner) et part de l'objectif journalier de chacun | 4 créneaux, 25 / 35 / 10 / 30 % | `PLA`, `NUT` |
 
 ## Pour plus tard (V2)

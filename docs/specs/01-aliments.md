@@ -66,6 +66,9 @@ stockées **pour 100 g** ou **pour 100 mL** (la **base nutritionnelle** de l'ali
 - **R-ALI-3** — Une famille qui contient des aliments, des sous-familles, ou que vise un ingrédient de
   recette ou une préférence, ne peut pas être supprimée ; elle peut être fusionnée dans une autre
   (tout ce qui la vise est déplacé).
+- **R-ALI-4** — Une famille peut désigner un **aliment de référence**, choisi parmi ses aliments ou ceux
+  de ses sous-familles (« Fromage râpé » → « Emmental »). Il fournit les valeurs nutritionnelles et le
+  prix d'un ingrédient de recette qui vise la famille, marqués estimés (R-REC-24).
 
 ### Aliments
 

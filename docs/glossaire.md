@@ -60,12 +60,25 @@ Langage commun du projet. Chaque terme métier a **un seul** nom français (docu
 | Invité | `guest` | Convive ponctuel, hors du foyer. |
 | Préférence | `Preference` | Goût d'un membre pour un aliment, une famille ou une recette : `LOVES`, `LIKES`, `DISLIKES`, `REFUSES`. |
 
-## Recettes et planification (ADR-0011, specs à venir)
+## Recettes (spec 03) et planification (ADR-0011)
 
 | Terme | Identifiant | Définition |
 |---|---|---|
 | Temps actif | `active time` | Temps pendant lequel on travaille à une recette (éplucher, saisir, assembler). |
 | Temps passif | `passive time` | Temps d'attente d'une recette (cuisson au four, repos, marinade), pendant lequel on est libre. |
+| Recette | `Recipe` | Ingrédients, étapes, rendement, temps et préparation à l'avance d'un plat. |
+| Catégorie de recette | `RecipeKind` | `MAIN`, `SIDE`, `STARTER`, `DESSERT`, `BREAKFAST`, `SNACK`, `BASE` (préparation de base, souvent sous-recette). |
+| Rendement | `yield` | Ce que produit une recette : des portions adulte, ou une quantité (900 g de sauce). |
+| Portion adulte | `adult portion` | Portion pour un équivalent adulte ; unité du rendement en portions. |
+| Mise à l'échelle | `scaling` | Calcul des quantités d'une recette pour un nombre d'équivalents adulte ou une quantité voulue. |
+| Ingrédient | `RecipeIngredient` | Ligne de recette visant un aliment, une famille ou une sous-recette, avec une quantité ou « à volonté ». |
+| À volonté | `to taste` | Ingrédient sans quantité (sel, poivre) : hors calculs, seulement « à avoir ». |
+| Ingrédient fixe | `fixed` | Ingrédient non mis à l'échelle (une feuille de laurier). |
+| Aliment de référence | `reference food` | Aliment d'une famille qui fournit valeurs et prix d'un ingrédient « au choix ». |
+| Étape | `RecipeStep` | Instruction de recette, avec un minuteur facultatif. |
+| Brouillon de recette | `RecipeDraft` | Recette importée en attente de revue. |
+| Rattachement mémorisé | `IngredientMapping` | Lien validé entre un nom d'ingrédient importé et un aliment, une famille ou une recette. |
+| Confiance | `MatchConfidence` | Qualité d'un rattachement proposé : `HIGH`, `MEDIUM`, `LOW`, `NONE`. |
 | Sous-recette | `sub-recipe` | Recette utilisée comme ingrédient d'une autre (sauce tomate maison, pâte brisée). |
 | Temps de finition | `finishing time` | Temps actif restant le jour du repas pour une recette préparée à l'avance (réchauffer, assembler). |
 | Semaine type | `WeekTemplate` | Créneaux de repas, temps disponible et heure limite par jour et créneau. Les sessions de préparation n'en font pas partie. |

@@ -6,7 +6,7 @@ Modèle **logique**. Sa traduction physique (SQLite, sqlx, tables `STRICT`) suit
 conventions de Cashflow. Ce document est la source de vérité du schéma. Les règles métier détaillées
 sont dans les specs ; ici ne figurent que les contraintes structurelles.
 
-Domaines couverts à ce stade : aliments (spec 01) et stock (spec 02). Les autres viendront avec leur spec.
+Domaines couverts à ce stade : aliments (spec 01), stock (spec 02) et recettes (spec 03). Les autres viendront avec leur spec.
 
 ## Types logiques
 
@@ -37,6 +37,7 @@ Les réglages hérités (R-ALI-2) sont des colonnes **nullables** sur `food_grou
 | `parent_id` | `Id` ? | FK `FoodGroup` ; sans cycle (R-ALI-1) |
 | `name` | texte | unique parmi les enfants d'un même parent |
 | `ciqual_code` | texte ? | unique ; famille créée par l'import Ciqual |
+| `reference_food_id` | `Id` ? | FK `Food` de la famille ou d'une sous-famille (R-ALI-4) |
 | `nutrition_group` | `NutritionGroup` ? | hérité si `NULL` (spec `NUT`) |
 | `stock_measure` | `Measure` ? | hérité si `NULL` |
 | `tracking_mode` | `TrackingMode` ? | hérité si `NULL` |
@@ -173,3 +174,84 @@ service à chaque mouvement concerné, et vérifiées par un test de cohérence 
 | `batch_id` | `Id` ? | validation d'origine (session de courses, repas) ; annulée en bloc (R-STK-12) |
 | `note` | texte ? | |
 | `created_at` | `Timestamp` | |
+
+## Recettes — spec 03
+
+### `Recipe`
+
+| Champ | Type | Contraintes |
+|---|---|---|
+| `id` | `Id` | PK |
+| `name` | texte | non vide |
+| `kind` | `RecipeKind` | `MAIN`, `SIDE`, `STARTER`, `DESSERT`, `BREAKFAST`, `SNACK`, `BASE` |
+| `description`, `notes` | texte ? | description d'origine, notes personnelles (R-REC-4) |
+| `yield_kind` | `PORTIONS` \| `AMOUNT` | R-REC-10, R-REC-11 |
+| `yield_portions` | `Amount` ? | millièmes de portion adulte, > 0 ; requis si `PORTIONS` |
+| `yield_measure` | `Measure` ? | requis si `AMOUNT` |
+| `yield_amount` | `Amount` ? | > 0 ; requis si `AMOUNT` |
+| `active_minutes`, `passive_minutes` | entier | ≥ 0 (R-REC-40) |
+| `fridge_days` | entier ? | > 0 ; présent = se prépare à l'avance (R-REC-42) |
+| `freezable` | booléen | |
+| `frozen_days` | entier ? | requis si `freezable` |
+| `finishing_minutes` | entier ? | ≥ 0 |
+| `source_url` | texte ? | URL d'origine d'un import |
+| `image_path` | texte ? | fichier dans le volume `/data/images` |
+| `archived` | booléen | R-REC-2 |
+| `created_at`, `updated_at` | `Timestamp` | |
+
+### `RecipeTag`
+
+| Champ | Type | Contraintes |
+|---|---|---|
+| `recipe_id` | `Id` | FK `Recipe` ; PK avec `tag` |
+| `tag` | texte | normalisé (minuscules, sans espaces superflus) |
+
+### `RecipeIngredient`
+
+| Champ | Type | Contraintes |
+|---|---|---|
+| `id` | `Id` | PK |
+| `recipe_id` | `Id` | FK `Recipe` |
+| `position` | entier | ordre ; unique par recette |
+| `section` | texte ? | « Pour la béchamel » |
+| `food_id` / `group_id` / `sub_recipe_id` | `Id` ? | exactement un des trois (R-REC-20) ; sans cycle (R-REC-30) |
+| `amount` | `Amount` ? | dans la mesure de stock, ou en portions ou unité de rendement de la sous-recette ; `NULL` si à volonté ou non convertible |
+| `to_taste` | booléen | à volonté (R-REC-22) ; alors `amount` et la saisie sont vides |
+| `entered_quantity` | `Ratio` ? | quantité saisie, en millièmes |
+| `entered_unit_id` | `Id` ? | FK `Unit` (générale ou propre) |
+| `note` | texte ? | précision (« émincé ») |
+| `optional` | booléen | R-REC-23 |
+| `fixed` | booléen | non mis à l'échelle (R-REC-13) |
+| `source_line` | texte ? | ligne d'origine d'un import (R-REC-65) |
+
+### `RecipeStep`
+
+| Champ | Type | Contraintes |
+|---|---|---|
+| `id` | `Id` | PK |
+| `recipe_id` | `Id` | FK `Recipe` |
+| `position` | entier | unique par recette |
+| `section` | texte ? | |
+| `text` | texte | non vide |
+| `timer_minutes` | entier ? | > 0 |
+
+### `RecipeDraft`
+
+| Champ | Type | Contraintes |
+|---|---|---|
+| `id` | `Id` | PK |
+| `source_url` | texte | |
+| `fetched_at` | `Timestamp` | |
+| `payload` | `Json` | recette analysée et propositions de rattachement, modifiées pendant la revue |
+| `raw_json_ld` | `Json` | données schema.org d'origine |
+
+Un brouillon est supprimé à sa validation (qui crée la recette) ou à son abandon (R-REC-61).
+
+### `IngredientMapping`
+
+| Champ | Type | Contraintes |
+|---|---|---|
+| `normalized_name` | texte | PK ; sans accents, minuscules, singulier (R-REC-66) |
+| `food_id` / `group_id` / `recipe_id` | `Id` ? | exactement un des trois |
+| `unit_id` | `Id` ? | FK `Unit` propre à l'aliment, si le nom en implique une (« gousses d'ail ») |
+| `updated_at` | `Timestamp` | |
