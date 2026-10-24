@@ -21,14 +21,16 @@ validation de courses erronée. Cashflow a fait le même choix pour le solde (AD
 
 ## Décision
 
-Option 2. Le stock est organisé en **lots** (un produit, un aliment ou les restes d'une recette ; un
+Option 2. Le stock est organisé en **lots** (un produit, un aliment ou une préparation, c'est-à-dire une recette cuisinée : restes ou préparation à
+l'avance, ADR-0011 ; un
 emplacement ; une date de péremption éventuelle). Chaque lot porte un **journal de mouvements** datés et typés :
 
 | Type | Origine | Signe |
 |---|---|---|
 | `PURCHASE` | Validation d'une session de courses | + |
 | `COOKED` | Validation d'un repas cuisiné | − |
-| `LEFTOVER` | Reste d'un repas remis en stock (crée un lot) | + |
+| `LEFTOVER` | Reste d'un repas remis en stock (crée un lot de préparation) | + |
+| `PREPARED` | Préparation cuisinée à l'avance, en session de préparation (crée un lot de préparation, ADR-0011) | + |
 | `WASTE` | Produit jeté (péremption, abîmé) | − |
 | `MOVE` | Changement d'emplacement (congélation) | − sur l'ancien lot, + sur le nouveau |
 | `ADJUSTMENT` | Correction manuelle | ± |

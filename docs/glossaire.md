@@ -34,9 +34,10 @@ Langage commun du projet. Chaque terme métier a **un seul** nom français (docu
 |---|---|---|
 | Emplacement | `Location` | Lieu de rangement, de nature `PANTRY`, `FRIDGE` ou `FREEZER`. |
 | Lot | `StockLot` | Quantité d'un produit, d'un aliment ou de restes, rangée au même endroit avec la même péremption. |
-| Restes | `leftovers` | Lot contenant des portions d'une recette cuisinée. |
+| Lot de préparation | `prepared lot` | Lot contenant une recette cuisinée (en portions ou en quantité) : restes d'un repas ou préparation à l'avance. |
+| Restes | `leftovers` | Ce qui reste d'un repas cuisiné, remis en stock comme lot de préparation. |
 | Mouvement | `StockMovement` | Entrée, sortie ou constat daté sur un lot. Jamais modifié : on l'annule par un mouvement inverse. |
-| Type de mouvement | `MovementKind` | `PURCHASE`, `COOKED`, `LEFTOVER`, `WASTE`, `MOVE`, `ADJUSTMENT`, `INVENTORY`, `OPENED`. |
+| Type de mouvement | `MovementKind` | `PURCHASE`, `COOKED`, `LEFTOVER`, `PREPARED`, `WASTE`, `MOVE`, `ADJUSTMENT`, `INVENTORY`, `OPENED`. |
 | Inventaire | `INVENTORY` | Mouvement qui constate la quantité réelle d'un lot et conserve l'écart avec la quantité calculée. |
 | Mode de suivi | `TrackingMode` | `QUANTITY` (quantité exacte) ou `PRESENCE` (état seulement), réglé par aliment. |
 | État de présence | `PresenceState` | `AVAILABLE`, `LOW`, `OUT`. |
@@ -57,6 +58,20 @@ Langage commun du projet. Chaque terme métier a **un seul** nom français (docu
 | Convive | `Diner` | Personne présente à un repas : membre, ou invité anonyme avec son coefficient. |
 | Invité | `guest` | Convive ponctuel, hors du foyer. |
 | Préférence | `Preference` | Goût d'un membre pour un aliment, une famille ou une recette : `LOVES`, `LIKES`, `DISLIKES`, `REFUSES`. |
+
+## Recettes et planification (ADR-0011, specs à venir)
+
+| Terme | Identifiant | Définition |
+|---|---|---|
+| Temps actif | `active time` | Temps pendant lequel on travaille à une recette (éplucher, saisir, assembler). |
+| Temps passif | `passive time` | Temps d'attente d'une recette (cuisson au four, repos, marinade), pendant lequel on est libre. |
+| Sous-recette | `sub-recipe` | Recette utilisée comme ingrédient d'une autre (sauce tomate maison, pâte brisée). |
+| Temps de finition | `finishing time` | Temps actif restant le jour du repas pour une recette préparée à l'avance (réchauffer, assembler). |
+| Semaine type | `WeekTemplate` | Créneaux de repas, temps disponible et heure limite par jour et créneau, sessions de préparation. |
+| Créneau de repas | `MealSlot` | Repas de la journée (petit-déjeuner, déjeuner, goûter, dîner), paramétrable. |
+| Temps disponible | `available time` | Temps actif dont on dispose pour un créneau ou une session de préparation. |
+| Session de préparation | `PrepSession` | Moment dédié à cuisiner à l'avance pour plusieurs repas de la semaine (batch cooking). |
+| Préparation à l'avance | `make-ahead` | Recette ou sous-recette cuisinée dans une session de préparation pour un repas ultérieur. |
 
 ## Transverse
 

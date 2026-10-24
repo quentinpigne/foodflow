@@ -13,7 +13,7 @@ Domaines couverts à ce stade : aliments (spec 01) et stock (spec 02). Les autre
 | Type | Représentation | Référence |
 |---|---|---|
 | `Id` | UUIDv7, généré côté application | ADR-0009 |
-| `Amount` | Entier signé 64 bits dans l'unité de stockage d'une mesure : mg (`MASS`), µL (`VOLUME`), millième de pièce (`COUNT`), ou millième de portion (restes) | ADR-0001 |
+| `Amount` | Entier signé 64 bits dans l'unité de stockage d'une mesure : mg (`MASS`), µL (`VOLUME`), millième de pièce (`COUNT`), ou millième de portion (lot de préparation) | ADR-0001 |
 | `NutrientValue` | Entier ≥ 0 dans l'unité de stockage du nutriment (cal, mg ou µg), pour 100 g ou 100 mL | ADR-0001 |
 | `Money` | Entier signé 64 bits, en centimes d'euro | ADR-0001 |
 | `Ratio` | Entier en millièmes (1,000 → `1000`) | ADR-0001 |
@@ -141,7 +141,7 @@ Liste de référence, fournie par une migration.
 | Champ | Type | Contraintes |
 |---|---|---|
 | `id` | `Id` | PK |
-| `product_id` / `food_id` / `recipe_id` | `Id` ? | exactement un des trois (R-STK-1) ; `recipe_id` pour des restes |
+| `product_id` / `food_id` / `recipe_id` | `Id` ? | exactement un des trois (R-STK-1) ; `recipe_id` pour un lot de préparation |
 | `location_id` | `Id` | FK `Location` ; emplacement courant (le journal garde l'historique) |
 | `tracking_mode` | `TrackingMode` | figé à la création (R-STK-20), modifié seulement par R-STK-21 |
 | `expiry_kind` | `USE_BY` \| `BEST_BEFORE` \| `NONE` | |

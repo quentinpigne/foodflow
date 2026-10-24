@@ -20,8 +20,9 @@ Emplacement « Frigo » (FRIDGE)
 - **Emplacement** (`Location`) : placard, frigo, congélateur, cave… Il a une nature (`PANTRY`, `FRIDGE`,
   `FREEZER`) qui détermine les durées de conservation qui s'appliquent.
 - **Lot** (`StockLot`) : ce qu'on a acheté ou préparé ensemble, au même endroit, avec la même péremption.
-  Il contient **un produit, un aliment** (vrac, marché, fait maison) **ou les restes d'une recette**
-  (en portions).
+  Il contient **un produit, un aliment** (vrac, marché) **ou une préparation** : une recette cuisinée,
+  en portions ou en quantité, qu'il s'agisse de restes d'un repas ou d'une préparation à l'avance
+  (ADR-0011).
 - **Mouvement** (`StockMovement`) : entrée, sortie ou constat sur un lot (ADR-0002). La quantité d'un lot
   n'est jamais stockée : elle se calcule.
 - **Mode de suivi** (`TrackingMode`), réglé par aliment (hérité de sa famille, R-ALI-2) :
@@ -43,11 +44,11 @@ décongélation (R-STK-30 à R-STK-34).
 
 ### Lots et quantités
 
-- **R-STK-1** — Un lot contient exactement un produit, un aliment ou une recette (restes). Un lot de
+- **R-STK-1** — Un lot contient exactement un produit, un aliment ou une recette (lot de préparation). Un lot de
   produit compte dans le stock de l'aliment (ou de la famille) du produit.
 - **R-STK-2** — La quantité d'un lot suivi en `QUANTITY` = quantité du dernier inventaire + Σ des
   mouvements postérieurs (ADR-0002). Elle est exprimée dans la mesure de stock de l'aliment
-  (en portions pour des restes).
+  (en portions ou dans la mesure de la recette pour un lot de préparation).
 - **R-STK-3** — La quantité d'un lot n'est jamais négative. Une sortie supérieure à la quantité calculée
   est **bornée** à celle-ci ; l'écart est enregistré sur le mouvement et le lot est signalé « à
   vérifier », ce qui invite à un inventaire.
@@ -61,7 +62,7 @@ décongélation (R-STK-30 à R-STK-34).
 
 ### Mouvements
 
-- **R-STK-10** — Types de mouvements : `PURCHASE`, `COOKED`, `LEFTOVER`, `WASTE`, `MOVE`, `ADJUSTMENT`,
+- **R-STK-10** — Types de mouvements : `PURCHASE`, `COOKED`, `LEFTOVER`, `PREPARED`, `WASTE`, `MOVE`, `ADJUSTMENT`,
   `INVENTORY`, `OPENED` (ADR-0002). Chaque mouvement a une date, un type, une quantité signée (ou un état
   pour un lot en `PRESENCE`) et, s'il y a lieu, son origine : session de courses, repas, mouvement annulé.
 - **R-STK-11** — Un mouvement validé n'est **ni modifié ni supprimé**. On l'annule par un mouvement
@@ -98,8 +99,9 @@ décongélation (R-STK-30 à R-STK-34).
 - **R-STK-33** — Sortir un lot d'un emplacement `FREEZER` le **décongèle** : date limite effective = date
   de décongélation + durée après décongélation. Un lot décongelé ne peut pas être recongelé (sauf
   après cuisson, qui crée un lot de restes).
-- **R-STK-34** — Un lot de restes a pour date limite la date du repas + la durée de conservation des
-  restes (réglage général, 3 jours par défaut au frigo).
+- **R-STK-34** — Un lot de préparation a pour date limite la date où il a été cuisiné + la conservation
+  au frigo de sa recette (à défaut, réglage général : 3 jours) ; rangé au congélateur, R-STK-32
+  s'applique, et seulement si la recette est congelable.
 - **R-STK-35** — État de péremption d'un lot, à une date donnée : `OK` ; `SOON` si la date limite
   effective est dans moins de N jours (réglage général, 3 par défaut) ; `EXPIRED` si une date `USE_BY`
   ou une durée de conservation est dépassée ; `PAST_BEST_BEFORE` si seule une date `BEST_BEFORE` est
@@ -129,7 +131,7 @@ décongélation (R-STK-30 à R-STK-34).
 | STK-05 | MVP | Inventaire par emplacement ou par aliment, écarts conservés |
 | STK-06 | V1 | Ouverture d'un lot et durée après ouverture |
 | STK-07 | V1 | Congélation et décongélation, durées par famille |
-| STK-08 | V1 | Lots de restes d'un repas (portions) |
+| STK-08 | V1 | Lots de préparation : restes d'un repas, préparations à l'avance (ADR-0011) |
 | STK-09 | V1 | Stock minimum par aliment |
 | STK-10 | V1 | Sortie rapide depuis le téléphone (scan du code-barres, premier périmé premier sorti) |
 | STK-11 | V2 | Statistiques de consommation par aliment et par mois |

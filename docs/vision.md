@@ -37,7 +37,10 @@ Application personnelle, auto-hébergée sur le même serveur que Cashflow, avec
 2. **Planifier des repas équilibrés** : un calendrier de repas, rempli à la main, généré
    automatiquement selon un objectif (algorithme déterministe), ou proposé par une IA (optionnel).
    L'équilibre se mesure en calories, en macronutriments, en groupes d'aliments (repères PNNS) et en
-   variété. Ses critères sont réglables et changent dans le temps.
+   variété. Ses critères sont réglables et changent dans le temps. Le menu tient compte du **temps
+   disponible** à chaque repas et peut s'organiser autour d'une **session de préparation**
+   (batch cooking, le dimanche par exemple) où l'on cuisine à l'avance des recettes ou des éléments de
+   recettes pour la semaine (ADR-0011).
 3. **Acheter juste ce qui manque** : une liste de courses calculée à partir des repas prévus moins le
    stock, utilisable en magasin sur le téléphone, même sans réseau.
 4. **Gaspiller moins** : alerter avant péremption, proposer des recettes qui utilisent ce qui va
@@ -75,9 +78,9 @@ Application personnelle, auto-hébergée sur le même serveur que Cashflow, avec
 |---|---|---|
 | Aliments | Référentiel : aliments génériques (Ciqual), produits du commerce (Open Food Facts, code-barres), saisie manuelle ; valeurs nutritionnelles ; unités et conversions | `ALI` |
 | Stock | Emplacements, lots, quantités ou présence selon le produit, péremption, entrées et sorties validées, restes | `STK` |
-| Recettes | Saisie, import depuis une URL (schema.org/Recipe) avec revue, portions, étapes, valeurs nutritionnelles et coût calculés | `REC` |
+| Recettes | Saisie, import depuis une URL (schema.org/Recipe) avec revue, portions, étapes, sous-recettes, temps actif et passif, préparation à l'avance, valeurs nutritionnelles et coût calculés | `REC` |
 | Objectifs nutritionnels | Calories, macronutriments, groupes d'aliments, variété ; versionnés dans le temps | `NUT` |
-| Planification | Calendrier des repas, saisie manuelle, génération déterministe, génération par IA (optionnelle), bilan de la semaine | `PLA` |
+| Planification | Semaine type (créneaux, temps disponible, sessions de préparation), calendrier des repas, saisie manuelle, génération déterministe, génération par IA (optionnelle), batch cooking, bilan de la semaine | `PLA` |
 | Courses | Liste calculée (besoins − stock), rayons, mode magasin hors connexion, validation vers le stock, prix | `COU` |
 | Anti-gaspillage | Alertes de péremption, recettes « à finir », suivi de ce qui est jeté | `GAS` |
 | Lien avec Cashflow | Budgets alimentation, rapprochement des courses avec les transactions | `CSH` |
