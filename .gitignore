@@ -1,0 +1,28 @@
+# Données personnelles : jamais versionnées
+/data/
+*.db
+*.db-shm
+*.db-wal
+*.db-journal
+*.sqlite
+*.sqlite3
+imports/
+exports/
+backups/
+
+# Secrets
+.env
+.env.*
+!.env.example
+
+# Fixtures : seuls les fichiers anonymisés sont autorisés (fixtures/**/anonymized/)
+fixtures/**/raw/
+
+# Build
+/target/
+
+# Build
+/target/
+
+# Journal local des déploiements (deploy/deploy.sh)
+/deploy/deployments.log
