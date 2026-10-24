@@ -11,10 +11,13 @@ planification de repas équilibrés, liste de courses, coût et lien avec les bu
 | Je veux… | Lire |
 |---|---|
 | Comprendre le produit et ses limites | [vision.md](vision.md) |
+| Connaître le vocabulaire métier | [glossaire.md](glossaire.md) |
+| Voir le modèle de données | [modele-de-donnees.md](modele-de-donnees.md) |
+| Lire les règles et features d'un domaine | [specs/](specs/) : [01 aliments](specs/01-aliments.md), [02 stock](specs/02-stock.md) |
 | Voir ce qui reste à trancher | [questions-ouvertes.md](questions-ouvertes.md) |
 | Comprendre pourquoi un choix a été fait | [adr/](adr/README.md) |
 
-À venir : glossaire, modèle de données, architecture, écrans, roadmap, specs par domaine.
+À venir : specs des autres domaines, architecture, écrans, roadmap.
 
 ## Conventions de la documentation
 

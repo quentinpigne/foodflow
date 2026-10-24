@@ -21,8 +21,8 @@ validation de courses erronée. Cashflow a fait le même choix pour le solde (AD
 
 ## Décision
 
-Option 2. Le stock est organisé en **lots** (un produit ou un aliment, un emplacement, une date de
-péremption éventuelle). Chaque lot porte un **journal de mouvements** datés et typés :
+Option 2. Le stock est organisé en **lots** (un produit, un aliment ou les restes d'une recette ; un
+emplacement ; une date de péremption éventuelle). Chaque lot porte un **journal de mouvements** datés et typés :
 
 | Type | Origine | Signe |
 |---|---|---|
@@ -33,6 +33,7 @@ péremption éventuelle). Chaque lot porte un **journal de mouvements** datés e
 | `MOVE` | Changement d'emplacement (congélation) | − sur l'ancien lot, + sur le nouveau |
 | `ADJUSTMENT` | Correction manuelle | ± |
 | `INVENTORY` | Inventaire : constat de la quantité réelle | point de contrôle |
+| `OPENED` | Ouverture d'un lot (raccourcit sa conservation) | aucun |
 
 - **La quantité d'un lot se calcule** : somme des mouvements depuis le dernier inventaire, plus la
   quantité constatée par cet inventaire.
