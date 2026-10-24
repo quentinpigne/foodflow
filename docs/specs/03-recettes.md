@@ -1,6 +1,6 @@
 # Spec 03 — Recettes
 
-Statut : **Brouillon** (2026-10-25)
+Statut : **Validée** (2026-10-25)
 Modèle : [Recipe, RecipeIngredient, RecipeStep, RecipeDraft, IngredientMapping](../modele-de-donnees.md#recettes--spec-03)
 Décisions : ADR-0003 (aliments et familles), ADR-0004 (convives), ADR-0005 (revue des imports),
 ADR-0007 (services tiers), ADR-0008 (export), ADR-0011 (temps et préparation à l'avance)
@@ -101,6 +101,9 @@ Par portion (adulte) : 640 kcal · P 32 g · G 52 g · L 33 g · coût ≈ 2,10 
   **temps de finition** (minutes, actif) pour le jour du repas.
 - **R-REC-43** — Une recette sans conservation déclarée ne peut pas être préparée à l'avance ; ses restes
   suivent la durée générale (R-STK-34).
+- **R-REC-44** — Une recette peut déclarer un **aliment de reste** (poulet rôti → « Poulet, viande
+  rôtie ») : ses restes peuvent alors être déclarés comme un lot de cet aliment, en quantité, et servir
+  d'ingrédient à d'autres recettes (ADR-0012).
 
 ### Valeurs calculées
 
@@ -168,6 +171,7 @@ Par portion (adulte) : 640 kcal · P 32 g · G 52 g · L 33 g · coût ≈ 2,10 
 | REC-10 | V1 | Photo de la recette (import ou téléversement) |
 | REC-11 | V1 | Export d'une recette en schema.org JSON-LD, réimport |
 | REC-12 | V1 | Archivage, notes personnelles, duplication d'une recette pour en faire une variante |
+| REC-16 | V1 | Aliment de reste ; recettes qui utilisent un reste (par sous-recette ou par aliment de reste) |
 | REC-13 | V2 | Substitutions proposées pour un ingrédient (une famille, ou un aliment de remplacement déclaré) |
 | REC-14 | V2 | Import d'une page sans JSON-LD par extraction IA (service tiers optionnel) |
 | REC-15 | V2 | Ustensiles et appareils (four, robot) et leurs conflits dans une session de préparation |

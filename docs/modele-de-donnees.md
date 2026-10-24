@@ -194,6 +194,7 @@ service à chaque mouvement concerné, et vérifiées par un test de cohérence 
 | `freezable` | booléen | |
 | `frozen_days` | entier ? | requis si `freezable` |
 | `finishing_minutes` | entier ? | ≥ 0 |
+| `leftover_food_id` | `Id` ? | FK `Food` ; aliment de reste (R-REC-44) |
 | `source_url` | texte ? | URL d'origine d'un import |
 | `image_path` | texte ? | fichier dans le volume `/data/images` |
 | `archived` | booléen | R-REC-2 |

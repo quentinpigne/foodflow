@@ -17,8 +17,6 @@ a été consignée (ADR, spec).
 | Q9 | Open Food Facts : appel à la demande, ou copie locale filtrée ? | Appel à la demande au scan, résultat mis en cache dans la base | ADR-0007, `ALI` |
 | Q10 | Prix : saisis article par article aux courses, ou total du ticket seulement ? | Prix par article facultatif ; total de la session obligatoire pour le rapprochement avec Cashflow | `COU`, `CSH` |
 | Q12 | IA : quel modèle, quel format d'échange, quel garde-fou de coût ? | API Claude, désactivée par défaut ; réponse structurée contrôlée par le domaine | ADR-0007, `PLA` |
-| Q19 | Import par URL : JSON-LD seulement en V1, échec franc sinon (pas d'extraction approximative) ? | Oui ; extraction par IA en V2 (REC-14) | spec 03 |
-| Q20 | Prix de référence d'un aliment (pour le coût des recettes) : dernier prix payé, moyenne des N derniers achats, ou prix du produit habituel ? | Dernier prix payé du produit habituel, sinon de n'importe quel produit de l'aliment | `COU`, spec 03 |
 | Q13 | Créneaux de repas par défaut (petit-déjeuner, déjeuner, goûter, dîner) et part de l'objectif journalier de chacun | 4 créneaux, 25 / 35 / 10 / 30 % | `PLA`, `NUT` |
 
 ## Pour plus tard (V2)
@@ -35,6 +33,9 @@ a été consignée (ADR, spec).
 | Q18 | Semaine type par défaut | Semaine 10 / 20 / 30 min, week-end 20 / 30 / 45 min ; aucune session de préparation par défaut (2026-10-25) | ADR-0011 |
 | — | Date de péremption dépassée | L'utilisateur décide : jeter, ou garder avec une nouvelle date limite (2026-10-25) | spec 02, R-STK-37 |
 | — | Choix des specs 01 et 02 | Validés (2026-10-25) | specs 01, 02 |
+| Q19 | Import par URL | JSON-LD seulement, échec franc sinon ; extraction IA en V2 (2026-10-25) | spec 03 |
+| Q20 | Prix de référence d'un aliment | Dernier prix payé du produit habituel, sinon de n'importe quel produit de l'aliment (2026-10-25) | spec 03, `COU` |
+| — | Choix de la spec 03 | Validés (2026-10-25) | spec 03 |
 | Q17 | Granularité du batch cooking | Recette entière et sous-recettes, pas d'étape (2026-10-25) | ADR-0011 |
 | Q8 | HTTPS pour la PWA | Domaine personnel, Let's Encrypt par challenge DNS-01, certificat renouvelé hors du binaire (2026-10-25) | ADR-0009 |
 | Q11 | Revue des ADR 0001 à 0010 | Tous acceptés (2026-10-25) | adr/ |

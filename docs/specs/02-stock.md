@@ -44,7 +44,8 @@ décongélation (R-STK-30 à R-STK-34), et de ta décision de le garder malgré 
 
 ### Lots et quantités
 
-- **R-STK-1** — Un lot contient exactement un produit, un aliment ou une recette (lot de préparation). Un lot de
+- **R-STK-1** — Un lot contient exactement un produit, un aliment ou une recette (lot de préparation).
+  Un reste de repas est un lot de préparation, ou un lot de l'aliment de reste de la recette (ADR-0012). Un lot de
   produit compte dans le stock de l'aliment (ou de la famille) du produit.
 - **R-STK-2** — La quantité d'un lot suivi en `QUANTITY` = quantité du dernier inventaire + Σ des
   mouvements postérieurs (ADR-0002). Elle est exprimée dans la mesure de stock de l'aliment

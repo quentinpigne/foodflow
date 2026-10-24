@@ -35,7 +35,9 @@ Langage commun du projet. Chaque terme métier a **un seul** nom français (docu
 | Emplacement | `Location` | Lieu de rangement, de nature `PANTRY`, `FRIDGE` ou `FREEZER`. |
 | Lot | `StockLot` | Quantité d'un produit, d'un aliment ou de restes, rangée au même endroit avec la même péremption. |
 | Lot de préparation | `prepared lot` | Lot contenant une recette cuisinée (en portions ou en quantité) : restes d'un repas ou préparation à l'avance. |
-| Restes | `leftovers` | Ce qui reste d'un repas cuisiné, remis en stock comme lot de préparation. |
+| Restes | `leftovers` | Ce qui reste d'un repas cuisiné, remis en stock comme lot de préparation ou comme lot de son aliment de reste (ADR-0012). |
+| Aliment de reste | `leftover food` | Aliment que devient le reste d'une recette pour être réutilisé (poulet rôti → « Poulet, viande rôtie »). |
+| Reste prévu | `planned leftovers` | Portions cuisinées en plus des convives, à affecter à un repas ultérieur. |
 | Mouvement | `StockMovement` | Entrée, sortie ou constat daté sur un lot. Jamais modifié : on l'annule par un mouvement inverse. |
 | Type de mouvement | `MovementKind` | `PURCHASE`, `COOKED`, `LEFTOVER`, `PREPARED`, `WASTE`, `MOVE`, `ADJUSTMENT`, `INVENTORY`, `OPENED`, `CHECKED`. |
 | Inventaire | `INVENTORY` | Mouvement qui constate la quantité réelle d'un lot et conserve l'écart avec la quantité calculée. |
