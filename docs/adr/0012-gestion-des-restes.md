@@ -1,6 +1,6 @@
 # ADR-0012 — Gestion des restes
 
-- **Statut** : Proposé
+- **Statut** : Accepté (2026-10-25)
 - **Date** : 2026-10-25
 - **Concerne** : `STK`, `REC`, `PLA`, `NUT`, `GAS`, ADR-0002, ADR-0005, ADR-0011
 

@@ -29,4 +29,4 @@ retenu et ses conséquences. Il sert à comprendre plus tard *pourquoi* le proje
 | [0009](0009-stack-et-deploiement.md) | Stack et déploiement : ceux de Cashflow, plus une PWA | Accepté |
 | [0010](0010-lecture-de-cashflow.md) | Foodflow lit Cashflow par son API | Accepté |
 | [0011](0011-temps-disponible-et-preparation-a-l-avance.md) | Temps disponible et préparation à l'avance (batch cooking) | Accepté |
-| [0012](0012-gestion-des-restes.md) | Gestion des restes | Proposé |
+| [0012](0012-gestion-des-restes.md) | Gestion des restes | Accepté |
