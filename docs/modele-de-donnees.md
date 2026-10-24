@@ -6,7 +6,8 @@ Modèle **logique**. Sa traduction physique (SQLite, sqlx, tables `STRICT`) suit
 conventions de Cashflow. Ce document est la source de vérité du schéma. Les règles métier détaillées
 sont dans les specs ; ici ne figurent que les contraintes structurelles.
 
-Domaines couverts à ce stade : aliments (spec 01), stock (spec 02) et recettes (spec 03). Les autres viendront avec leur spec.
+Domaines couverts à ce stade : aliments (spec 01), stock (spec 02), recettes (spec 03) et objectifs
+nutritionnels (spec 04). Les autres viendront avec leur spec.
 
 ## Types logiques
 
@@ -38,7 +39,8 @@ Les réglages hérités (R-ALI-2) sont des colonnes **nullables** sur `food_grou
 | `name` | texte | unique parmi les enfants d'un même parent |
 | `ciqual_code` | texte ? | unique ; famille créée par l'import Ciqual |
 | `reference_food_id` | `Id` ? | FK `Food` de la famille ou d'une sous-famille (R-ALI-4) |
-| `nutrition_group` | `NutritionGroup` ? | hérité si `NULL` (spec `NUT`) |
+| `nutrition_group` | `NutritionGroup` ? | hérité si `NULL` (spec 04) |
+| `portion_measure`, `portion_amount` | `Measure` ?, `Amount` ? | taille de portion du groupe nutritionnel ; héritée si `NULL` (R-NUT-22) |
 | `stock_measure` | `Measure` ? | hérité si `NULL` |
 | `tracking_mode` | `TrackingMode` ? | hérité si `NULL` |
 | `shelf_life_days` | entier ? | sans date (`NONE`), hérité si `NULL` |
@@ -59,7 +61,7 @@ Les réglages hérités (R-ALI-2) sont des colonnes **nullables** sur `food_grou
 | `nutrient_basis` | `PER_100_G` \| `PER_100_ML` | `PER_100_G` pour Ciqual |
 | `density_mg_per_ml` | entier ? | > 0 |
 | `piece_weight_mg` | entier ? | > 0 |
-| `stock_measure`, `tracking_mode`, `*_shelf_life_days` | | comme `FoodGroup`, hérités si `NULL` |
+| `stock_measure`, `tracking_mode`, `*_shelf_life_days`, `nutrition_group`, `portion_*` | | comme `FoodGroup`, hérités si `NULL` |
 | `minimum_stock` | `Amount` ? | dans la mesure de stock ; `0` signifie « toujours en avoir » en `PRESENCE` (R-STK-42) |
 | `preferred_product_id` | `Id` ? | FK `Product` rattaché à cet aliment (R-ALI-43) |
 | `merged_into_id` | `Id` ? | FK `Food` ; aliment absorbé par une fusion (R-ALI-13) |
@@ -256,3 +258,55 @@ Un brouillon est supprimé à sa validation (qui crée la recette) ou à son aba
 | `food_id` / `group_id` / `recipe_id` | `Id` ? | exactement un des trois |
 | `unit_id` | `Id` ? | FK `Unit` propre à l'aliment, si le nom en implique une (« gousses d'ail ») |
 | `updated_at` | `Timestamp` | |
+
+## Objectifs nutritionnels — spec 04
+
+### `MealSlot`
+
+Créneau de repas de la journée ; complété par la spec `PLA` (temps disponible, heure limite).
+
+| Champ | Type | Contraintes |
+|---|---|---|
+| `id` | `Id` | PK |
+| `name` | texte | unique |
+| `position` | entier | ordre dans la journée |
+| `energy_share` | `Ratio` | part de l'énergie du jour ; Σ des créneaux actifs = 1 000 (R-NUT-30) |
+| `active` | booléen | |
+
+### `NutritionGoal`
+
+Une ligne par version de l'objectif du foyer (R-NUT-1, R-NUT-2).
+
+| Champ | Type | Contraintes |
+|---|---|---|
+| `id` | `Id` | PK |
+| `valid_from` | `Date` | unique |
+| `note` | texte ? | |
+
+### `GoalTemplate`
+
+| Champ | Type | Contraintes |
+|---|---|---|
+| `id` | `Id` | PK |
+| `name` | texte | unique |
+| `builtin` | booléen | modèle fourni (« Repères PNNS 2019 — adulte »), non modifiable |
+
+### `GoalCriterion`
+
+Rattaché à une version (`goal_id`) **ou** à un modèle (`template_id`).
+
+| Champ | Type | Contraintes |
+|---|---|---|
+| `id` | `Id` | PK |
+| `goal_id` / `template_id` | `Id` ? | exactement un des deux |
+| `kind` | `CriterionKind` | `ENERGY`, `NUTRIENT`, `GROUP_PORTIONS`, `GROUP_AMOUNT`, `GROUP_FREQUENCY`, `RECIPE_REPEAT`, `FAMILY_REPEAT` |
+| `nutrient_code` | texte ? | FK `Nutrient` ; requis si `ENERGY` (`ENERGY`) ou `NUTRIENT` |
+| `nutrition_groups` | `Json` ? | liste de `NutritionGroup` ; requis si `GROUP_*` |
+| `food_group_id` | `Id` ? | FK `FoodGroup` ; requis si `FAMILY_REPEAT` |
+| `expression` | `ABSOLUTE` \| `PERCENT_ENERGY` | `PERCENT_ENERGY` seulement pour `NUTRIENT` |
+| `period` | `DAY` \| `WEEK` | |
+| `min_value`, `max_value` | entier ? | au moins un des deux ; unité du nutriment, millièmes de portion, `Amount`, ou jours (`RECIPE_REPEAT`) ; ‰ pour un pourcentage |
+| `tolerance` | `Ratio` ? | requis si `ENERGY` (R-NUT-12) |
+| `occurrence_threshold` | `Amount` ? | millièmes de portion ; `GROUP_FREQUENCY` (R-NUT-14) |
+| `importance` | `REQUIRED` \| `PREFERRED` \| `INFO` | |
+| `position` | entier | ordre d'affichage |

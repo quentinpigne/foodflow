@@ -60,7 +60,7 @@ stockées **pour 100 g** ou **pour 100 mL** (la **base nutritionnelle** de l'ali
 - **R-ALI-1** — Les familles forment un arbre : une famille a au plus un parent, et aucun cycle n'est
   permis. Un aliment appartient à **exactement une** famille.
 - **R-ALI-2** — Une famille porte des **réglages par défaut**, hérités par ses sous-familles et ses
-  aliments tant qu'ils ne les remplacent pas : groupe nutritionnel (spec `NUT`), mode de suivi du stock,
+  aliments tant qu'ils ne les remplacent pas : groupe nutritionnel et taille de portion (spec 04), mode de suivi du stock,
   mesure de stock, durées de conservation (spec `STK`). La valeur effective d'un réglage est celle de
   l'élément le plus spécifique qui le définit.
 - **R-ALI-3** — Une famille qui contient des aliments, des sous-familles, ou que vise un ingrédient de

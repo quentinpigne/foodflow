@@ -26,7 +26,8 @@ Langage commun du projet. Chaque terme métier a **un seul** nom français (docu
 | Base nutritionnelle | `nutrient basis` | Quantité de référence des valeurs nutritionnelles : `PER_100_G` ou `PER_100_ML`. |
 | Valeur estimée | `estimated` | Valeur nutritionnelle approchée (« traces », « < x », énergie calculée). |
 | Total incomplet | `incomplete` | Total (nutriment, coût) dont au moins une composante est inconnue ou non convertible. |
-| Groupe nutritionnel | `NutritionGroup` | Groupe des repères de consommation (légumes, fruits, féculents, légumineuses…) attaché à une famille ; détaillé en spec `NUT`. |
+| Groupe nutritionnel | `NutritionGroup` | Groupe des repères de consommation (légumes, fruits, féculents, légumineuses…) attaché à une famille ; détaillé en spec 04. |
+| Taille de portion | `portion size` | Quantité d'un aliment qui compte pour une portion de son groupe nutritionnel (80 g de légumes). |
 
 ## Stock (spec 02)
 
@@ -88,6 +89,20 @@ Langage commun du projet. Chaque terme métier a **un seul** nom français (docu
 | Temps disponible | `available time` | Temps actif dont on dispose pour un créneau ou une session de préparation. |
 | Session de préparation | `PrepSession` | Moment dédié à cuisiner à l'avance pour plusieurs repas (batch cooking), ajouté à une semaine donnée. |
 | Préparation à l'avance | `make-ahead` | Recette ou sous-recette cuisinée dans une session de préparation pour un repas ultérieur. |
+
+## Objectifs nutritionnels (spec 04)
+
+| Terme | Identifiant | Définition |
+|---|---|---|
+| Objectif nutritionnel | `NutritionGoal` | Ensemble de critères du foyer, par équivalent adulte, versionné par date de début. |
+| Version d'objectif | `NutritionGoal` (`valid_from`) | Critères en vigueur à partir d'une date, jusqu'à la version suivante. |
+| Critère | `GoalCriterion` | Exigence mesurable : énergie, nutriment, portions, quantité ou fréquence d'un groupe, variété. |
+| Importance | `CriterionImportance` | `REQUIRED` (contrainte), `PREFERRED` (à approcher), `INFO` (affiché seulement). |
+| Modèle d'objectif | `GoalTemplate` | Jeu de critères prêt à copier (« Repères PNNS 2019 — adulte »). |
+| Part d'énergie | `energy share` | Part de l'énergie de la journée attribuée à un créneau de repas. |
+| Hors foyer | `out of home` | Repas pris à l'extérieur : il occupe son créneau sans compter dans le stock, les courses ni le bilan. |
+| Bilan | `NutritionReport` | Évaluation des critères sur une période, en lecture prévue ou réelle. |
+| Statut d'un critère | `CriterionStatus` | `MET`, `BELOW`, `ABOVE`, `INCOMPLETE`, `NOT_APPLICABLE`. |
 
 ## Transverse
 
