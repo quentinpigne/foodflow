@@ -7,31 +7,43 @@ a été consignée (ADR, spec).
 
 | # | Question | Proposition par défaut | Où |
 |---|---|---|---|
-| Q1 | Foyer : comment compter les convives ? Un nombre de personnes, ou des « équivalents adulte » (un enfant = 0,6) pour les portions et les calories ? | Équivalents adulte, réglables par repas | vision, `PLA` |
-| Q2 | Structure de la journée : quels repas (petit-déjeuner, déjeuner, goûter, dîner) ? Les repas pris hors du foyer (cantine, restaurant) comptent-ils dans l'objectif ? | Créneaux réglables ; un repas « hors foyer » occupe le créneau sans compter dans le stock ni dans les courses | `PLA`, `NUT` |
-| Q3 | Lien avec Cashflow : dans quel sens, et comment ? Foodflow lit le budget Alimentation de Cashflow ? Rapproche une session de courses d'une transaction Cashflow ? Cashflow lit les coûts de Foodflow ? | Foodflow appelle l'API de Cashflow (lecture du budget, recherche de la transaction des courses) ; aucune écriture dans Cashflow | `CSH`, ADR |
-| Q4 | Stack et déploiement : la même que Cashflow (Rust axum + sqlx/SQLite, Angular, binaire unique, Docker sur ubuntu01) ? | Oui, avec en plus une PWA pour le mode magasin hors connexion | ADR |
-| Q5 | Précision des quantités et des valeurs nutritionnelles : entiers (milligrammes, millilitres, millièmes de pièce) comme les centimes de Cashflow ? | Oui, pas de flottant pour les quantités, les nutriments ni les prix | ADR |
-| Q6 | Stock : un état qu'on corrige, ou un journal de mouvements (entrées, sorties, inventaires) dont l'état se déduit, comme le solde de Cashflow ? | Journal de mouvements avec inventaires comme points de contrôle | `STK`, ADR |
-| Q7 | Aliment et produit : un produit du commerce (code-barres) est-il toujours rattaché à un aliment générique (« Lait demi-écrémé ») qui sert aux recettes et au stock ? | Oui : les recettes demandent un aliment, le stock contient des produits ou des aliments | `ALI`, ADR |
+| Q8 | HTTPS pour la PWA : autorité de certification interne (certificat à installer sur chaque appareil) ou domaine personnel avec Let's Encrypt par challenge DNS ? Tranche aussi Q15 de Cashflow | Domaine personnel, si tu en as un dont le DNS a une API | ADR-0009 |
+| Q11 | Revue des ADR 0001 à 0010 (statut `Proposé`) | — | adr/ |
 
 ## À trancher avant la phase concernée
 
 | # | Question | Proposition par défaut | Où |
 |---|---|---|---|
-| Q8 | IA : quel fournisseur, quelles données lui envoyer (stock, recettes, objectifs) ? | API Claude, désactivée par défaut, envoi limité au strict nécessaire et affiché avant l'envoi | `PLA`, ADR |
-| Q9 | Open Food Facts : appel à la demande, ou copie locale filtrée ? | Appel à la demande au scan, résultat mis en cache dans la base | `ALI` |
-| Q10 | Prix : saisis article par article aux courses, ou total du ticket seulement ? | Prix par article facultatif ; total de la session obligatoire pour le lien avec Cashflow | `COU`, `CSH` |
+| Q9 | Open Food Facts : appel à la demande, ou copie locale filtrée ? | Appel à la demande au scan, résultat mis en cache dans la base | ADR-0007, `ALI` |
+| Q10 | Prix : saisis article par article aux courses, ou total du ticket seulement ? | Prix par article facultatif ; total de la session obligatoire pour le rapprochement avec Cashflow | `COU`, `CSH` |
+| Q12 | IA : quel modèle, quel format d'échange, quel garde-fou de coût ? | API Claude, désactivée par défaut ; réponse structurée contrôlée par le domaine | ADR-0007, `PLA` |
+| Q13 | Créneaux de repas par défaut (petit-déjeuner, déjeuner, goûter, dîner) et part de l'objectif journalier de chacun | 4 créneaux, 25 / 35 / 10 / 30 % | `PLA`, `NUT` |
+
+## Pour plus tard (V2)
+
+| # | Question | Où |
+|---|---|---|
+| Q14 | Allergies et régimes : liste fermée (14 allergènes réglementaires) ou libre ? Sur l'aliment, la famille ou le produit (traces) ? | ADR-0004 |
+| Q15 | Préférences des invités récurrents : un invité devient-il un membre « occasionnel » ? | ADR-0004 |
 
 ## Tranchées
 
 | # | Question | Réponse | Où |
 |---|---|---|---|
-| — | Pour qui planifier ? | Le foyer entier, sans profil individuel en V1, sans s'interdire d'en ajouter (2026-10-24) | vision |
-| — | Précision du stock | Choisie par produit : quantité ou présence ; péremption suivie (2026-10-24) | vision, `STK` |
+| Q1 | Comment compter les convives ? | En équivalents adulte ; invités et absents réglables par repas (2026-10-24) | ADR-0004 |
+| Q2 | Structure de la journée | Créneaux de repas paramétrables (2026-10-24) | vision, `PLA` |
+| Q3 | Lien avec Cashflow | Foodflow lit Cashflow par son API, en lecture seule (2026-10-24) | ADR-0010 |
+| Q4 | Stack et déploiement | Identiques à Cashflow, plus une PWA (2026-10-24) | ADR-0009 |
+| Q5 | Précision des quantités | Entiers en base, décimaux dans l'interface (2026-10-24) | ADR-0001 |
+| Q6 | Stock : état ou journal ? | Journal de mouvements, inventaires comme points de contrôle (2026-10-24) | ADR-0002 |
+| Q7 | Aliment et produit | Un produit est toujours rattaché à un aliment générique ou à une famille (2026-10-24) | ADR-0003 |
+| — | Allergies, conseils médicaux, journal par personne | V2 (2026-10-24) | vision |
+| — | Goûts de chacun | En V1, par membre du foyer (2026-10-24) | ADR-0004 |
+| — | Pour qui planifier ? | Le foyer entier, objectif global (2026-10-24) | vision, ADR-0004 |
+| — | Précision du stock | Choisie par aliment : quantité ou présence ; péremption suivie (2026-10-24) | ADR-0003, `STK` |
 | — | Sources nutritionnelles | Ciqual, Open Food Facts, saisie manuelle (2026-10-24) | vision, `ALI` |
 | — | Construction des menus | Saisie manuelle, génération déterministe, génération par IA optionnelle (2026-10-24) | vision, `PLA` |
 | — | Sources de recettes | Saisie manuelle, import depuis une URL (2026-10-24) | vision, `REC` |
 | — | Critères d'équilibre | Calories, macronutriments, groupes PNNS, variété ; réglables et versionnés (2026-10-24) | vision, `NUT` |
-| — | Mise à jour du stock | Validation explicite après les courses et après chaque repas cuisiné (2026-10-24) | vision, `STK` |
+| — | Mise à jour du stock | Validation explicite après les courses et après chaque repas cuisiné (2026-10-24) | ADR-0005 |
 | — | Usages des courses | Mode magasin hors connexion, prix et coût, anti-gaspillage, lien avec les budgets de Cashflow (2026-10-24) | vision |

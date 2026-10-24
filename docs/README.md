@@ -12,7 +12,7 @@ planification de repas équilibrés, liste de courses, coût et lien avec les bu
 |---|---|
 | Comprendre le produit et ses limites | [vision.md](vision.md) |
 | Voir ce qui reste à trancher | [questions-ouvertes.md](questions-ouvertes.md) |
-| Comprendre pourquoi un choix a été fait | [adr/](adr/) |
+| Comprendre pourquoi un choix a été fait | [adr/](adr/README.md) |
 
 À venir : glossaire, modèle de données, architecture, écrans, roadmap, specs par domaine.
 

@@ -15,12 +15,20 @@ Nourrir le foyer demande de jongler entre plusieurs questions, que rien ne relie
 
 ## Pour qui
 
-Le foyer, piloté par un seul utilisateur depuis l'ordinateur et le téléphone (en cuisine et en magasin).
-Les repas sont planifiés **pour le foyer** : un nombre de convives et un objectif global, sans profil par
-personne en V1. Le modèle ne doit pas empêcher d'ajouter plus tard des profils individuels (objectif,
-régime, allergies) (ADR à venir).
+Le foyer, piloté par un seul utilisateur (ADR-0006) depuis l'ordinateur et le téléphone (en cuisine et
+en magasin).
 
-Application personnelle, auto-hébergée sur le même serveur que Cashflow.
+Les repas sont planifiés **pour le foyer**, avec un objectif nutritionnel global (ADR-0004) :
+
+- chaque membre du foyer compte pour un **équivalent adulte** (un jeune enfant : 0,6) et a ses **goûts**
+  (aime, n'aime pas, refuse), que la planification respecte ;
+- un repas peut compter **des invités** ou des absents, exceptionnellement : les quantités et les courses
+  suivent.
+
+Les profils nutritionnels individuels, les allergies et régimes, et le journal alimentaire par personne
+viendront en V2, sur ces mêmes membres.
+
+Application personnelle, auto-hébergée sur le même serveur que Cashflow, avec la même stack (ADR-0009).
 
 ## Objectifs
 
@@ -75,13 +83,16 @@ Application personnelle, auto-hébergée sur le même serveur que Cashflow.
 | Lien avec Cashflow | Budgets alimentation, rapprochement des courses avec les transactions | `CSH` |
 | Tableau de bord | Ce qui périme, repas du jour, bilan nutritionnel, coût et budget | `TDB` |
 
-## Non-objectifs (proposition, au moins pour la V1)
+## Reporté en V2
 
-- **Profils nutritionnels individuels.** Le foyer a un objectif global ; le modèle le prépare sans
-  l'implémenter.
-- **Multi-utilisateur.** Un seul compte, qui saisit pour le foyer.
-- **Conseil médical ou diététique.** Les repères (PNNS, apports de référence) sont indicatifs.
-- **Suivi de ce que chacun a réellement mangé** (journal alimentaire individuel).
+- **Profils nutritionnels individuels** : objectif propre à chaque membre.
+- **Allergies, régimes et contraintes médicales** : contraintes strictes, distinctes des goûts (ADR-0004).
+- **Journal alimentaire par personne** : ce que chacun a réellement mangé.
+
+## Non-objectifs
+
+- **Multi-utilisateur.** Un seul compte, qui saisit pour le foyer (ADR-0006).
+- **Conseil médical ou diététique.** Les repères (PNNS, apports de référence) sont indicatifs, même en V2.
 - **Commande en ligne et drive.** La liste de courses ne s'envoie pas à une enseigne.
 - **Import de recettes par photo ou OCR.**
 - **Comparateur de prix entre enseignes.**
