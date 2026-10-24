@@ -62,6 +62,7 @@ Langage commun du projet. Chaque terme métier a **un seul** nom français (docu
 | Convive | `Diner` | Personne présente à un repas : membre, ou invité anonyme avec son coefficient. |
 | Invité | `guest` | Convive ponctuel, hors du foyer. |
 | Préférence | `Preference` | Goût d'un membre pour un aliment, une famille ou une recette : `LOVES`, `LIKES`, `DISLIKES`, `REFUSES`. |
+| Présence par défaut | `MemberPresence` | Présence habituelle d'un membre à un créneau, par jour de la semaine. |
 
 ## Recettes (spec 03) et planification (ADR-0011)
 
@@ -103,6 +104,23 @@ Langage commun du projet. Chaque terme métier a **un seul** nom français (docu
 | Hors foyer | `out of home` | Repas pris à l'extérieur : il occupe son créneau sans compter dans le stock, les courses ni le bilan. |
 | Bilan | `NutritionReport` | Évaluation des critères sur une période, en lecture prévue ou réelle. |
 | Statut d'un critère | `CriterionStatus` | `MET`, `BELOW`, `ABOVE`, `INCOMPLETE`, `NOT_APPLICABLE`. |
+
+## Planification (spec 05)
+
+| Terme | Identifiant | Définition |
+|---|---|---|
+| Repas | `Meal` | Une date, un créneau, des convives et des éléments ; statut `PLANNED`, `DONE`, `SKIPPED` ou `OUT_OF_HOME`. |
+| Élément de repas | `MealItem` | Recette cuisinée sur place ou préparée, part d'un lot, ou aliment, dans un repas. |
+| Composition type | `SlotRole` | Rôles d'un repas pour un créneau (plat, accompagnement, laitage ou fruit), obligatoires ou facultatifs. |
+| Repas habituel | `HabitualMeal` | Repas fixe défini par équivalent adulte, repris par défaut sur un créneau (petit-déjeuner, goûter). |
+| Portions cuisinées | `cooked portions` | Portions préparées pour un élément ; au-delà des équivalents adulte, la différence est un reste prévu. |
+| Repas verrouillé | `locked` | Repas que la génération ne modifie pas. |
+| Consommation réelle | `MealIngredientUse` | Ce qui a été utilisé et mangé, enregistré à la validation ; base du bilan réel. |
+| Préparation | `PrepItem` | Recette cuisinée dans une session de préparation, pour un ou plusieurs repas. |
+| Signalement | `warning` | Anomalie non bloquante d'un repas, d'une journée ou d'une semaine. |
+| Génération | `GenerationRun` | Proposition de menus, déterministe (ADR-0013) ou par IA (ADR-0014), en attente d'acceptation. |
+| Graine | `seed` | Nombre qui fixe les départages d'une génération déterministe ; même graine, même proposition. |
+| Réglages de génération | `generation settings` | Poids du score, nombre d'itérations, plafond de coût. |
 
 ## Transverse
 

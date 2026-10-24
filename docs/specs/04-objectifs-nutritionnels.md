@@ -1,6 +1,6 @@
 # Spec 04 — Objectifs nutritionnels
 
-Statut : **Brouillon** (2026-10-25)
+Statut : **Validée** (2026-10-25)
 Modèle : [NutritionGoal, GoalCriterion, MealSlot](../modele-de-donnees.md#objectifs-nutritionnels--spec-04)
 Décisions : ADR-0003 (familles), ADR-0004 (équivalent adulte, objectif du foyer), ADR-0012 (restes)
 

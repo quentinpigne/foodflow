@@ -7,7 +7,7 @@ conventions de Cashflow. Ce document est la source de vérité du schéma. Les r
 sont dans les specs ; ici ne figurent que les contraintes structurelles.
 
 Domaines couverts à ce stade : aliments (spec 01), stock (spec 02), recettes (spec 03) et objectifs
-nutritionnels (spec 04). Les autres viendront avec leur spec.
+nutritionnels (spec 04), planification (spec 05). Les autres viendront avec leur spec.
 
 ## Types logiques
 
@@ -310,3 +310,135 @@ Rattaché à une version (`goal_id`) **ou** à un modèle (`template_id`).
 | `occurrence_threshold` | `Amount` ? | millièmes de portion ; `GROUP_FREQUENCY` (R-NUT-14) |
 | `importance` | `REQUIRED` \| `PREFERRED` \| `INFO` | |
 | `position` | entier | ordre d'affichage |
+
+## Planification — spec 05
+
+### `Member` et `Preference` (ADR-0004)
+
+| Champ | Type | Contraintes |
+|---|---|---|
+| `Member.id` | `Id` | PK |
+| `Member.name` | texte | unique |
+| `Member.adult_equivalent` | `Ratio` | > 0 |
+| `Member.active` | booléen | un membre parti du foyer reste dans l'historique |
+| `Preference.member_id` | `Id` | FK `Member` |
+| `Preference.food_id` / `group_id` / `recipe_id` | `Id` ? | exactement un des trois ; unique par membre et cible |
+| `Preference.level` | `LOVES` \| `LIKES` \| `DISLIKES` \| `REFUSES` | |
+
+### `SlotSchedule` (semaine type)
+
+| Champ | Type | Contraintes |
+|---|---|---|
+| `slot_id` | `Id` | FK `MealSlot` ; PK avec `weekday` |
+| `weekday` | entier | 1 (lundi) à 7 |
+| `available_active_minutes` | entier | ≥ 0 (R-PLA-1) |
+| `earliest_start`, `ready_by` | heure `HH:MM` | `earliest_start` < `ready_by` |
+| `out_of_home` | booléen | hors foyer par défaut (R-PLA-3) |
+| `habitual_meal_id` | `Id` ? | FK `HabitualMeal` (R-PLA-21) |
+
+### `MemberPresence`
+
+| Champ | Type | Contraintes |
+|---|---|---|
+| `member_id`, `slot_id`, `weekday` | `Id`, `Id`, entier | PK ; absent = présent par défaut |
+| `present` | booléen | R-PLA-2 |
+
+### `SlotRole` (composition type)
+
+| Champ | Type | Contraintes |
+|---|---|---|
+| `id` | `Id` | PK |
+| `slot_id` | `Id` | FK `MealSlot` |
+| `position` | entier | unique par créneau |
+| `name` | texte | « Plat », « Accompagnement », « Laitage ou fruit » |
+| `required` | booléen | R-PLA-14 |
+| `recipe_kinds` | `Json` ? | liste de `RecipeKind` admis |
+| `nutrition_groups` | `Json` ? | liste de `NutritionGroup` admis pour un aliment |
+
+### `HabitualMeal` et `HabitualMealItem`
+
+| Champ | Type | Contraintes |
+|---|---|---|
+| `HabitualMeal.id`, `name` | `Id`, texte | nom unique |
+| `HabitualMealItem.habitual_meal_id` | `Id` | FK |
+| `HabitualMealItem.food_id` / `product_id` / `recipe_id` | `Id` ? | exactement un des trois |
+| `HabitualMealItem.amount` | `Amount` | **par équivalent adulte** (R-PLA-20) ; portions pour une recette |
+
+### `Meal`
+
+| Champ | Type | Contraintes |
+|---|---|---|
+| `id` | `Id` | PK |
+| `date`, `slot_id` | `Date`, `Id` | unique ensemble (R-PLA-10) |
+| `status` | `PLANNED` \| `DONE` \| `SKIPPED` \| `OUT_OF_HOME` | |
+| `available_active_minutes`, `earliest_start`, `ready_by` | | recopiés de la semaine type, modifiables (R-PLA-5) |
+| `locked` | booléen | R-PLA-15 |
+| `validation_batch_id` | `Id` ? | mouvements créés par la validation (R-STK-12) |
+| `note` | texte ? | |
+
+### `MealDiner`
+
+| Champ | Type | Contraintes |
+|---|---|---|
+| `meal_id` | `Id` | FK `Meal` |
+| `member_id` | `Id` ? | FK `Member` ; `NULL` pour un invité |
+| `guest_label` | texte ? | |
+| `adult_equivalent` | `Ratio` | recopié du membre, saisi pour un invité |
+
+### `MealItem`
+
+| Champ | Type | Contraintes |
+|---|---|---|
+| `id` | `Id` | PK |
+| `meal_id` | `Id` | FK `Meal` |
+| `role_id` | `Id` ? | FK `SlotRole` |
+| `position` | entier | |
+| `source` | `COOK` \| `PREPARED` \| `LOT` \| `FOOD` | R-PLA-12 |
+| `recipe_id` | `Id` ? | requis si `COOK` ou `PREPARED` |
+| `cooked_portions` | `Amount` ? | `COOK` : portions cuisinées (R-PLA-13) |
+| `prep_item_id` | `Id` ? | FK `PrepItem` ; requis si `PREPARED` |
+| `lot_id` | `Id` ? | FK `StockLot` ; requis si `LOT` |
+| `food_id` / `product_id` | `Id` ? | un des deux requis si `FOOD` |
+| `amount` | `Amount` ? | portions servies (`PREPARED`, `LOT`), ou quantité (`FOOD`) |
+| `per_adult_equivalent` | booléen | `FOOD` : quantité par équivalent adulte ou totale |
+| `leftover_of_item_id` | `Id` ? | FK `MealItem` dont c'est le reste prévu (R-PLA-13) |
+| `eaten_ratio` | `Ratio` ? | renseigné à la validation : part mangée (R-PLA-31) |
+
+### `MealIngredientUse`
+
+Consommation réelle, enregistrée à la validation (R-PLA-31), base du bilan réel.
+
+| Champ | Type | Contraintes |
+|---|---|---|
+| `meal_item_id` | `Id` | FK `MealItem` |
+| `food_id` / `product_id` / `recipe_id` | `Id` ? | exactement un des trois (`recipe_id` : part de lot de préparation) |
+| `amount` | `Amount` | quantité utilisée |
+| `movement_id` | `Id` ? | FK `StockMovement` ; `NULL` si rien n'est sorti du stock (R-PLA-32) |
+
+### `PrepSession` et `PrepItem` (ADR-0011)
+
+| Champ | Type | Contraintes |
+|---|---|---|
+| `PrepSession.id` | `Id` | PK |
+| `PrepSession.date`, `start_time`, `available_minutes` | `Date`, heure, entier | |
+| `PrepSession.status` | `PLANNED` \| `DONE` \| `SKIPPED` | |
+| `PrepSession.validation_batch_id` | `Id` ? | |
+| `PrepItem.id`, `session_id`, `recipe_id` | `Id` | |
+| `PrepItem.amount` | `Amount` | portions ou quantité de rendement (R-PLA-41) |
+| `PrepItem.location_id` | `Id` | FK `Location` ; congélateur ⇒ recette congelable |
+| `PrepItem.lot_id` | `Id` ? | lot créé à la validation (R-PLA-44) |
+
+### `GenerationRun`
+
+| Champ | Type | Contraintes |
+|---|---|---|
+| `id` | `Id` | PK |
+| `kind` | `DETERMINISTIC` \| `AI` | |
+| `period_start`, `period_end` | `Date` | |
+| `seed` | entier ? | requis si `DETERMINISTIC` (R-PLA-65) |
+| `settings` | `Json` | poids, itérations, plafond de coût, consigne libre |
+| `request_payload` | `Json` ? | `AI` : données envoyées, telles qu'affichées (ADR-0014) |
+| `response_payload` | `Json` ? | `AI` : réponse brute |
+| `proposal` | `Json` | repas proposés, raisons, bilan, contraintes non satisfaites |
+| `status` | `PENDING` \| `ACCEPTED` \| `PARTIALLY_ACCEPTED` \| `DISCARDED` | |
+| `created_at` | `Timestamp` | |
