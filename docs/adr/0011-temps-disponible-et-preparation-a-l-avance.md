@@ -4,15 +4,6 @@
 - **Date** : 2026-10-25
 - **Concerne** : `REC`, `PLA`, `STK`, ADR-0002, ADR-0004, ADR-0005
 
-Valeurs par défaut de la semaine type (Q18, 2026-10-25) :
-
-| | Petit-déjeuner | Déjeuner | Dîner |
-|---|---|---|---|
-| Lundi à vendredi | 10 min | 20 min | 30 min |
-| Samedi, dimanche | 20 min | 30 min | 45 min |
-
-Aucune session de préparation par défaut.
-
 ## Contexte
 
 Un menu équilibré ne sert à rien s'il est impossible à cuisiner : le temps disponible varie selon le jour
@@ -52,6 +43,13 @@ Temps actif et temps passif ; préparation à l'avance par recette entière et p
 ### Temps disponible (spec `PLA`)
 - La **semaine type** définit, pour chaque jour et chaque créneau de repas, un **temps actif disponible**
   et une **heure limite** (le repas doit être prêt à 19 h 30). Un jour précis peut être surchargé.
+  Valeurs par défaut (Q18, 2026-10-25) :
+
+  | | Petit-déjeuner | Déjeuner | Dîner |
+  |---|---|---|---|
+  | Lundi à vendredi | 10 min | 20 min | 30 min |
+  | Samedi, dimanche | 20 min | 30 min | 45 min |
+
 - Les **sessions de préparation** ne font **pas** partie de la semaine type : on les ajoute à une semaine
   donnée, quand on sait qu'on aura le temps (jour, heure de début, temps disponible). Une semaine peut en
   avoir zéro, une ou plusieurs.

@@ -160,7 +160,7 @@ décongélation (R-STK-30 à R-STK-34), et de ta décision de le garder malgré 
 - Étant donné deux lots de crème, l'un à DLC le 28/10, l'autre le 05/11, quand un repas sort 20 cL de
   crème, alors elle est prise dans le lot du 28/10 (R-STK-36).
 - Étant donné un lot décongelé, alors le déplacer vers le congélateur est refusé (R-STK-33).
-- Étant donné un yogourt dont la DLC est dépassée d'un jour, quand je valide un repas qui en demande,
+- Étant donné un yaourt dont la DLC est dépassée d'un jour, quand je valide un repas qui en demande,
   alors la validation me demande s'il est encore utilisable ; si je réponds « encore bon », il est
   utilisé et un mouvement `CHECKED` est enregistré ; sinon, il est jeté (`WASTE`, `EXPIRED`) et la sortie
   puise dans le lot suivant (R-STK-37).
