@@ -1,6 +1,6 @@
 # ADR-0015 — Ordonnancement des préparations
 
-- **Statut** : Proposé
+- **Statut** : Accepté (2026-10-25)
 - **Date** : 2026-10-25
 - **Concerne** : `REC`, `PLA`, ADR-0011, ADR-0013
 
