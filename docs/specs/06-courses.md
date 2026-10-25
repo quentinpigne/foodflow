@@ -1,6 +1,6 @@
 # Spec 06 — Courses
 
-Statut : **Brouillon** (2026-10-25)
+Statut : **Validée** (2026-10-25)
 Modèle : [ShoppingTrip, ShoppingAdjustment, ShoppingItem, Store, Aisle, PriceObservation](../modele-de-donnees.md#courses--spec-06)
 Décisions : ADR-0001 (entiers), ADR-0002 (stock), ADR-0003 (aliments et produits), ADR-0005
 (validation), ADR-0009 (PWA hors connexion), ADR-0010 (Cashflow), ADR-0011 (sessions de préparation)

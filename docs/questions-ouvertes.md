@@ -14,8 +14,6 @@ a été consignée (ADR, spec).
 | # | Question | Proposition par défaut | Où |
 |---|---|---|---|
 | Q16 | Fournisseur DNS du domaine (pour le plugin ACME) et choix entre enregistrement DNS public vers l'adresse privée ou DNS local | Enregistrement public, DNS local si le routeur le bloque | ADR-0009, phase 1 |
-| Q9 | Open Food Facts : appel à la demande, ou copie locale filtrée ? | Appel à la demande au scan, résultat mis en cache dans la base | ADR-0007, `ALI` |
-| Q10 | Prix : saisis article par article aux courses, ou total du ticket seulement ? | Prix par article facultatif ; total de la session obligatoire pour le rapprochement avec Cashflow | `COU`, `CSH` |
 | Q12 | IA : quel modèle, quel plafond d'appels mensuel ? | API Claude, désactivée par défaut ; modèle et plafond dans la configuration, choisis à la phase concernée | ADR-0014 |
 
 ## Pour plus tard (V2)
@@ -32,6 +30,9 @@ a été consignée (ADR, spec).
 | Q18 | Semaine type par défaut | Semaine 10 / 20 / 30 min, week-end 20 / 30 / 45 min ; aucune session de préparation par défaut (2026-10-25) | ADR-0011 |
 | — | Date de péremption dépassée | L'utilisateur décide : jeter, ou garder avec une nouvelle date limite (2026-10-25) | spec 02, R-STK-37 |
 | — | Choix des specs 01 et 02 | Validés (2026-10-25) | specs 01, 02 |
+| Q9 | Open Food Facts | Appel à la demande au scan, résultat gardé en base (2026-10-25) | ADR-0007, spec 01 |
+| Q10 | Prix aux courses | Par article, facultatif ; total payé facultatif, nécessaire au rapprochement avec Cashflow (2026-10-25) | spec 06 |
+| — | Spec 06 | Validée (2026-10-25) | spec 06 |
 | — | Spec 05, ADR-0013, ADR-0014 | Validés (2026-10-25) | spec 05 |
 | — | Ordre de cuisson d'une session | Optimisé dès la V1 (2026-10-25) | ADR-0015 |
 | — | Spec 04 | Validée (2026-10-25) | spec 04 |
