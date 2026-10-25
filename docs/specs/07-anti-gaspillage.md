@@ -1,6 +1,6 @@
 # Spec 07 — Anti-gaspillage
 
-Statut : **Brouillon** (2026-10-25)
+Statut : **Validée** (2026-10-25)
 Modèle : [Notification, PushSubscription, Setting](../modele-de-donnees.md#anti-gaspillage--spec-07)
 Décisions : ADR-0002 (journal de mouvements), ADR-0007 (services tiers), ADR-0009 (PWA, HTTPS),
 ADR-0012 (restes), ADR-0013 (génération)
