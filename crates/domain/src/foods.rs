@@ -31,7 +31,7 @@ pub enum NutrientBasis {
 
 /// Groupe des repères de consommation (spec 04), attaché aux familles.
 #[cfg_attr(feature = "openapi", derive(utoipa::ToSchema))]
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord, Serialize, Deserialize)]
 #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
 pub enum NutritionGroup {
     Vegetables,

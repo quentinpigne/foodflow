@@ -4,6 +4,9 @@
 //! La date du jour est toujours un paramètre. Les flottants y sont interdits (ADR-0001).
 
 pub mod foods;
+pub mod nutrition;
+pub mod recipes;
+pub mod scheduling;
 pub mod shared;
 pub mod stock;
 pub mod text;

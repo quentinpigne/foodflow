@@ -71,6 +71,30 @@ pub enum DomainError {
     CheckedUntilBeforeDate,
     #[error("un lot épuisé ne bouge plus")]
     LotDepleted,
+
+    // ----- Recettes (spec 03)
+    #[error("une recette a au moins un ingrédient")]
+    RecipeWithoutIngredient,
+    #[error("rendement invalide : un nombre de portions positif, ou une quantité positive avec sa mesure")]
+    InvalidYield,
+    #[error("un ingrédient vise un aliment, une famille ou une sous-recette, et un seul")]
+    IngredientTarget,
+    #[error("une recette ne peut pas être, directement ou non, son propre ingrédient")]
+    RecipeCycle,
+    #[error("un ingrédient à volonté n'a pas de quantité")]
+    ToTasteWithQuantity,
+    #[error("une recette congelable indique sa durée au congélateur")]
+    FrozenDaysRequired,
+
+    // ----- Objectifs nutritionnels (spec 04)
+    #[error("une version d'objectif existe déjà à cette date")]
+    GoalVersionTaken,
+    #[error("une version déjà entrée en vigueur ne se modifie pas : en créer une nouvelle")]
+    GoalVersionLocked,
+    #[error("critère invalide : {0}")]
+    InvalidCriterion(&'static str),
+    #[error("les parts d'énergie des créneaux actifs totalisent 100 %")]
+    EnergySharesNotFull,
 }
 
 impl DomainError {
@@ -109,6 +133,16 @@ impl DomainError {
             MoveExceedsLot(_) => "MOVE_EXCEEDS_LOT",
             CheckedUntilBeforeDate => "CHECKED_UNTIL_BEFORE_DATE",
             LotDepleted => "LOT_DEPLETED",
+            RecipeWithoutIngredient => "RECIPE_WITHOUT_INGREDIENT",
+            InvalidYield => "INVALID_YIELD",
+            IngredientTarget => "INGREDIENT_TARGET",
+            RecipeCycle => "RECIPE_CYCLE",
+            ToTasteWithQuantity => "TO_TASTE_WITH_QUANTITY",
+            FrozenDaysRequired => "FROZEN_DAYS_REQUIRED",
+            GoalVersionTaken => "GOAL_VERSION_TAKEN",
+            GoalVersionLocked => "GOAL_VERSION_LOCKED",
+            InvalidCriterion(_) => "INVALID_CRITERION",
+            EnergySharesNotFull => "ENERGY_SHARES_NOT_FULL",
         }
     }
 
@@ -137,6 +171,15 @@ impl DomainError {
             RefreezeThawed => "R-STK-33",
             MoveExceedsLot(_) => "R-STK-15",
             CheckedUntilBeforeDate => "R-STK-37",
+            RecipeWithoutIngredient | InvalidYield => "R-REC-1",
+            IngredientTarget => "R-REC-20",
+            ToTasteWithQuantity => "R-REC-22",
+            RecipeCycle => "R-REC-30",
+            FrozenDaysRequired => "R-REC-42",
+            GoalVersionTaken => "R-NUT-2",
+            GoalVersionLocked => "R-NUT-3",
+            InvalidCriterion(_) => "R-NUT-10",
+            EnergySharesNotFull => "R-NUT-30",
         })
     }
 }

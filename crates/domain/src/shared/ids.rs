@@ -53,6 +53,14 @@ define_id!(
     MovementId,
     /// Lot d'opérations validées ensemble, annulées ensemble (R-STK-12).
     BatchId,
+    RecipeId,
+    IngredientId,
+    StepId,
+    RecipeDraftId,
+    NutritionGoalId,
+    GoalTemplateId,
+    CriterionId,
+    MealSlotId,
 );
 
 #[cfg(test)]
