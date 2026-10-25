@@ -11,13 +11,16 @@ import {
 import { rxResource, toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
+import { MatDialog } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
-import { debounceTime, forkJoin, map, of } from 'rxjs';
+import { debounceTime, firstValueFrom, forkJoin, map, of } from 'rxjs';
 
 import { Target } from '../api/models/target';
 import { FoodsService } from '../api/services/foods.service';
 import { RecipesService } from '../api/services/recipes.service';
+import { DataVersion } from '../core/data-version';
+import { NewFood, NewFoodDialog } from './new-food-dialog';
 import { GroupsStore } from './stores';
 
 export interface PickedTarget {
@@ -73,6 +76,9 @@ function fold(text: string): string {
             </mat-optgroup>
           }
         }
+        @if (q().length >= 2) {
+          <mat-option [value]="create">Créer l'aliment « {{ q() }} »</mat-option>
+        }
       </mat-autocomplete>
     </mat-form-field>
   `,
@@ -86,6 +92,11 @@ export class TargetPicker {
   private readonly foods = inject(FoodsService);
   private readonly recipes = inject(RecipesService);
   private readonly groupStore = inject(GroupsStore);
+  private readonly dialog = inject(MatDialog);
+  private readonly version = inject(DataVersion);
+
+  /** Option « Créer l'aliment » : un ingrédient sans aliment existant (R-REC-66). */
+  protected readonly create = { create: true } as const;
 
   readonly label = input('Ingrédient');
   /** Nom de la cible déjà choisie. */
@@ -98,7 +109,7 @@ export class TargetPicker {
   private readonly query = toSignal(toObservable(this.text).pipe(debounceTime(200)), {
     initialValue: '',
   });
-  private readonly q = computed(() => {
+  protected readonly q = computed(() => {
     const value = this.query();
     return typeof value === 'string' ? value.trim() : '';
   });
@@ -141,9 +152,22 @@ export class TargetPicker {
   });
 
   protected readonly display = (value: PickedTarget | string | null): string =>
-    !value ? '' : typeof value === 'string' ? value : value.name;
+    !value ? '' : typeof value === 'string' ? value : 'name' in value ? value.name : '';
 
-  protected pick(value: PickedTarget): void {
-    this.picked.emit(value);
+  protected async pick(value: PickedTarget | typeof this.create): Promise<void> {
+    if (!('create' in value)) {
+      this.picked.emit(value);
+      return;
+    }
+    const ref = this.dialog.open(NewFoodDialog, {
+      data: { groupId: null, name: this.q() },
+      width: '30rem',
+    });
+    const created: NewFood | undefined = await firstValueFrom(ref.afterClosed());
+    if (created) {
+      this.version.bump();
+      this.picked.emit({ target: { kind: 'FOOD', id: created.id }, name: created.name });
+    }
+    this.text.set(created?.name ?? this.name() ?? '');
   }
 }

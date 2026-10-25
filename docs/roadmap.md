@@ -41,6 +41,8 @@ Objectif : un carnet de recettes avec des valeurs nutritionnelles honnêtes.
 - REC-01, REC-02, REC-03, REC-05 — saisie, mise à l'échelle, valeurs nutritionnelles, temps et
   préparation à l'avance
 - REC-06 (sous-recettes), REC-07 (import par URL), REC-08 (mode cuisine), REC-09 à REC-12, REC-16
+- Rattachement des ingrédients amélioré (R-REC-63, R-REC-64, 2026-10-25) : dictionnaire de départ, nom
+  principal, création d'un aliment depuis la revue ; mesuré sur des lignes typiques
 - REC-17 (import par lot), REC-18 (envoi depuis le navigateur), ajoutées le 2026-10-25 : saisir des
   centaines de recettes une à une serait trop long, et aucune base de recettes ouverte en français ne convient
 - NUT-01 à NUT-03 — objectif versionné, groupes et portions, modèle PNNS

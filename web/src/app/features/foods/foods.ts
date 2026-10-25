@@ -19,7 +19,7 @@ import { DataVersion } from '../../core/data-version';
 import { MEASURE_LABELS, TRACKING_LABELS } from '../../core/labels';
 import { GroupsStore } from '../../shared/stores';
 import { GroupDialog } from './group-dialog';
-import { NewFoodDialog } from './new-food';
+import { NewFood, NewFoodDialog } from '../../shared/new-food-dialog';
 
 /** Aliments (ALI-01, ALI-06) : recherche dans le référentiel, et arborescence des familles. */
 @Component({
@@ -213,10 +213,10 @@ export class FoodsPage {
       data: { groupId: this.group() },
       width: '30rem',
     });
-    const id = await firstValueFrom(ref.afterClosed());
-    if (id) {
+    const created: NewFood | undefined = await firstValueFrom(ref.afterClosed());
+    if (created) {
       this.version.bump();
-      await this.router.navigate(['/aliments', id]);
+      await this.router.navigate(['/aliments', created.id]);
     }
   }
 }

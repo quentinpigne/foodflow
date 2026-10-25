@@ -7,9 +7,20 @@ import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { firstValueFrom } from 'rxjs';
 
-import { FoodsService } from '../../api/services/foods.service';
-import { errorMessage } from '../../core/http-errors';
-import { GroupsStore } from '../../shared/stores';
+import { FoodsService } from '../api/services/foods.service';
+import { errorMessage } from '../core/http-errors';
+import { GroupsStore } from './stores';
+
+export interface NewFoodData {
+  groupId: string | null;
+  /** Nom proposé : celui d'un ingrédient importé sans aliment (R-REC-66). */
+  name?: string;
+}
+
+export interface NewFood {
+  id: string;
+  name: string;
+}
 
 /** Nouvel aliment (ALI-02) : nom et famille ; le reste se règle sur sa fiche. */
 @Component({
@@ -75,12 +86,12 @@ import { GroupsStore } from '../../shared/stores';
   `,
 })
 export class NewFoodDialog {
-  private readonly data = inject<{ groupId: string | null }>(MAT_DIALOG_DATA);
+  private readonly data = inject<NewFoodData>(MAT_DIALOG_DATA);
   private readonly ref = inject(MatDialogRef<NewFoodDialog>);
   private readonly api = inject(FoodsService);
   protected readonly groups = inject(GroupsStore);
 
-  protected readonly name = signal('');
+  protected readonly name = signal(this.data.name ?? '');
   protected readonly group = signal<string | null>(this.data.groupId);
   protected readonly busy = signal(false);
   protected readonly error = signal<string | null>(null);
@@ -91,10 +102,11 @@ export class NewFoodDialog {
     this.busy.set(true);
     this.error.set(null);
     try {
+      const name = this.name().trim();
       const created = await firstValueFrom(
-        this.api.createFood({ body: { name: this.name(), group_id: group } }),
+        this.api.createFood({ body: { name, group_id: group } }),
       );
-      this.ref.close(created.id);
+      this.ref.close({ id: created.id, name } satisfies NewFood);
     } catch (error) {
       this.error.set(errorMessage(error));
     } finally {

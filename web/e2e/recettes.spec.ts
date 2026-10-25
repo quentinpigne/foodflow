@@ -124,3 +124,52 @@ test('envoi depuis le navigateur : favori ou partage (REC-18, R-REC-72)', async 
   await page.getByRole('dialog').getByRole('button', { name: 'Abandonner' }).click();
   await expect(page.getByRole('heading', { name: 'Importer des recettes' })).toBeVisible();
 });
+
+test('revue : créer l’aliment d’un ingrédient inconnu, retenu à l’import suivant (R-REC-66)', async ({
+  page,
+}, testInfo) => {
+  const ingredient = `Os à moelle ${testInfo.project.name}`;
+  const jsonLd = (name: string) =>
+    JSON.stringify({
+      '@type': 'Recipe',
+      name,
+      recipeIngredient: [`2 ${ingredient}`, '4 tomates'],
+      recipeInstructions: 'Tout mijoter.',
+    });
+  await login(page);
+  await page.goto('/recettes/import');
+  await page.locator('input[type=file]').setInputFiles({
+    name: 'pot-au-feu.jsonld',
+    mimeType: 'application/ld+json',
+    buffer: Buffer.from(jsonLd(`Pot-au-feu (${testInfo.project.name})`)),
+  });
+  await expect(page.getByRole('heading', { name: 'Revue de l’import' })).toBeVisible();
+  // La ligne sans aliment est en tête : on crée l'aliment depuis le choix de l'ingrédient, une fois la revue
+  // chargée.
+  await expect(page.getByRole('combobox', { name: 'Ingrédient' }).nth(1)).toHaveValue('Tomate');
+  const picker = page.getByRole('combobox', { name: 'Ingrédient' }).first();
+  await picker.fill('');
+  await picker.pressSequentially(ingredient);
+  await page.getByRole('option', { name: `Créer l'aliment « ${ingredient} »` }).click();
+  const dialog = page.getByRole('dialog');
+  await expect(dialog.getByLabel('Nom')).toHaveValue(ingredient);
+  await dialog.getByRole('combobox', { name: 'Famille' }).click();
+  await page.getByRole('option').first().click();
+  await dialog.getByRole('button', { name: 'Créer' }).click();
+  await expect(picker).toHaveValue(ingredient);
+  await page.getByRole('button', { name: 'Valider la recette' }).click();
+  await expect(page.getByRole('heading', { name: /Pot-au-feu/ })).toBeVisible();
+
+  // Le rattachement est mémorisé : le même ingrédient est reconnu à l'import suivant.
+  await page.goto('/recettes/import');
+  await page.locator('input[type=file]').setInputFiles({
+    name: 'pot-au-feu-2.jsonld',
+    mimeType: 'application/ld+json',
+    buffer: Buffer.from(jsonLd(`Pot-au-feu bis (${testInfo.project.name})`)),
+  });
+  await expect(page.getByRole('combobox', { name: 'Ingrédient' }).first()).not.toHaveValue('');
+  await expect(page.getByText('À choisir')).toHaveCount(0);
+  await page.getByRole('button', { name: 'Abandonner l’import' }).click();
+  await page.getByRole('dialog').getByRole('button', { name: 'Abandonner' }).click();
+  await expect(page.getByRole('heading', { name: 'Importer des recettes' })).toBeVisible();
+});

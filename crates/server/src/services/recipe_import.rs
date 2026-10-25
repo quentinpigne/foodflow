@@ -8,7 +8,7 @@ use std::collections::HashMap;
 use foodflow_domain::recipes::matching::{self, Candidate, Confidence};
 use foodflow_domain::recipes::parsing::parse_lines;
 use foodflow_domain::recipes::{RecipeKind, Target};
-use foodflow_domain::shared::ids::{RecipeDraftId, RecipeId, UnitId};
+use foodflow_domain::shared::ids::{FoodId, RecipeDraftId, RecipeId, UnitId};
 use foodflow_domain::text::normalize;
 use rust_decimal::Decimal;
 use serde::{Deserialize, Serialize};
@@ -101,6 +101,45 @@ fn kind_of(categories: &[String]) -> RecipeKind {
 
 fn decimal_text(value: Decimal) -> String {
     value.normalize().to_string().replace('.', ",")
+}
+
+const DICTIONARY: &str = include_str!("../../seed/ingredient_dictionary.json");
+
+#[derive(Deserialize)]
+struct Dictionary {
+    entries: Vec<DictionaryEntry>,
+}
+
+#[derive(Deserialize)]
+struct DictionaryEntry {
+    /// Noms sous lesquels l'ingrédient apparaît dans les recettes (« farine », « farine de blé »).
+    names: Vec<String>,
+    /// Code Ciqual de l'aliment visé.
+    ciqual: String,
+}
+
+/// Dictionnaire de départ (R-REC-64) : nom normalisé → aliment, pour les aliments Ciqual présents dans la base.
+/// Les rattachements mémorisés de l'utilisateur passent devant (R-REC-66).
+pub(crate) fn dictionary(foods_by_code: &HashMap<&str, FoodId>) -> anyhow::Result<HashMap<String, Target>> {
+    let dictionary: Dictionary = serde_json::from_str(DICTIONARY)?;
+    let mut out = HashMap::new();
+    for entry in dictionary.entries {
+        if let Some(food) = foods_by_code.get(entry.ciqual.as_str()) {
+            for name in &entry.names {
+                out.insert(matching::key(name), Target::Food(*food));
+            }
+        }
+    }
+    Ok(out)
+}
+
+/// Mémoire de rattachement : le dictionnaire de départ, puis les rattachements validés par l'utilisateur.
+async fn memory(conn: &mut sqlx::SqliteConnection, kitchen: &Kitchen) -> anyhow::Result<HashMap<String, Target>> {
+    let codes: HashMap<&str, FoodId> =
+        kitchen.catalog.foods.values().filter_map(|f| Some((f.ciqual_code.as_deref()?, f.id))).collect();
+    let mut memory = dictionary(&codes)?;
+    memory.extend(db::recipes::mappings(&mut *conn).await?);
+    Ok(memory)
 }
 
 /// Candidats au rattachement : aliments (et alias), familles, recettes.
@@ -220,7 +259,7 @@ pub async fn start(db: &Db, data: &DataDir, fetcher: &dyn Fetcher, input: &Start
     let imported = jsonld::read(&recipe);
     let mut conn = db.read.acquire().await?;
     let kitchen = Kitchen::load(&mut conn).await?;
-    let memory: HashMap<String, Target> = db::recipes::mappings(&mut *conn).await?.into_iter().collect();
+    let memory = memory(&mut conn, &kitchen).await?;
     let candidates = candidates(&mut conn, &kitchen).await?;
     drop(conn);
     let (active, passive) = match (imported.prep_minutes, imported.cook_minutes) {

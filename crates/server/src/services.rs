@@ -41,6 +41,8 @@ pub fn required(value: &str, field: &'static str, max: usize) -> AppResult<Strin
 }
 
 #[cfg(test)]
+mod matching_tests;
+#[cfg(test)]
 mod recipe_tests;
 #[cfg(test)]
 mod tests;

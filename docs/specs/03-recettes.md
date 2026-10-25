@@ -136,18 +136,30 @@ Par portion (adulte) : 640 kcal · P 32 g · G 52 g · L 33 g · coût ≈ 2,10 
   sections (`recipeInstructions`), catégorie et étiquettes (`recipeCategory`, `recipeCuisine`,
   `keywords`), image, URL d'origine. Les valeurs nutritionnelles de la page sont ignorées.
 - **R-REC-63** — Chaque ligne d'ingrédient est **analysée** (fonction pure du domaine) en quantité
-  (entier, décimal à virgule ou à point, fraction, `½`, intervalle « 2 à 3 » → borne basse, signalée),
-  unité (unités générales et propres, avec leurs abréviations : « cs », « c. à s. », « cuil. à soupe »),
-  nom de l'ingrédient et précision (« émincé », « bien mûres »). « Sel, poivre » donne deux ingrédients
-  à volonté.
+  (entier, décimal à virgule ou à point, fraction, `½`, intervalle « 2 à 3 » → borne basse, signalée ;
+  « un », « une » valent 1, « quelques » ne donne pas de quantité), unité (unités générales et propres,
+  avec leurs abréviations : « cs », « c. à s. », « cuil. à soupe » ; un contenant — bouquet, boîte,
+  rouleau, pavé… — seulement devant « de », pour que « 1 bouquet garni » reste un nom ; un adjectif devant
+  l'unité est ignoré : « 1 petite boîte de maïs »), nom de l'ingrédient et précision (« émincé », « bien
+  mûres »). Une alternative (« 4 citrons jaunes ou 8 verts ») ou un usage (« chocolat pour la pâte »)
+  passe en précision. « Sel, poivre » donne deux ingrédients à volonté ; « 1 œuf + 1 blanc d'œuf », deux
+  ingrédients.
 - **R-REC-64** — Le nom analysé est **rattaché** à une cible (aliment, famille, sous-recette), dans cet
-  ordre : rattachement mémorisé (R-REC-66), nom ou alias exact, recherche approchée. Chaque proposition a
-  une **confiance** (`HIGH`, `MEDIUM`, `LOW`, `NONE`) ; la revue met en tête les lignes de faible
-  confiance.
+  ordre : rattachement mémorisé (R-REC-66), **dictionnaire de départ** (`seed/ingredient_dictionary.json` :
+  quelque 700 noms courants des recettes → aliment Ciqual, « farine » → farine de blé T55), nom ou alias
+  exact, recherche approchée. La recherche approchée exige que le **nom principal** de l'ingrédient soit
+  celui du candidat (« avocat » n'est pas « Huile d'avocat », « citron » pas « Tarte au citron ») ; les
+  qualificatifs de la recette (« fondu », « frais », « rouge ») départagent sans être exigés ; à égalité, la
+  forme brute l'emporte sur une forme cuite ou transformée (purée, conserve, jus). Chaque proposition a une
+  **confiance** (`HIGH`, `MEDIUM`, `LOW`, `NONE`) ; la revue met en tête les lignes de faible confiance.
+  Critère mesuré : au moins 90 % des lignes typiques de `fixtures/recipes/lignes-ingredients.json` sont
+  bien rattachées, et au moins 70 % sans le dictionnaire.
 - **R-REC-65** — La validation exige que chaque ingrédient ait une cible ; une quantité non convertible
   reste permise (R-REC-21). La ligne d'origine est conservée sur l'ingrédient.
 - **R-REC-66** — Chaque rattachement validé est **mémorisé** (nom normalisé → cible) et proposé en
-  priorité aux imports suivants. Un aliment nouveau peut être créé depuis la revue.
+  priorité aux imports suivants, avant le dictionnaire de départ. Un aliment nouveau peut être créé depuis
+  la revue (« Créer l'aliment ») : son nom reprend celui de l'ingrédient, et le rattachement est mémorisé à
+  la validation.
 - **R-REC-67** — Importer une URL déjà importée prévient et propose d'ouvrir la recette existante ;
   on peut tout de même créer une autre recette.
 - **R-REC-68** — L'image est téléchargée au moment de l'import et conservée localement ; la recette ne
