@@ -10,7 +10,7 @@ action volontaire.
 
 ## Statut
 
-Conception en cours (phase 0) : aucune ligne de code n'est écrite. Voir la [roadmap](docs/roadmap.md).
+Conception terminée (2026-10-25) ; l'implémentation de la V1 suit la [roadmap](docs/roadmap.md).
 
 ## Stack
 

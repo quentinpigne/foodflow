@@ -35,8 +35,12 @@ Option 2.
 - La réponse est demandée dans un **format JSON imposé** : pour chaque créneau, des éléments qui
   référencent une recette ou un aliment **par identifiant**, ou une **recette nouvelle** (nom, rendement,
   temps, lignes d'ingrédients, étapes), avec une justification courte.
-- Fournisseur : API Claude (Anthropic) ; modèle, clé et plafond d'appels mensuel dans la configuration du
-  serveur. Le nombre de recettes nouvelles par demande est plafonné (3 par défaut).
+- Fournisseur : **toute API compatible OpenAI** (`POST /v1/chat/completions`), probablement un
+  proxy LiteLLM devant le modèle choisi (Q12, 2026-10-25). Adresse, clé, nom du modèle et plafond
+  d'appels mensuel sont dans la configuration du serveur ; changer de modèle ne demande aucun code.
+  Le format JSON est demandé par schéma (`response_format` de type `json_schema`) quand le modèle le
+  permet, et la réponse est de toute façon validée par le domaine. Le nombre de recettes nouvelles par
+  demande est plafonné (3 par défaut).
 
 ### Contrôle de la réponse
 - Le domaine **vérifie** la réponse : identifiants existants, contraintes dures (ADR-0013). Un élément

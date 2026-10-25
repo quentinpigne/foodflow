@@ -1,6 +1,6 @@
 # Roadmap
 
-Statut : **Revue** (2026-10-25)
+Statut : **Validée** (2026-10-25)
 
 Ordre de réalisation proposé. Chaque phase livre quelque chose d'**utilisable** et repose sur la
 précédente. Les identifiants renvoient aux features des specs. Les écrans de chaque phase sont
@@ -10,8 +10,8 @@ implémentés directement, en s'inspirant de Cashflow, puis corrigés visuelleme
 
 - [x] Vision, ADR 0001 à 0015 (2026-10-24 et 2026-10-25)
 - [x] Specs 01 à 08 validées (2026-10-25)
-- [ ] Spec 09, architecture, roadmap, glossaire, modèle de données : passage à `Validée`
-- [ ] `CLAUDE.md`
+- [x] Spec 09, vision, architecture, roadmap, glossaire, modèle de données validés (2026-10-25)
+- [x] `CLAUDE.md` (2026-10-25)
 
 ## Phase 1 — Socle et stock (MVP)
 
@@ -20,7 +20,7 @@ Objectif : décrire sa cuisine et tenir un stock exact.
 - Squelette : workspace Cargo (`domain`, `server`), `web/` (Angular), CI, image Docker, déploiement
   (comme Cashflow)
 - HTTPS servi par axum avec rechargement du certificat, renouvellement Let's Encrypt sur ubuntu01
-  (ADR-0009, Q16) ; authentification ; sauvegardes automatiques
+  (ADR-0009 ; mécanisme à confirmer, Q16) ; authentification ; sauvegardes automatiques
 - Chaîne OpenAPI → client TypeScript ; types `Amount`, `Measure`, `Money`, `Ratio` et leurs tests ;
   `quantity.ts`
 - ALI-01 à ALI-06 — familles, aliments, import Ciqual, unités et conversions, produits, recherche

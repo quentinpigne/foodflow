@@ -2,9 +2,11 @@
 
 Consignes pour Claude Code sur le projet Foodflow (gestion alimentaire du foyer).
 
-## Phase actuelle : conception (phase 0)
+## Phase actuelle : implémentation de la V1
 
-La conception se termine (`docs/roadmap.md`). L'implémentation suivra la roadmap phase par phase.
+La conception est terminée et validée (phase 0, 2026-10-25). On implémente la V1 phase par phase
+(`docs/roadmap.md`). Le propriétaire corrigera la conception à l'usage : un écart constaté se reporte
+dans la spec ou l'ADR concerné, dans le même commit que le code.
 Questions encore ouvertes, **à ne jamais trancher seul** (proposer, puis demander) :
 `docs/questions-ouvertes.md`.
 

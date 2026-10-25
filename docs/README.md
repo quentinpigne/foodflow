@@ -3,7 +3,8 @@
 Application personnelle de gestion alimentaire du foyer : stock et péremption, recettes,
 planification de repas équilibrés, liste de courses, coût et lien avec les budgets de Cashflow.
 
-> **Statut : conception en cours (phase 0).** Aucune ligne de code n'est écrite.
+> **Statut : conception terminée (phase 0, 2026-10-25).** Tous les ADR sont acceptés et toutes les specs
+> validées ; prochaine étape : phase 1 de la [roadmap](roadmap.md). On corrigera à l'usage.
 > Ce qui reste à trancher : [questions-ouvertes.md](questions-ouvertes.md).
 
 ## Par où commencer

@@ -1,6 +1,6 @@
 # Architecture cible
 
-Statut : **Revue** (2026-10-25)
+Statut : **Validée** (2026-10-25)
 
 Même architecture que Cashflow (ADR-0009) : monolithe en couches autour d'un **cœur de calcul pur**,
 une base SQLite à fichier unique, une API REST décrite en OpenAPI consommée par une SPA Angular servie

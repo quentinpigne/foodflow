@@ -1,6 +1,6 @@
 # Modèle de données
 
-Statut : **Revue** (2026-10-25)
+Statut : **Validée** (2026-10-25)
 
 Modèle **logique**. Sa traduction physique (SQLite, sqlx, tables `STRICT`) suit ADR-0009, avec les
 conventions de Cashflow. Ce document est la source de vérité du schéma. Les règles métier détaillées

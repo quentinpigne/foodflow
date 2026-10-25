@@ -1,6 +1,6 @@
 # Spec 09 — Tableau de bord
 
-Statut : **Revue** (2026-10-25)
+Statut : **Validée** (2026-10-25)
 Décisions : ADR-0010 (Cashflow), ADR-0012 (restes)
 
 ## Principe

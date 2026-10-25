@@ -1,6 +1,6 @@
 # Glossaire
 
-Statut : **Revue** (2026-10-25)
+Statut : **Validée** (2026-10-25)
 
 Langage commun du projet. Chaque terme métier a **un seul** nom français (documentation) et
 **un seul** identifiant anglais (code). En cas de doute, ce fichier fait foi.

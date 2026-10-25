@@ -13,8 +13,7 @@ a été consignée (ADR, spec).
 
 | # | Question | Proposition par défaut | Où |
 |---|---|---|---|
-| Q16 | Fournisseur DNS du domaine (pour le plugin ACME) et choix entre enregistrement DNS public vers l'adresse privée ou DNS local | Enregistrement public, DNS local si le routeur le bloque | ADR-0009, phase 1 |
-| Q12 | IA : quel modèle, quel plafond d'appels mensuel ? | API Claude, désactivée par défaut ; modèle et plafond dans la configuration, choisis à la phase concernée | ADR-0014 |
+| Q16 | Certificat HTTPS : le domaine est `pigne.ddns.net` (No-IP, 2026-10-25), mais No-IP ne propose pas d'API pour les enregistrements TXT (pas de fournisseur lego) ni de sous-domaine sur un hôte gratuit : le challenge DNS-01 automatique n'est pas possible. Alternatives : Duck DNS (gratuit, fournisseur lego `duckdns`, adresse privée possible), domaine personnel chez un registraire avec API (≈ 10 €/an), challenge HTTP-01 (ouvre le port 80 sur Internet, contraire à ADR-0009), autorité de certification interne (option 2 de ADR-0009) | Duck DNS | ADR-0009, phase 1 |
 
 ## Pour plus tard (V2)
 
@@ -32,6 +31,9 @@ a été consignée (ADR, spec).
 | — | Choix des specs 01 et 02 | Validés (2026-10-25) | specs 01, 02 |
 | Q9 | Open Food Facts | Appel à la demande au scan, résultat gardé en base (2026-10-25) | ADR-0007, spec 01 |
 | Q10 | Prix aux courses | Par article, facultatif ; total payé facultatif, nécessaire au rapprochement avec Cashflow (2026-10-25) | spec 06 |
+| Q12 | Fournisseur d'IA | API compatible OpenAI (probablement derrière LiteLLM), modèle et plafond dans la configuration (2026-10-25) | ADR-0014 |
+| — | Documents transverses et spec 09 | Validés ; phase 0 close (2026-10-25) | docs/ |
+| — | ADR des jetons d'accès dans Cashflow | Écrit par le propriétaire dans le dépôt Cashflow (2026-10-25) | spec 08, CSH-00 |
 | — | Spec 08 | Validée (2026-10-25) | spec 08 |
 | — | Écrans | Implémentés directement en s'inspirant de Cashflow, corrigés visuellement ; pas de document d'écrans (2026-10-25) | architecture, roadmap |
 | — | Spec 07 | Validée (2026-10-25) | spec 07 |
