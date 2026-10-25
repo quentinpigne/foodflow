@@ -250,9 +250,11 @@ Quand une recette a des phases, `active_minutes` et `passive_minutes` en sont la
 | `section` | texte ? | « Pour la béchamel » |
 | `food_id` / `group_id` / `sub_recipe_id` | `Id` ? | exactement un des trois (R-REC-20) ; sans cycle (R-REC-30) |
 | `amount` | `Amount` ? | dans la mesure de stock, ou en portions ou unité de rendement de la sous-recette ; `NULL` si à volonté ou non convertible |
+| `measure` | `Measure` ? | mesure de `amount` (masse, volume ou pièce) ; `NULL` pour des portions de sous-recette |
 | `to_taste` | booléen | à volonté (R-REC-22) ; alors `amount` et la saisie sont vides |
 | `entered_quantity` | `Ratio` ? | quantité saisie, en millièmes |
 | `entered_unit_id` | `Id` ? | FK `Unit` (générale ou propre) |
+| `entered_unit_label` | texte ? | unité saisie sans correspondance (« sachet ») : affichée telle quelle, `amount` vide |
 | `note` | texte ? | précision (« émincé ») |
 | `optional` | booléen | R-REC-23 |
 | `fixed` | booléen | non mis à l'échelle (R-REC-13) |
@@ -274,10 +276,11 @@ Quand une recette a des phases, `active_minutes` et `passive_minutes` en sont la
 | Champ | Type | Contraintes |
 |---|---|---|
 | `id` | `Id` | PK |
-| `source_url` | texte | |
+| `source_url` | texte ? | vide pour un fichier JSON-LD réimporté (REC-11) |
 | `fetched_at` | `Timestamp` | |
 | `payload` | `Json` | recette analysée et propositions de rattachement, modifiées pendant la revue |
 | `raw_json_ld` | `Json` | données schema.org d'origine |
+| `image_path` | texte ? | image téléchargée à l'import, reprise par la recette à sa validation |
 
 Un brouillon est supprimé à sa validation (qui crée la recette) ou à son abandon (R-REC-61).
 
@@ -287,7 +290,7 @@ Un brouillon est supprimé à sa validation (qui crée la recette) ou à son aba
 |---|---|---|
 | `normalized_name` | texte | PK ; sans accents, minuscules, singulier (R-REC-66) |
 | `food_id` / `group_id` / `recipe_id` | `Id` ? | exactement un des trois |
-| `unit_id` | `Id` ? | FK `Unit` propre à l'aliment, si le nom en implique une (« gousses d'ail ») |
+| `unit_id` | `Id` ? | FK `Unit` propre à l'aliment, si le nom en implique une (« gousses d'ail ») ; pas encore implémenté |
 | `updated_at` | `Timestamp` | |
 
 ## Objectifs nutritionnels — spec 04

@@ -41,10 +41,15 @@ Objectif : un carnet de recettes avec des valeurs nutritionnelles honnêtes.
 - REC-01, REC-02, REC-03, REC-05 — saisie, mise à l'échelle, valeurs nutritionnelles, temps et
   préparation à l'avance
 - REC-06 (sous-recettes), REC-07 (import par URL), REC-08 (mode cuisine), REC-09 à REC-12, REC-16
-- NUT-01 à NUT-04 — objectif versionné, groupes et portions, modèle PNNS, bilan
+- NUT-01 à NUT-03 — objectif versionné, groupes et portions, modèle PNNS
 
 **Critère de sortie** : 20 recettes réelles saisies ou importées, dont la revue d'import prend moins de
 2 minutes ; leurs valeurs incomplètes disent ce qui manque.
+
+**État (2026-10-25)** : tout est implémenté. Le bilan NUT-04 passe en phase 3 : il porte sur des repas,
+qui n'existent qu'avec la planification. Les phases de préparation et les équipements (ADR-0015) sont
+dans le domaine (ordonnancement) mais pas encore en base ni à l'écran. Reste à faire l'essai réel du
+critère de sortie.
 
 ## Phase 3 — Planification et validation (MVP)
 
@@ -53,6 +58,7 @@ Objectif : planifier la semaine du foyer et tenir le stock par la validation des
 - PLA-01 à PLA-05 — membres, semaine type, calendrier, validation des repas, signalements
 - PLA-06 à PLA-09 — préférences, composition type, repas habituels, restes (ADR-0012)
 - STK-08 — lots de préparation et de restes
+- NUT-04 — bilan nutritionnel des repas (reporté de la phase 2)
 - NUT-05 à NUT-07 — critères de groupes, variété, créneaux et hors foyer
 - PLA-13 — copier une semaine
 
