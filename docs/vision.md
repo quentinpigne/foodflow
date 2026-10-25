@@ -1,6 +1,6 @@
 # Vision produit
 
-Statut : **Brouillon** (2026-10-24)
+Statut : **Revue** (2026-10-24)
 
 ## Le problème
 

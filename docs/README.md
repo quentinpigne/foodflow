@@ -16,18 +16,22 @@ planification de repas équilibrés, liste de courses, coût et lien avec les bu
 | Lire les règles et features d'un domaine | [specs/](specs/) : [01 aliments](specs/01-aliments.md), [02 stock](specs/02-stock.md), [03 recettes](specs/03-recettes.md),
   [04 objectifs nutritionnels](specs/04-objectifs-nutritionnels.md),
   [05 planification](specs/05-planification.md), [06 courses](specs/06-courses.md),
-  [07 anti-gaspillage](specs/07-anti-gaspillage.md), [08 lien avec Cashflow](specs/08-lien-cashflow.md) |
+  [07 anti-gaspillage](specs/07-anti-gaspillage.md), [08 lien avec Cashflow](specs/08-lien-cashflow.md),
+  [09 tableau de bord](specs/09-tableau-de-bord.md) |
+| Comprendre l'architecture cible | [architecture.md](architecture.md) |
+| Connaître l'ordre de réalisation | [roadmap.md](roadmap.md) |
 | Voir ce qui reste à trancher | [questions-ouvertes.md](questions-ouvertes.md) |
 | Comprendre pourquoi un choix a été fait | [adr/](adr/README.md) |
 
-À venir : specs des autres domaines, architecture, écrans, roadmap.
+Pas de document d'écrans : ils sont implémentés directement en s'inspirant de Cashflow, puis corrigés
+visuellement (cf. [architecture](architecture.md), § « Interface »).
 
 ## Conventions de la documentation
 
 Elles reprennent celles de Cashflow.
 
 - **Langue** : documentation en français ; identifiants (entités, champs, enums) en anglais.
-  La correspondance sera dans le glossaire.
+  La correspondance est dans le [glossaire](glossaire.md).
 - **Identifiants de traçabilité** :
   - Règles métier : `R-<DOMAINE>-<n>` (ex. `R-STK-3`). Chaque règle doit avoir au moins un test.
   - Features : `<DOMAINE>-<nn>` (ex. `COU-04`), avec une priorité `MVP`, `V1` ou `V2`.

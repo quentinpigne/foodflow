@@ -1,6 +1,6 @@
 # Spec 08 — Lien avec Cashflow
 
-Statut : **Brouillon** (2026-10-25)
+Statut : **Validée** (2026-10-25)
 Modèle : [CashflowCategory, TripPayment, Store](../modele-de-donnees.md#lien-avec-cashflow--spec-08)
 Décisions : ADR-0001 (centimes), ADR-0005 (validation), ADR-0010 (lecture de Cashflow par son API),
 ADR-0013 (plafond de coût)

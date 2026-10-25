@@ -32,6 +32,8 @@ a été consignée (ADR, spec).
 | — | Choix des specs 01 et 02 | Validés (2026-10-25) | specs 01, 02 |
 | Q9 | Open Food Facts | Appel à la demande au scan, résultat gardé en base (2026-10-25) | ADR-0007, spec 01 |
 | Q10 | Prix aux courses | Par article, facultatif ; total payé facultatif, nécessaire au rapprochement avec Cashflow (2026-10-25) | spec 06 |
+| — | Spec 08 | Validée (2026-10-25) | spec 08 |
+| — | Écrans | Implémentés directement en s'inspirant de Cashflow, corrigés visuellement ; pas de document d'écrans (2026-10-25) | architecture, roadmap |
 | — | Spec 07 | Validée (2026-10-25) | spec 07 |
 | — | Spec 06 | Validée (2026-10-25) | spec 06 |
 | — | Notifications push | Dès la V1, Web Push chiffré, désactivable (2026-10-25) | spec 07, ADR-0007 |
