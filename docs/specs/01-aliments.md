@@ -61,7 +61,7 @@ stockées **pour 100 g** ou **pour 100 mL** (la **base nutritionnelle** de l'ali
   permis. Un aliment appartient à **exactement une** famille.
 - **R-ALI-2** — Une famille porte des **réglages par défaut**, hérités par ses sous-familles et ses
   aliments tant qu'ils ne les remplacent pas : groupe nutritionnel et taille de portion (spec 04), mode de suivi du stock,
-  mesure de stock, durées de conservation (spec `STK`). La valeur effective d'un réglage est celle de
+  mesure de stock, durées de conservation (spec 02). La valeur effective d'un réglage est celle de
   l'élément le plus spécifique qui le définit.
 - **R-ALI-3** — Une famille qui contient des aliments, des sous-familles, ou que vise un ingrédient de
   recette ou une préférence, ne peut pas être supprimée ; elle peut être fusionnée dans une autre
@@ -122,7 +122,7 @@ stockées **pour 100 g** ou **pour 100 mL** (la **base nutritionnelle** de l'ali
   produit. Un produit sans code-barres est permis (vrac, marché).
 - **R-ALI-42** — Le **conditionnement** d'un produit est une quantité dans la mesure de stock de son
   aliment (1 L de lait, 6 œufs, 500 g de pâtes). Un produit vendu en lot (6 × 1 L) peut déclarer son
-  nombre d'unités, pour entrer en stock en un ou plusieurs lots (spec `STK`).
+  nombre d'unités, pour entrer en stock en un ou plusieurs lots (spec 02).
 - **R-ALI-43** — Un aliment peut désigner un **produit habituel**, proposé en premier sur la liste de
   courses.
 

@@ -44,7 +44,7 @@ Les calculs intermédiaires (mise à l'échelle d'une recette, coût d'une porti
 
 - Les sommes et comparaisons SQL sont exactes ; « stock nul » se teste par `= 0`.
 - Les unités de cuisine (cuillère, pincée, verre, sachet) ne sont pas des unités de stockage : elles se
-  convertissent vers l'une des trois grandeurs ci-dessus (spec `ALI`, unités et conversions).
+  convertissent vers l'une des trois grandeurs ci-dessus (spec 01, unités et conversions).
 - Passer d'une grandeur à une autre (pièce → masse, volume → masse) exige une donnée propre à l'aliment
   (poids moyen d'une pièce, densité) : sans elle, la conversion est impossible et signalée.
 - Une `i64` en mg couvre largement les quantités domestiques (plus de 9 millions de tonnes).

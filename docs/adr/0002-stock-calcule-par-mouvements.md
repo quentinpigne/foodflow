@@ -53,4 +53,4 @@ emplacement ; une date de péremption éventuelle). Chaque lot porte un **journa
   et signale l'écart, qui invite à un inventaire.
 - Le calcul doit rester rapide sur des années d'historique : un index par lot suffit ; un lot épuisé
   depuis longtemps peut être archivé.
-- Règles détaillées dans la spec `STK`.
+- Règles détaillées dans la spec 02.

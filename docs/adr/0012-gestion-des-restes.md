@@ -62,7 +62,7 @@ Après la validation d'un repas qui laisse des restes, ou depuis le stock, l'app
 
 La planification, manuelle ou générée, **met en priorité les restes en stock** avant leur date limite.
 Manger un reste ne compte pas comme une répétition de la recette pour les critères de variété
-(spec `NUT`).
+(spec 04).
 
 ### Bilan nutritionnel
 - Un repas compte ce qui y a été **réellement mangé** : quantités cuisinées − restes déclarés.
@@ -75,5 +75,5 @@ Manger un reste ne compte pas comme une répétition de la recette pour les crit
 - La validation d'un repas pose une question de plus (« il en reste ? »), répondue par défaut « rien »
   sauf pour un repas cuisiné pour plus.
 - Le tableau de bord et la vue du stock affichent les restes à finir, triés par date limite.
-- Règles détaillées : spec 02 (lots), spec 03 (aliment de reste), spec `PLA` (affectation, priorité),
+- Règles détaillées : spec 02 (lots), spec 03 (aliment de reste), spec 05 (affectation, priorité),
   spec 04 (bilan).

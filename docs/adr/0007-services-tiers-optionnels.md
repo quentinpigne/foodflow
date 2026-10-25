@@ -48,4 +48,4 @@ Option 3.
 
 - Hors connexion à Internet, tout fonctionne sauf le scan d'un produit inconnu, l'import par URL et l'IA.
 - Les clés d'API sont dans la configuration du serveur, jamais dans le dépôt ni dans la base exportée.
-- Le choix du modèle et le format d'échange avec l'IA feront l'objet d'une spec `PLA` dédiée.
+- Le format d'échange avec l'IA est décrit par l'ADR-0014 ; le modèle est un réglage du serveur.

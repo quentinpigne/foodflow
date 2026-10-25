@@ -43,7 +43,7 @@ Par portion (adulte) : 640 kcal · P 32 g · G 52 g · L 33 g · coût ≈ 2,10 
 - **R-REC-2** — Une recette **archivée** n'est plus proposée par la planification ni par la recherche
   par défaut ; elle reste visible dans l'historique des repas.
 - **R-REC-3** — Modifier une recette ne change pas les repas déjà cuisinés : leur consommation réelle a
-  été enregistrée à leur validation (spec `PLA`, ADR-0005). Elle change les repas planifiés non encore
+  été enregistrée à leur validation (spec 05, ADR-0005). Elle change les repas planifiés non encore
   cuisinés.
 - **R-REC-4** — Une recette a des **notes personnelles** (« mettre moins de sel »), distinctes de sa
   description d'origine.
@@ -88,7 +88,7 @@ Par portion (adulte) : 640 kcal · P 32 g · G 52 g · L 33 g · coût ≈ 2,10 
 - **R-REC-31** — Une sous-recette est une recette comme une autre : elle a ses temps, sa conservation et
   sa préparation à l'avance, et peut être planifiée seule dans une session de préparation (ADR-0011).
 - **R-REC-32** — Pour la liste de courses et le stock, une sous-recette se **développe** en ses propres
-  ingrédients, sauf si un lot de préparation de cette sous-recette couvre le besoin (spec `STK`).
+  ingrédients, sauf si un lot de préparation de cette sous-recette couvre le besoin (spec 02).
 
 ### Temps et préparation à l'avance (ADR-0011)
 
@@ -119,7 +119,7 @@ Par portion (adulte) : 640 kcal · P 32 g · G 52 g · L 33 g · coût ≈ 2,10 
   100 mL** de préparation (rendement en quantité).
 - **R-REC-52** — Un total est **incomplet** si un ingrédient avec quantité a une valeur inconnue, ou une
   quantité non convertible (R-ALI-20) ; l'affichage dit combien d'ingrédients manquent et lesquels.
-- **R-REC-53** — **Coût** d'une recette = Σ quantité × prix de référence de l'aliment (spec `COU`) ; même
+- **R-REC-53** — **Coût** d'une recette = Σ quantité × prix de référence de l'aliment (spec 06) ; même
   règle d'incomplétude. Il est affiché par portion et pour la recette.
 - **R-REC-54** — Les valeurs calculées d'une recette sont **toujours recalculées** (jamais stockées comme
   vérité) : elles suivent les modifications des aliments et des prix.
@@ -166,7 +166,7 @@ Par portion (adulte) : 640 kcal · P 32 g · G 52 g · L 33 g · coût ≈ 2,10 
 | REC-01 | MVP | Saisie d'une recette : ingrédients (aliment, famille, à volonté, facultatif, fixe), étapes, sections, rendement, catégorie, étiquettes |
 | REC-02 | MVP | Fiche recette : quantités mises à l'échelle d'un nombre d'équivalents adulte choisi |
 | REC-03 | MVP | Valeurs nutritionnelles par portion ou pour 100, avec incomplétude détaillée |
-| REC-04 | V1 | Coût par portion et par recette (après la spec `COU`) |
+| REC-04 | V1 | Coût par portion et par recette (spec 06) |
 | REC-05 | MVP | Temps actif et passif ; préparation à l'avance : conservation, congélation, finition |
 | REC-06 | V1 | Sous-recettes, développement des ingrédients, contrôle des cycles |
 | REC-07 | V1 | Import depuis une URL (schema.org JSON-LD) : brouillon, analyse des lignes, revue, rattachements mémorisés |

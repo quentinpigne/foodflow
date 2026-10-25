@@ -34,7 +34,7 @@ Option 2.
 - **Préférences** (`Preference`) : par membre, sur un aliment, une famille d'aliments ou une recette,
   avec un niveau : `LOVES`, `LIKES`, `DISLIKES`, `REFUSES`. La génération exclut ce qu'un convive refuse
   et favorise ce que les convives aiment. Les préférences d'un invité ne sont pas saisies en V1.
-- **L'objectif nutritionnel** (spec `NUT`) est défini pour **un équivalent adulte** et par jour ;
+- **L'objectif nutritionnel** (spec 04) est défini pour **un équivalent adulte** et par jour ;
   le bilan d'une période le compare aux apports ramenés à l'équivalent adulte.
 
 ## Conséquences

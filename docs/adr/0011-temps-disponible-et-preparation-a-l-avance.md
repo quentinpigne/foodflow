@@ -34,13 +34,13 @@ l'avance et combien de temps cela se conserve ; et, pour chaque repas, combien d
 
 Temps actif et temps passif ; préparation à l'avance par recette entière et par sous-recettes.
 
-### Recettes (spec `REC`)
+### Recettes (spec 03)
 - Une recette a un **temps actif** et un **temps passif** ; ses sous-recettes ont les leurs.
 - Un ingrédient de recette peut être **une autre recette** (sous-recette), en quantité ou en portions.
 - Une recette indique si elle **se prépare à l'avance** : conservation au frigo (jours), congelable ou
   non, et **temps de finition** le jour du repas (réchauffer, cuire les pâtes, assembler).
 
-### Temps disponible (spec `PLA`)
+### Temps disponible (spec 05)
 - La **semaine type** définit, pour chaque jour et chaque créneau de repas, un **temps actif disponible**
   et une **heure limite** (le repas doit être prêt à 19 h 30). Un jour précis peut être surchargé.
   Valeurs par défaut (Q18, 2026-10-25) :

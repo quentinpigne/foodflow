@@ -121,7 +121,7 @@ Total estimé ≈ 48,60 € (incomplet : 2 articles sans prix connu) · reste du
 - **R-COU-52** — Un produit nouveau (scanné ou saisi) doit être rattaché à un aliment ou une famille
   avant la validation (ADR-0003).
 - **R-COU-53** — La session terminée enregistre le **total payé** (facultatif, prérempli par la somme des
-  prix saisis). Il est nécessaire pour le rapprochement avec Cashflow (spec `CSH`).
+  prix saisis). Il est nécessaire pour le rapprochement avec Cashflow (spec 08).
 
 ### Prix
 

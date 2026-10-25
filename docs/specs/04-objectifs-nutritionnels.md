@@ -38,7 +38,7 @@ Objectif « Foyer »
 
 Chaque critère a une **importance** :
 
-- `REQUIRED` : la génération de menus doit le respecter si une solution existe (spec `PLA`) ;
+- `REQUIRED` : la génération de menus doit le respecter si une solution existe (spec 05) ;
 - `PREFERRED` : la génération cherche à s'en approcher ;
 - `INFO` : affiché dans le bilan seulement.
 
@@ -75,7 +75,7 @@ pas des légumes.
 
 ### Créneaux et répartition de l'énergie
 
-Chaque créneau de repas (spec `PLA`) porte une **part de l'énergie de la journée** : par défaut
+Chaque créneau de repas (spec 05) porte une **part de l'énergie de la journée** : par défaut
 petit-déjeuner 25 %, déjeuner 35 %, goûter 10 %, dîner 30 %. Elle sert à fixer la cible d'un repas pour
 la génération, et à ajuster la cible d'une journée dont un repas est pris hors du foyer.
 

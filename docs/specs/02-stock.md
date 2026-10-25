@@ -71,7 +71,7 @@ décongélation (R-STK-30 à R-STK-34), et de ta décision de le garder malgré 
 - **R-STK-12** — Annuler une validation (courses, repas) annule **tous** les mouvements qu'elle a créés,
   ensemble.
 - **R-STK-13** — `WASTE` porte un motif : `EXPIRED`, `SPOILED`, `OTHER`. Ces sorties alimentent les
-  statistiques de gaspillage (spec `GAS`).
+  statistiques de gaspillage (spec 07).
 - **R-STK-14** — Un mouvement est daté du jour de l'événement, qui peut être passé (saisie en retard) mais
   jamais futur. Aucun mouvement n'est antérieur au dernier inventaire du lot.
 - **R-STK-15** — Déplacer **tout** un lot change son emplacement (un mouvement `MOVE` sur le lot).
@@ -130,7 +130,7 @@ décongélation (R-STK-30 à R-STK-34), et de ta décision de le garder malgré 
   avec la quantité calculée.
 - **R-STK-41** — Un inventaire peut créer des lots (trouvés) et épuiser des lots (absents).
 - **R-STK-42** — Un aliment peut avoir un **stock minimum** (en quantité, ou « toujours en avoir » en
-  `PRESENCE`). En dessous, l'aliment est proposé pour la liste de courses (spec `COU`), même sans repas
+  `PRESENCE`). En dessous, l'aliment est proposé pour la liste de courses (spec 06), même sans repas
   qui le demande.
 
 ## Features

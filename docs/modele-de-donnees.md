@@ -154,7 +154,7 @@ Liste de référence, fournie par une migration.
 | `expiry_date` | `Date` ? | requis sauf `NONE` |
 | `opened_on`, `frozen_on`, `thawed_on` | `Date` ? | dérivés des mouvements, recopiés pour la lecture |
 | `checked_until` | `Date` ? | nouvelle date limite du dernier `CHECKED` (R-STK-37), recopiée pour la lecture |
-| `unit_price` | `Money` ? | prix payé pour le lot (spec `COU`) |
+| `unit_price` | `Money` ? | prix payé pour le lot (spec 06) |
 | `needs_review` | booléen | écart à vérifier (R-STK-3) |
 
 La **quantité** et l'**état de présence** ne sont pas des colonnes : ils se calculent depuis le journal
@@ -288,7 +288,7 @@ Un brouillon est supprimé à sa validation (qui crée la recette) ou à son aba
 
 ### `MealSlot`
 
-Créneau de repas de la journée ; complété par la spec `PLA` (temps disponible, heure limite).
+Créneau de repas de la journée ; complété par la spec 05 (temps disponible, heure limite).
 
 | Champ | Type | Contraintes |
 |---|---|---|
