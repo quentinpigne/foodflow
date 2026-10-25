@@ -263,25 +263,27 @@ let keys = 0;
               }
             </div>
           </div>
-          @if (leftoverName()) {
-            <div class="inline">
-              <span>Restes : {{ leftoverName() }}</span>
-              <button
-                mat-icon-button
-                type="button"
-                aria-label="Retirer l'aliment de reste"
-                (click)="setLeftover(null)"
-              >
-                <mat-icon>close</mat-icon>
-              </button>
-            </div>
-          } @else {
-            <app-item-picker
-              label="Aliment de reste (facultatif)"
-              [foodsOnly]="true"
-              (picked)="setLeftover($event)"
-            />
-          }
+          <div class="leftover">
+            @if (leftoverName()) {
+              <div class="inline">
+                <span>Restes : {{ leftoverName() }}</span>
+                <button
+                  mat-icon-button
+                  type="button"
+                  aria-label="Retirer l'aliment de reste"
+                  (click)="setLeftover(null)"
+                >
+                  <mat-icon>close</mat-icon>
+                </button>
+              </div>
+            } @else {
+              <app-item-picker
+                label="Aliment de reste (facultatif)"
+                [foodsOnly]="true"
+                (picked)="setLeftover($event)"
+              />
+            }
+          </div>
         </section>
 
         <section class="card">
@@ -410,50 +412,52 @@ let keys = 0;
 
         <section class="card">
           <h2 class="widget-title">Étapes</h2>
-          @for (s of steps(); track s.key; let index = $index) {
-            <div class="step">
-              <span class="number">{{ index + 1 }}</span>
-              <mat-form-field class="grow">
-                <mat-label>Étape</mat-label>
-                <textarea
-                  matInput
-                  [name]="'st' + s.key"
-                  rows="2"
-                  [ngModel]="s.text"
-                  (ngModelChange)="patchStep(index, { text: $event })"
-                ></textarea>
-              </mat-form-field>
-              <mat-form-field class="short">
-                <mat-label>Minuteur</mat-label>
-                <input
-                  matInput
-                  [name]="'sm' + s.key"
-                  type="number"
-                  min="0"
-                  [ngModel]="s.timer"
-                  (ngModelChange)="patchStep(index, { timer: $event || null })"
-                />
-                <span matTextSuffix>min</span>
-              </mat-form-field>
-              <mat-form-field class="short">
-                <mat-label>Section</mat-label>
-                <input
-                  matInput
-                  [name]="'ss' + s.key"
-                  [ngModel]="s.section"
-                  (ngModelChange)="patchStep(index, { section: $event })"
-                />
-              </mat-form-field>
-              <button
-                mat-icon-button
-                type="button"
-                aria-label="Retirer l'étape"
-                (click)="removeStep(index)"
-              >
-                <mat-icon>delete</mat-icon>
-              </button>
-            </div>
-          }
+          <div class="steps">
+            @for (s of steps(); track s.key; let index = $index) {
+              <div class="step">
+                <span class="number">{{ index + 1 }}</span>
+                <mat-form-field class="grow">
+                  <mat-label>Étape</mat-label>
+                  <textarea
+                    matInput
+                    [name]="'st' + s.key"
+                    rows="2"
+                    [ngModel]="s.text"
+                    (ngModelChange)="patchStep(index, { text: $event })"
+                  ></textarea>
+                </mat-form-field>
+                <mat-form-field class="short">
+                  <mat-label>Minuteur</mat-label>
+                  <input
+                    matInput
+                    [name]="'sm' + s.key"
+                    type="number"
+                    min="0"
+                    [ngModel]="s.timer"
+                    (ngModelChange)="patchStep(index, { timer: $event || null })"
+                  />
+                  <span matTextSuffix>min</span>
+                </mat-form-field>
+                <mat-form-field class="short">
+                  <mat-label>Section</mat-label>
+                  <input
+                    matInput
+                    [name]="'ss' + s.key"
+                    [ngModel]="s.section"
+                    (ngModelChange)="patchStep(index, { section: $event })"
+                  />
+                </mat-form-field>
+                <button
+                  mat-icon-button
+                  type="button"
+                  aria-label="Retirer l'étape"
+                  (click)="removeStep(index)"
+                >
+                  <mat-icon>delete</mat-icon>
+                </button>
+              </div>
+            }
+          </div>
           <button mat-stroked-button type="button" (click)="addStep()">
             <mat-icon>add</mat-icon>Étape
           </button>
@@ -503,6 +507,9 @@ let keys = 0;
     .card {
       margin-bottom: 1rem;
     }
+    .widget-title {
+      margin-bottom: 1rem;
+    }
     .wide {
       grid-column: 1 / -1;
     }
@@ -517,27 +524,35 @@ let keys = 0;
     .short {
       width: 9rem;
     }
-    .ingredients {
+    .leftover {
+      margin-top: var(--field-gap);
+    }
+    .ingredients,
+    .steps {
       display: flex;
       flex-direction: column;
-      gap: 0.75rem;
+      gap: 1.25rem;
       margin-bottom: 1rem;
     }
-    .ingredient {
+    .ingredient,
+    .step {
       border-bottom: 1px solid var(--mat-sys-outline-variant);
-      padding-bottom: 0.5rem;
+      padding-bottom: 1rem;
     }
     .source {
       display: flex;
       align-items: center;
       gap: 0.5rem;
-      margin-bottom: 0.25rem;
+      margin-bottom: 0.75rem;
     }
     .line {
       display: flex;
       flex-wrap: wrap;
       align-items: center;
-      gap: 0.5rem;
+      gap: 0.75rem var(--field-gap);
+    }
+    .line + .line {
+      margin-top: 0.75rem;
     }
     .qty {
       width: 6rem;
@@ -556,7 +571,7 @@ let keys = 0;
       display: flex;
       flex-wrap: wrap;
       align-items: center;
-      gap: 0.5rem;
+      gap: 0.75rem var(--field-gap);
     }
     .number {
       font: var(--mat-sys-title-medium);

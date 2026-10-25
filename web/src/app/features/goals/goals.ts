@@ -45,8 +45,9 @@ function scale(c: Criterion): { factor: number; unit: string } {
     case 'ENERGY':
       return { factor: 1000, unit: 'kcal' };
     case 'NUTRIENT':
+      // « % » suffit : le champ « Exprimé en » dit déjà « part de l'énergie ».
       return c.expression === 'PERCENT_ENERGY'
-        ? { factor: 10, unit: '% de l’énergie' }
+        ? { factor: 10, unit: '%' }
         : { factor: 1000, unit: 'g' };
     case 'GROUP_PORTIONS':
       return { factor: 1000, unit: 'portions' };
@@ -132,7 +133,7 @@ function blank(kind: CriterionKind): Criterion {
           }
         }
         <form class="row new-version" (ngSubmit)="createVersion()">
-          <mat-form-field>
+          <mat-form-field class="date">
             <mat-label>Nouvelle version à partir du</mat-label>
             <input
               matInput
@@ -475,10 +476,19 @@ function blank(kind: CriterionKind): Criterion {
       display: flex;
       flex-wrap: wrap;
       align-items: center;
-      gap: 0 var(--field-gap);
+      gap: 0.75rem var(--field-gap);
+    }
+    .row + .row {
+      margin-top: 0.75rem;
     }
     .new-version {
       margin-top: 1rem;
+    }
+    .date {
+      width: 17rem;
+    }
+    .widget-title {
+      margin-bottom: 1rem;
     }
     .short {
       width: 10rem;
@@ -488,7 +498,7 @@ function blank(kind: CriterionKind): Criterion {
       flex: 1;
     }
     .criterion {
-      padding: 0.75rem 0 0;
+      padding: 1.25rem 0 1rem;
       border-top: 1px solid var(--mat-sys-outline-variant);
     }
     .section-head {
@@ -502,7 +512,7 @@ function blank(kind: CriterionKind): Criterion {
       flex-wrap: wrap;
       align-items: center;
       gap: 0.5rem;
-      margin-top: 0.5rem;
+      margin-top: 1rem;
     }
     .spacer {
       flex: 1;
