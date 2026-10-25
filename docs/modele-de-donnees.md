@@ -7,7 +7,8 @@ conventions de Cashflow. Ce document est la source de vérité du schéma. Les r
 sont dans les specs ; ici ne figurent que les contraintes structurelles.
 
 Domaines couverts à ce stade : aliments (spec 01), stock (spec 02), recettes (spec 03) et objectifs
-nutritionnels (spec 04), planification (spec 05), courses (spec 06). Les autres viendront avec leur spec.
+nutritionnels (spec 04), planification (spec 05), courses (spec 06),
+anti-gaspillage (spec 07). Les autres viendront avec leur spec.
 
 ## Types logiques
 
@@ -138,6 +139,7 @@ Liste de référence, fournie par une migration.
 | `id` | `Id` | PK |
 | `name` | texte | unique |
 | `kind` | `PANTRY` \| `FRIDGE` \| `FREEZER` | |
+| `soon_days` | entier ? | seuil `SOON` propre à l'emplacement (R-GAS-2) ; réglage général si `NULL` |
 | `position` | entier | ordre d'affichage |
 
 ### `StockLot`
@@ -538,3 +540,39 @@ Articles figés au départ en magasin (R-COU-40).
 | `price_paid` | `Money` | ≥ 0 |
 | `unit_price` | `Money` | centimes par kg, L ou pièce (R-COU-60) |
 | `shopping_item_id` | `Id` ? | FK `ShoppingItem` |
+
+## Anti-gaspillage — spec 07
+
+### `Setting`
+
+Réglages généraux de l'application (seuil `SOON`, durée des restes, début de semaine, fuseau du foyer,
+heures de notification, poids de génération…).
+
+| Champ | Type | Contraintes |
+|---|---|---|
+| `key` | texte | PK ; liste fermée, définie dans le code avec sa valeur par défaut |
+| `value` | `Json` | validé par le schéma du réglage |
+
+### `Notification`
+
+| Champ | Type | Contraintes |
+|---|---|---|
+| `id` | `Id` | PK |
+| `kind` | `NotificationKind` | `LOT_SOON`, `LOT_EXPIRED`, `LEFTOVER_TO_FINISH`, `THAW_REMINDER`, `UNUSED_LOT`, `EXPIRY_MISSING`, `MEAL_TO_VALIDATE`, `DAILY_SUMMARY` |
+| `lot_id` / `meal_id` | `Id` ? | cible de l'alerte |
+| `dedup_key` | texte | unique ; empêche de renvoyer la même alerte (R-GAS-32) |
+| `created_at` | `Timestamp` | |
+| `pushed_at`, `read_at` | `Timestamp` ? | |
+
+### `PushSubscription`
+
+| Champ | Type | Contraintes |
+|---|---|---|
+| `id` | `Id` | PK |
+| `endpoint` | texte | unique ; adresse fournie par le navigateur |
+| `p256dh`, `auth` | texte | clés de chiffrement du navigateur (Web Push) |
+| `device_label` | texte ? | |
+| `created_at`, `last_success_at` | `Timestamp`, `Timestamp` ? | un abonnement refusé par le service (410) est supprimé |
+
+Les clés VAPID du serveur sont dans le volume `/data`, générées au premier démarrage, jamais dans la base
+exportée ni dans le dépôt.

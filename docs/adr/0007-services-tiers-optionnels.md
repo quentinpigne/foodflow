@@ -10,7 +10,9 @@ Plusieurs fonctions gagnent à appeler un service extérieur :
 
 - **Open Food Facts** : décrire un produit à partir de son code-barres ;
 - **sites de recettes** : télécharger une page pour en extraire la recette ;
-- **IA (API Claude)** : proposer des menus à partir des recettes, du stock et des objectifs.
+- **IA (API Claude)** : proposer des menus à partir des recettes, du stock et des objectifs ;
+- **notifications push** (Web Push) : prévenir le téléphone de ce qui périme, via le service de
+  notification de son navigateur (spec 07).
 
 Les données du foyer (stock, habitudes, goûts) sont personnelles. Les appels sortants doivent être
 connus, maîtrisés et désactivables, comme l'OCR dans Cashflow (ADR-0007 de Cashflow).

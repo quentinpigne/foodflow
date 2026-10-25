@@ -145,6 +145,20 @@ Langage commun du projet. Chaque terme métier a **un seul** nom français (docu
 | Total estimé | `estimated total` | Somme des articles au prix de référence. |
 | Total payé | `total paid` | Montant réellement payé pour une session ; sert au rapprochement avec Cashflow. |
 
+## Anti-gaspillage (spec 07)
+
+| Terme | Identifiant | Définition |
+|---|---|---|
+| À consommer en priorité | `priority list` | Lots `SOON`, à date dépassée, restes, dates à compléter et décongélations à faire, triés par date limite. |
+| Usage prévu | `planned use` | Repas ou préparation planifié qui consomme un lot avant sa date limite. |
+| Lot sans usage prévu | `unused lot` | Lot dont une quantité restera à sa date limite si rien ne change. |
+| Gaspillage | `waste` | Somme des mouvements `WASTE` d'une période, en quantité et en valeur. |
+| Taux de gaspillage | `waste rate` | Valeur jetée ÷ valeur achetée sur un mois. |
+| Pertes inexpliquées | `unexplained losses` | Écarts d'inventaire négatifs ; signe d'un suivi qui dérive, pas du gaspillage constaté. |
+| Notification | `Notification` | Alerte du centre de notifications, éventuellement envoyée en push. |
+| Notification push | `Web Push` | Message envoyé au téléphone par le service de notification de son navigateur, chiffré de bout en bout. |
+| Réglage | `Setting` | Paramètre général de l'application, avec sa valeur par défaut. |
+
 ## Transverse
 
 | Terme | Identifiant | Définition |
