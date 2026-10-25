@@ -159,6 +159,17 @@ Langage commun du projet. Chaque terme métier a **un seul** nom français (docu
 | Notification push | `Web Push` | Message envoyé au téléphone par le service de notification de son navigateur, chiffré de bout en bout. |
 | Réglage | `Setting` | Paramètre général de l'application, avec sa valeur par défaut. |
 
+## Lien avec Cashflow (spec 08)
+
+| Terme | Identifiant | Définition |
+|---|---|---|
+| Jeton d'accès | `API token` | Secret créé dans Cashflow, en lecture seule, qui autorise Foodflow à lire certaines routes. |
+| Catégorie suivie | `CashflowCategory` | Catégorie de Cashflow comptée comme « courses alimentaires ». |
+| Projection de fin de mois | `month-end projection` | Réel de Cashflow + totaux estimés des courses prévues restantes du mois. |
+| Plafond proposé | `proposed cost cap` | Part du reste du budget proposée comme plafond de coût d'une génération. |
+| Rapprochement des courses | `TripPayment` | Lien confirmé entre une session de courses et la ou les transactions Cashflow qui l'ont payée. |
+| Rapprochement orphelin | `orphan payment` | Rapprochement dont la transaction n'existe plus dans Cashflow. |
+
 ## Transverse
 
 | Terme | Identifiant | Définition |

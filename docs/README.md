@@ -16,7 +16,7 @@ planification de repas équilibrés, liste de courses, coût et lien avec les bu
 | Lire les règles et features d'un domaine | [specs/](specs/) : [01 aliments](specs/01-aliments.md), [02 stock](specs/02-stock.md), [03 recettes](specs/03-recettes.md),
   [04 objectifs nutritionnels](specs/04-objectifs-nutritionnels.md),
   [05 planification](specs/05-planification.md), [06 courses](specs/06-courses.md),
-  [07 anti-gaspillage](specs/07-anti-gaspillage.md) |
+  [07 anti-gaspillage](specs/07-anti-gaspillage.md), [08 lien avec Cashflow](specs/08-lien-cashflow.md) |
 | Voir ce qui reste à trancher | [questions-ouvertes.md](questions-ouvertes.md) |
 | Comprendre pourquoi un choix a été fait | [adr/](adr/README.md) |
 

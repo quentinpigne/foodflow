@@ -8,7 +8,7 @@ sont dans les specs ; ici ne figurent que les contraintes structurelles.
 
 Domaines couverts à ce stade : aliments (spec 01), stock (spec 02), recettes (spec 03) et objectifs
 nutritionnels (spec 04), planification (spec 05), courses (spec 06),
-anti-gaspillage (spec 07). Les autres viendront avec leur spec.
+anti-gaspillage (spec 07), lien avec Cashflow (spec 08). Les autres viendront avec leur spec.
 
 ## Types logiques
 
@@ -492,7 +492,7 @@ Consommation réelle, enregistrée à la validation (R-PLA-31), base du bilan r�
 | `covers_until` | `Date` | calculée au départ en magasin (R-COU-20) |
 | `total_paid` | `Money` ? | R-COU-53 |
 | `validation_batch_id` | `Id` ? | mouvements `PURCHASE` (R-COU-50) |
-| `cashflow_transaction_id` | texte ? | rapprochement (spec `CSH`, ADR-0010) |
+| `no_transaction` | booléen | payée sans transaction suivie dans Cashflow (R-CSH-36) |
 
 ### `ShoppingAdjustment`
 
@@ -576,3 +576,29 @@ heures de notification, poids de génération…).
 
 Les clés VAPID du serveur sont dans le volume `/data`, générées au premier démarrage, jamais dans la base
 exportée ni dans le dépôt.
+
+## Lien avec Cashflow — spec 08
+
+Foodflow ne stocke que des **identifiants** Cashflow, jamais de montant ni de libellé (ADR-0010,
+R-CSH-35). L'adresse de Cashflow et le jeton sont dans la configuration du serveur, pas dans la base.
+
+### `CashflowCategory`
+
+| Champ | Type | Contraintes |
+|---|---|---|
+| `cashflow_category_id` | texte | PK ; catégorie suivie (R-CSH-10) |
+
+### `Store` (compléments)
+
+| Champ | Type | Contraintes |
+|---|---|---|
+| `cashflow_payee_id` | texte ? | tiers Cashflow (R-CSH-20) |
+| `cashflow_payee_group_id` | texte ? | groupe de tiers Cashflow ; au plus un des deux |
+
+### `TripPayment`
+
+| Champ | Type | Contraintes |
+|---|---|---|
+| `trip_id` | `Id` | FK `ShoppingTrip` |
+| `cashflow_transaction_id` | texte | unique : une transaction pour une seule session (R-CSH-34) |
+| `confirmed_at` | `Timestamp` | |
