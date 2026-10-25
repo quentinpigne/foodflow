@@ -117,3 +117,12 @@ export function quantityInput(raw: number, measure: Measure): string {
   const unit = bestUnit(raw, measure);
   return `${formatIn(raw, unit)} ${unit.symbol}`;
 }
+
+/** « ≈ 1 ½ » : une quantité de pièces déjà arrondie à la demi-pièce (R-REC-14). */
+export function formatHalves(raw: number): string {
+  const unit = UNITS.COUNT[0];
+  if (raw % unit.amount !== unit.amount / 2) {
+    return formatIn(raw, unit);
+  }
+  return raw < unit.amount ? '½' : `${formatIn(raw - unit.amount / 2, unit)} ½`;
+}

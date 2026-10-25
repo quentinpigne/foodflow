@@ -16,6 +16,8 @@ interface NavItem {
   label: string;
   icon: string;
   exact: boolean;
+  /** Absent de la barre du bas (mobile) : dans le menu. */
+  secondary?: boolean;
 }
 
 /** Navigation : barre du bas et « + » sur mobile, menu latéral permanent sur ordinateur (comme Cashflow). */
@@ -45,9 +47,13 @@ export class Shell {
   protected readonly items: NavItem[] = [
     { path: '/', label: 'Accueil', icon: 'home', exact: true },
     { path: '/stock', label: 'Stock', icon: 'kitchen', exact: false },
+    { path: '/recettes', label: 'Recettes', icon: 'menu_book', exact: false },
     { path: '/aliments', label: 'Aliments', icon: 'nutrition', exact: false },
+    { path: '/objectifs', label: 'Objectifs', icon: 'target', exact: false, secondary: true },
     { path: '/reglages', label: 'Réglages', icon: 'settings', exact: false },
   ];
+
+  protected readonly primaryItems = this.items.filter((item) => !item.secondary);
 
   protected newLot(): void {
     this.addLot.open();

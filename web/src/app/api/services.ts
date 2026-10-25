@@ -5,4 +5,6 @@ export { AuthService } from './services/auth.service';
 export { DashboardService } from './services/dashboard.service';
 export { SystemService } from './services/system.service';
 export { FoodsService } from './services/foods.service';
+export { GoalsService } from './services/goals.service';
 export { StockService } from './services/stock.service';
+export { RecipesService } from './services/recipes.service';

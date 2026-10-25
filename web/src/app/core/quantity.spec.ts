@@ -1,4 +1,4 @@
-import { formatQuantity, parseQuantity, quantityInput, UNITS } from './quantity';
+import { formatHalves, formatQuantity, parseQuantity, quantityInput, UNITS } from './quantity';
 
 describe('quantity', () => {
   it('analyse les saisies en unités de stockage (ADR-0001)', () => {
@@ -34,5 +34,11 @@ describe('quantity', () => {
   it('propose une saisie relisible', () => {
     expect(quantityInput(1_250_000, 'MASS')).toBe('1,25 kg');
     expect(parseQuantity(quantityInput(1_250_000, 'MASS'), 'MASS')).toBe(1_250_000);
+  });
+
+  it('affiche les demi-pièces (R-REC-14)', () => {
+    expect(formatHalves(1_500)).toBe('1 ½');
+    expect(formatHalves(500)).toBe('½');
+    expect(formatHalves(2_000)).toBe('2');
   });
 });
