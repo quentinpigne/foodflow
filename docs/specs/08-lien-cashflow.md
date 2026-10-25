@@ -19,7 +19,7 @@ Budget courses — novembre 2026                     (Cashflow : « Supermarché
 Prévu 600,00 €   Réel 388,20 €   Reste 211,80 €
 Courses prévues d'ici la fin du mois (Foodflow) :  samedi 21 ≈ 92 €, samedi 28 ≈ 85 € (incomplet)
 Projection fin de mois : 565,20 € ✔ sous le prévu
-Plafond proposé pour la génération de la semaine du 23 : 98 €
+Plafond proposé pour générer du 16 au 22/11 : 59,17 € (hors session du 28, sur 7 des 15 jours restants)
 
 Session du samedi 14/11 — Carrefour Market, payé 87,40 €
   ✔ Rapprochée : CB CARREFOUR MARKET 16/11  −87,40 €  (Courant LCL)
