@@ -1,0 +1,81 @@
+{
+  "db_name": "SQLite",
+  "query": "SELECT l.id, l.name, l.kind, l.position, l.soon_days,\n                  (SELECT count(*) FROM stock_lot s WHERE s.location_id = l.id AND s.depleted = 0) AS \"lot_count!: i64\"\n           FROM location l ORDER BY l.position, l.name COLLATE NOCASE",
+  "describe": {
+    "columns": [
+      {
+        "name": "id",
+        "ordinal": 0,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "location",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "name": "name",
+        "ordinal": 1,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "location",
+            "name": "name"
+          }
+        }
+      },
+      {
+        "name": "kind",
+        "ordinal": 2,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "location",
+            "name": "kind"
+          }
+        }
+      },
+      {
+        "name": "position",
+        "ordinal": 3,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "location",
+            "name": "position"
+          }
+        }
+      },
+      {
+        "name": "soon_days",
+        "ordinal": 4,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "location",
+            "name": "soon_days"
+          }
+        }
+      },
+      {
+        "name": "lot_count!: i64",
+        "ordinal": 5,
+        "type_info": "Integer",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Right": 0
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      true,
+      false
+    ]
+  },
+  "hash": "212e8a33059ea818210d5b1ae16050f182093c28349621c71e0e869b5d993e7d"
+}

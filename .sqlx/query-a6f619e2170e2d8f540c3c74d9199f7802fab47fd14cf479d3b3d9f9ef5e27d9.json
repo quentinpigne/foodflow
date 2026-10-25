@@ -1,0 +1,194 @@
+{
+  "db_name": "SQLite",
+  "query": "SELECT id, lot_id, date, kind, amount, presence, shortfall, waste_reason, from_location_id, to_location_id,\n                checked_until, reverses_id, batch_id, note, created_at\n         FROM stock_movement WHERE lot_id = ? ORDER BY date, id",
+  "describe": {
+    "columns": [
+      {
+        "name": "id",
+        "ordinal": 0,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "stock_movement",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "name": "lot_id",
+        "ordinal": 1,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "stock_movement",
+            "name": "lot_id"
+          }
+        }
+      },
+      {
+        "name": "date",
+        "ordinal": 2,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "stock_movement",
+            "name": "date"
+          }
+        }
+      },
+      {
+        "name": "kind",
+        "ordinal": 3,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "stock_movement",
+            "name": "kind"
+          }
+        }
+      },
+      {
+        "name": "amount",
+        "ordinal": 4,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "stock_movement",
+            "name": "amount"
+          }
+        }
+      },
+      {
+        "name": "presence",
+        "ordinal": 5,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "stock_movement",
+            "name": "presence"
+          }
+        }
+      },
+      {
+        "name": "shortfall",
+        "ordinal": 6,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "stock_movement",
+            "name": "shortfall"
+          }
+        }
+      },
+      {
+        "name": "waste_reason",
+        "ordinal": 7,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "stock_movement",
+            "name": "waste_reason"
+          }
+        }
+      },
+      {
+        "name": "from_location_id",
+        "ordinal": 8,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "stock_movement",
+            "name": "from_location_id"
+          }
+        }
+      },
+      {
+        "name": "to_location_id",
+        "ordinal": 9,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "stock_movement",
+            "name": "to_location_id"
+          }
+        }
+      },
+      {
+        "name": "checked_until",
+        "ordinal": 10,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "stock_movement",
+            "name": "checked_until"
+          }
+        }
+      },
+      {
+        "name": "reverses_id",
+        "ordinal": 11,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "stock_movement",
+            "name": "reverses_id"
+          }
+        }
+      },
+      {
+        "name": "batch_id",
+        "ordinal": 12,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "stock_movement",
+            "name": "batch_id"
+          }
+        }
+      },
+      {
+        "name": "note",
+        "ordinal": 13,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "stock_movement",
+            "name": "note"
+          }
+        }
+      },
+      {
+        "name": "created_at",
+        "ordinal": 14,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "stock_movement",
+            "name": "created_at"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Right": 1
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      false
+    ]
+  },
+  "hash": "a6f619e2170e2d8f540c3c74d9199f7802fab47fd14cf479d3b3d9f9ef5e27d9"
+}

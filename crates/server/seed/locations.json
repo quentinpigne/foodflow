@@ -1,0 +1,7 @@
+{
+  "locations": [
+    { "name": "Placard", "kind": "PANTRY" },
+    { "name": "Frigo", "kind": "FRIDGE", "soon_days": 2 },
+    { "name": "Congélateur", "kind": "FREEZER", "soon_days": 14 }
+  ]
+}

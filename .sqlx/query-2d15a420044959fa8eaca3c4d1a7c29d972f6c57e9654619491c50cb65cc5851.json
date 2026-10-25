@@ -1,0 +1,26 @@
+{
+  "db_name": "SQLite",
+  "query": "SELECT alias FROM food_alias WHERE food_id = ? ORDER BY alias_key",
+  "describe": {
+    "columns": [
+      {
+        "name": "alias",
+        "ordinal": 0,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "food_alias",
+            "name": "alias"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Right": 1
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "2d15a420044959fa8eaca3c4d1a7c29d972f6c57e9654619491c50cb65cc5851"
+}

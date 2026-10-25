@@ -1,0 +1,12 @@
+{
+  "nutrients": [
+    { "code": "ENERGY", "name": "Énergie", "storage_unit": "CAL", "ciqual_code": "328", "scale": 1000 },
+    { "code": "PROTEIN", "name": "Protéines", "storage_unit": "MG", "ciqual_code": "25000", "scale": 1000 },
+    { "code": "CARBOHYDRATE", "name": "Glucides", "storage_unit": "MG", "ciqual_code": "31000", "scale": 1000 },
+    { "code": "SUGARS", "name": "dont sucres", "storage_unit": "MG", "ciqual_code": "32000", "scale": 1000 },
+    { "code": "FAT", "name": "Lipides", "storage_unit": "MG", "ciqual_code": "40000", "scale": 1000 },
+    { "code": "SATURATED_FAT", "name": "dont acides gras saturés", "storage_unit": "MG", "ciqual_code": "40302", "scale": 1000 },
+    { "code": "FIBER", "name": "Fibres", "storage_unit": "MG", "ciqual_code": "34100", "scale": 1000 },
+    { "code": "SALT", "name": "Sel", "storage_unit": "MG", "ciqual_code": "10004", "scale": 1000 }
+  ]
+}

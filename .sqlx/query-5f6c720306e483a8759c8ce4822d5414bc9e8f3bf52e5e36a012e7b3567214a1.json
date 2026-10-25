@@ -1,0 +1,266 @@
+{
+  "db_name": "SQLite",
+  "query": "SELECT id, group_id, name, name_key, ciqual_code, hidden AS \"hidden: bool\", nutrient_basis,\n                  density_mg_per_ml, piece_weight_mg, nutrition_group, stock_measure, tracking_mode,\n                  shelf_life_days, opened_shelf_life_days, frozen_shelf_life_days, thawed_shelf_life_days,\n                  portion_measure, portion_amount, minimum_stock, preferred_product_id,\n                  user_modified AS \"user_modified: bool\"\n           FROM food WHERE ciqual_code = ?",
+  "describe": {
+    "columns": [
+      {
+        "name": "id",
+        "ordinal": 0,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "food",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "name": "group_id",
+        "ordinal": 1,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "food",
+            "name": "group_id"
+          }
+        }
+      },
+      {
+        "name": "name",
+        "ordinal": 2,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "food",
+            "name": "name"
+          }
+        }
+      },
+      {
+        "name": "name_key",
+        "ordinal": 3,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "food",
+            "name": "name_key"
+          }
+        }
+      },
+      {
+        "name": "ciqual_code",
+        "ordinal": 4,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "food",
+            "name": "ciqual_code"
+          }
+        }
+      },
+      {
+        "name": "hidden: bool",
+        "ordinal": 5,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "food",
+            "name": "hidden"
+          }
+        }
+      },
+      {
+        "name": "nutrient_basis",
+        "ordinal": 6,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "food",
+            "name": "nutrient_basis"
+          }
+        }
+      },
+      {
+        "name": "density_mg_per_ml",
+        "ordinal": 7,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "food",
+            "name": "density_mg_per_ml"
+          }
+        }
+      },
+      {
+        "name": "piece_weight_mg",
+        "ordinal": 8,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "food",
+            "name": "piece_weight_mg"
+          }
+        }
+      },
+      {
+        "name": "nutrition_group",
+        "ordinal": 9,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "food",
+            "name": "nutrition_group"
+          }
+        }
+      },
+      {
+        "name": "stock_measure",
+        "ordinal": 10,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "food",
+            "name": "stock_measure"
+          }
+        }
+      },
+      {
+        "name": "tracking_mode",
+        "ordinal": 11,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "food",
+            "name": "tracking_mode"
+          }
+        }
+      },
+      {
+        "name": "shelf_life_days",
+        "ordinal": 12,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "food",
+            "name": "shelf_life_days"
+          }
+        }
+      },
+      {
+        "name": "opened_shelf_life_days",
+        "ordinal": 13,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "food",
+            "name": "opened_shelf_life_days"
+          }
+        }
+      },
+      {
+        "name": "frozen_shelf_life_days",
+        "ordinal": 14,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "food",
+            "name": "frozen_shelf_life_days"
+          }
+        }
+      },
+      {
+        "name": "thawed_shelf_life_days",
+        "ordinal": 15,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "food",
+            "name": "thawed_shelf_life_days"
+          }
+        }
+      },
+      {
+        "name": "portion_measure",
+        "ordinal": 16,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "food",
+            "name": "portion_measure"
+          }
+        }
+      },
+      {
+        "name": "portion_amount",
+        "ordinal": 17,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "food",
+            "name": "portion_amount"
+          }
+        }
+      },
+      {
+        "name": "minimum_stock",
+        "ordinal": 18,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "food",
+            "name": "minimum_stock"
+          }
+        }
+      },
+      {
+        "name": "preferred_product_id",
+        "ordinal": 19,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "food",
+            "name": "preferred_product_id"
+          }
+        }
+      },
+      {
+        "name": "user_modified: bool",
+        "ordinal": 20,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "food",
+            "name": "user_modified"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Right": 1
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      true,
+      false,
+      false,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      false
+    ]
+  },
+  "hash": "5f6c720306e483a8759c8ce4822d5414bc9e8f3bf52e5e36a012e7b3567214a1"
+}

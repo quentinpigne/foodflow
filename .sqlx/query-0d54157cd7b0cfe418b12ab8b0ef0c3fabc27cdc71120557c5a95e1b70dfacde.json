@@ -1,0 +1,74 @@
+{
+  "db_name": "SQLite",
+  "query": "SELECT nutrient_code, value, estimated AS \"estimated: bool\", source, reference_value\n           FROM food_nutrient WHERE food_id = ?",
+  "describe": {
+    "columns": [
+      {
+        "name": "nutrient_code",
+        "ordinal": 0,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "food_nutrient",
+            "name": "nutrient_code"
+          }
+        }
+      },
+      {
+        "name": "value",
+        "ordinal": 1,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "food_nutrient",
+            "name": "value"
+          }
+        }
+      },
+      {
+        "name": "estimated: bool",
+        "ordinal": 2,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "food_nutrient",
+            "name": "estimated"
+          }
+        }
+      },
+      {
+        "name": "source",
+        "ordinal": 3,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "food_nutrient",
+            "name": "source"
+          }
+        }
+      },
+      {
+        "name": "reference_value",
+        "ordinal": 4,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "food_nutrient",
+            "name": "reference_value"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Right": 1
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      true
+    ]
+  },
+  "hash": "0d54157cd7b0cfe418b12ab8b0ef0c3fabc27cdc71120557c5a95e1b70dfacde"
+}

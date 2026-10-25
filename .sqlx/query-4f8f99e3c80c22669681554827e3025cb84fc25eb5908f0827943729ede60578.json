@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "INSERT INTO nutrient (code, name, storage_unit, ciqual_code, position) VALUES (?, ?, ?, ?, ?)\n         ON CONFLICT (code) DO UPDATE SET name = excluded.name, storage_unit = excluded.storage_unit,\n             ciqual_code = excluded.ciqual_code, position = excluded.position",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 5
+    },
+    "nullable": []
+  },
+  "hash": "4f8f99e3c80c22669681554827e3025cb84fc25eb5908f0827943729ede60578"
+}

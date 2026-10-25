@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "DELETE FROM location WHERE id = ?1\n           AND NOT EXISTS (SELECT 1 FROM stock_lot WHERE location_id = ?1)\n           AND NOT EXISTS (SELECT 1 FROM stock_movement WHERE from_location_id = ?1 OR to_location_id = ?1)",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 1
+    },
+    "nullable": []
+  },
+  "hash": "67ed6d23c3712980112e0f3de8fe8bd76f4b7d7c843876a9d4bd676b565ce601"
+}

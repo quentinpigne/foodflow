@@ -1,0 +1,230 @@
+{
+  "db_name": "SQLite",
+  "query": "SELECT s.id, s.product_id, s.food_id, s.location_id, s.tracking_mode, s.measure, s.expiry_kind,\n                  s.expiry_date, s.expiry_missing AS \"expiry_missing: bool\", s.stocked_on, s.opened_on, s.frozen_on,\n                  s.thawed_on, s.checked_until, s.unit_price, s.needs_review AS \"needs_review: bool\",\n                  s.depleted AS \"depleted: bool\", s.note\n           FROM stock_lot s LEFT JOIN product p ON p.id = s.product_id\n           WHERE (?1 IS NULL OR s.location_id = ?1)\n             AND (?2 IS NULL OR s.food_id = ?2 OR p.food_id = ?2)\n             AND (?3 OR s.depleted = 0)\n           ORDER BY s.created_at",
+  "describe": {
+    "columns": [
+      {
+        "name": "id",
+        "ordinal": 0,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "stock_lot",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "name": "product_id",
+        "ordinal": 1,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "stock_lot",
+            "name": "product_id"
+          }
+        }
+      },
+      {
+        "name": "food_id",
+        "ordinal": 2,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "stock_lot",
+            "name": "food_id"
+          }
+        }
+      },
+      {
+        "name": "location_id",
+        "ordinal": 3,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "stock_lot",
+            "name": "location_id"
+          }
+        }
+      },
+      {
+        "name": "tracking_mode",
+        "ordinal": 4,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "stock_lot",
+            "name": "tracking_mode"
+          }
+        }
+      },
+      {
+        "name": "measure",
+        "ordinal": 5,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "stock_lot",
+            "name": "measure"
+          }
+        }
+      },
+      {
+        "name": "expiry_kind",
+        "ordinal": 6,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "stock_lot",
+            "name": "expiry_kind"
+          }
+        }
+      },
+      {
+        "name": "expiry_date",
+        "ordinal": 7,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "stock_lot",
+            "name": "expiry_date"
+          }
+        }
+      },
+      {
+        "name": "expiry_missing: bool",
+        "ordinal": 8,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "stock_lot",
+            "name": "expiry_missing"
+          }
+        }
+      },
+      {
+        "name": "stocked_on",
+        "ordinal": 9,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "stock_lot",
+            "name": "stocked_on"
+          }
+        }
+      },
+      {
+        "name": "opened_on",
+        "ordinal": 10,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "stock_lot",
+            "name": "opened_on"
+          }
+        }
+      },
+      {
+        "name": "frozen_on",
+        "ordinal": 11,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "stock_lot",
+            "name": "frozen_on"
+          }
+        }
+      },
+      {
+        "name": "thawed_on",
+        "ordinal": 12,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "stock_lot",
+            "name": "thawed_on"
+          }
+        }
+      },
+      {
+        "name": "checked_until",
+        "ordinal": 13,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "stock_lot",
+            "name": "checked_until"
+          }
+        }
+      },
+      {
+        "name": "unit_price",
+        "ordinal": 14,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "stock_lot",
+            "name": "unit_price"
+          }
+        }
+      },
+      {
+        "name": "needs_review: bool",
+        "ordinal": 15,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "stock_lot",
+            "name": "needs_review"
+          }
+        }
+      },
+      {
+        "name": "depleted: bool",
+        "ordinal": 16,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "stock_lot",
+            "name": "depleted"
+          }
+        }
+      },
+      {
+        "name": "note",
+        "ordinal": 17,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "stock_lot",
+            "name": "note"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Right": 3
+    },
+    "nullable": [
+      false,
+      true,
+      true,
+      false,
+      false,
+      false,
+      false,
+      true,
+      false,
+      false,
+      true,
+      true,
+      true,
+      true,
+      true,
+      false,
+      false,
+      true
+    ]
+  },
+  "hash": "7dd8cf76ce76b223da1fd719945771a93656f922d214c60f9a1af263f54908c0"
+}

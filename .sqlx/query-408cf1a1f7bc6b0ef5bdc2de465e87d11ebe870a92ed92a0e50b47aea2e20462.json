@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "UPDATE stock_lot SET location_id = ?, tracking_mode = ?, expiry_kind = ?, expiry_date = ?, expiry_missing = ?,\n             opened_on = ?, frozen_on = ?, thawed_on = ?, checked_until = ?, unit_price = ?, needs_review = ?,\n             depleted = ?, note = ?, updated_at = ?\n         WHERE id = ?",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 15
+    },
+    "nullable": []
+  },
+  "hash": "408cf1a1f7bc6b0ef5bdc2de465e87d11ebe870a92ed92a0e50b47aea2e20462"
+}

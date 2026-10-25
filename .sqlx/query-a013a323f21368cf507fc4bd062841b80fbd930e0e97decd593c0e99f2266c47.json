@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "UPDATE unit SET name = ?, plural = ?, abbreviation = ?, measure = ?, amount = ?, position = ?, updated_at = ?\n         WHERE id = ?",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 8
+    },
+    "nullable": []
+  },
+  "hash": "a013a323f21368cf507fc4bd062841b80fbd930e0e97decd593c0e99f2266c47"
+}

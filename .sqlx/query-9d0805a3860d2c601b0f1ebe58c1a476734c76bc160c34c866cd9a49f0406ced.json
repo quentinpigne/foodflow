@@ -1,0 +1,21 @@
+{
+  "db_name": "SQLite",
+  "query": "SELECT count(*) AS \"n!: i64\" FROM food_group\n           WHERE parent_id IS ? AND name_key = ? AND (? IS NULL OR id <> ?)",
+  "describe": {
+    "columns": [
+      {
+        "name": "n!: i64",
+        "ordinal": 0,
+        "type_info": "Integer",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Right": 4
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "9d0805a3860d2c601b0f1ebe58c1a476734c76bc160c34c866cd9a49f0406ced"
+}

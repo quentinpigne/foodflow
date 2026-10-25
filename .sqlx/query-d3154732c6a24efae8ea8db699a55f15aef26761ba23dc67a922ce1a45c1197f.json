@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "UPDATE food_group SET parent_id = ?, updated_at = ? WHERE parent_id = ?",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 3
+    },
+    "nullable": []
+  },
+  "hash": "d3154732c6a24efae8ea8db699a55f15aef26761ba23dc67a922ce1a45c1197f"
+}

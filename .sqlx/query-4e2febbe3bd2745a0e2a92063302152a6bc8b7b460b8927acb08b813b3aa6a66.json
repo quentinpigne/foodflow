@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "INSERT INTO product (id, food_id, group_id, name, brand, barcode, stock_measure, package_amount,\n             package_units, nutrient_basis, created_at, updated_at)\n         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 12
+    },
+    "nullable": []
+  },
+  "hash": "4e2febbe3bd2745a0e2a92063302152a6bc8b7b460b8927acb08b813b3aa6a66"
+}

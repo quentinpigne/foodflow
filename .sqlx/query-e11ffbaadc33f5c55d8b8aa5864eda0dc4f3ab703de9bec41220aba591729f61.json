@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "UPDATE food SET hidden = 0, updated_at = ? WHERE id = ? AND hidden = 1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 2
+    },
+    "nullable": []
+  },
+  "hash": "e11ffbaadc33f5c55d8b8aa5864eda0dc4f3ab703de9bec41220aba591729f61"
+}

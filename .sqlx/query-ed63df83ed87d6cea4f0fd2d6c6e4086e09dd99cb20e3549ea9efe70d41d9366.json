@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "INSERT INTO stock_movement (id, lot_id, date, kind, amount, presence, shortfall, waste_reason,\n             from_location_id, to_location_id, checked_until, reverses_id, batch_id, note, created_at)\n         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 15
+    },
+    "nullable": []
+  },
+  "hash": "ed63df83ed87d6cea4f0fd2d6c6e4086e09dd99cb20e3549ea9efe70d41d9366"
+}

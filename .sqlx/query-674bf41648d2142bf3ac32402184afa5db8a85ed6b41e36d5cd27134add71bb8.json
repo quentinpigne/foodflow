@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "INSERT INTO location (id, name, name_key, kind, position, soon_days, created_at, updated_at)\n         VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 8
+    },
+    "nullable": []
+  },
+  "hash": "674bf41648d2142bf3ac32402184afa5db8a85ed6b41e36d5cd27134add71bb8"
+}

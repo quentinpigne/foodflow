@@ -1,0 +1,21 @@
+{
+  "db_name": "SQLite",
+  "query": "SELECT (SELECT count(*) FROM food WHERE name_key = ? AND (? IS NULL OR id <> ?))\n                + (SELECT count(*) FROM food_alias WHERE alias_key = ? AND (? IS NULL OR food_id <> ?)) AS \"n!: i64\"",
+  "describe": {
+    "columns": [
+      {
+        "name": "n!: i64",
+        "ordinal": 0,
+        "type_info": "Integer",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Right": 6
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "5fc4a7265ec78b94f51b274731cd21cdf198ea82fc27282e2878aaa67e1a6c6f"
+}

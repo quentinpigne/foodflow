@@ -1,0 +1,134 @@
+{
+  "db_name": "SQLite",
+  "query": "SELECT id, food_id, group_id, name, brand, barcode, stock_measure, package_amount, package_units,\n                nutrient_basis\n         FROM product WHERE food_id = ? ORDER BY name COLLATE NOCASE",
+  "describe": {
+    "columns": [
+      {
+        "name": "id",
+        "ordinal": 0,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "product",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "name": "food_id",
+        "ordinal": 1,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "product",
+            "name": "food_id"
+          }
+        }
+      },
+      {
+        "name": "group_id",
+        "ordinal": 2,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "product",
+            "name": "group_id"
+          }
+        }
+      },
+      {
+        "name": "name",
+        "ordinal": 3,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "product",
+            "name": "name"
+          }
+        }
+      },
+      {
+        "name": "brand",
+        "ordinal": 4,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "product",
+            "name": "brand"
+          }
+        }
+      },
+      {
+        "name": "barcode",
+        "ordinal": 5,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "product",
+            "name": "barcode"
+          }
+        }
+      },
+      {
+        "name": "stock_measure",
+        "ordinal": 6,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "product",
+            "name": "stock_measure"
+          }
+        }
+      },
+      {
+        "name": "package_amount",
+        "ordinal": 7,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "product",
+            "name": "package_amount"
+          }
+        }
+      },
+      {
+        "name": "package_units",
+        "ordinal": 8,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "product",
+            "name": "package_units"
+          }
+        }
+      },
+      {
+        "name": "nutrient_basis",
+        "ordinal": 9,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "product",
+            "name": "nutrient_basis"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Right": 1
+    },
+    "nullable": [
+      false,
+      true,
+      true,
+      false,
+      true,
+      true,
+      true,
+      true,
+      true,
+      false
+    ]
+  },
+  "hash": "b517e1e76f28b8e2594f7fe6a15146700e6dd96ac560119cd1e629dbe80da42c"
+}

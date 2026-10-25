@@ -1,0 +1,3775 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Foodflow",
+    "description": "API de gestion alimentaire du foyer (ADR-0009).",
+    "license": {
+      "name": "UNLICENSED",
+      "identifier": "UNLICENSED"
+    },
+    "version": "0.1.0"
+  },
+  "paths": {
+    "/api/v1/auth/login": {
+      "post": {
+        "tags": [
+          "auth"
+        ],
+        "summary": "Ouvre une session : pose le cookie `foodflow_session` (HttpOnly, SameSite=Strict, 30 jours glissants).",
+        "operationId": "login",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "Session ouverte"
+          },
+          "401": {
+            "description": "Mot de passe incorrect",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Aucun mot de passe défini",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Trop de tentatives",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/auth/logout": {
+      "post": {
+        "tags": [
+          "auth"
+        ],
+        "summary": "Ferme la session courante.",
+        "operationId": "logout",
+        "responses": {
+          "204": {}
+        }
+      }
+    },
+    "/api/v1/auth/logout-everywhere": {
+      "post": {
+        "tags": [
+          "auth"
+        ],
+        "summary": "Se déconnecter de tous les appareils (ADR-0009).",
+        "operationId": "logoutEverywhere",
+        "responses": {
+          "204": {}
+        }
+      }
+    },
+    "/api/v1/auth/status": {
+      "get": {
+        "tags": [
+          "auth"
+        ],
+        "summary": "État de la session courante.",
+        "operationId": "authStatus",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthStatus"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/dashboard": {
+      "get": {
+        "tags": [
+          "dashboard"
+        ],
+        "summary": "Accueil : ce qui demande une action dans le stock (TDB-01).",
+        "operationId": "getDashboard",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Dashboard"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/export": {
+      "get": {
+        "tags": [
+          "system"
+        ],
+        "summary": "Export complet, au format JSON (ADR-0008).",
+        "operationId": "exportAll",
+        "responses": {
+          "200": {
+            "description": "Fichier JSON (format décrit dans docs/export.md)",
+            "content": {
+              "application/json": {}
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/food-groups": {
+      "get": {
+        "tags": [
+          "foods"
+        ],
+        "summary": "Toutes les familles, avec leurs réglages propres et effectifs (ALI-01).",
+        "operationId": "listFoodGroups",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/FoodGroup"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "foods"
+        ],
+        "operationId": "createFoodGroup",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FoodGroupInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreatedGroup"
+                }
+              }
+            }
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/food-groups/{id}": {
+      "put": {
+        "tags": [
+          "foods"
+        ],
+        "summary": "Renomme, déplace ou règle une famille (R-ALI-1, R-ALI-2, R-ALI-4).",
+        "operationId": "updateFoodGroup",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/FoodGroupId"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FoodGroupInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {},
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "foods"
+        ],
+        "summary": "Supprime une famille vide (R-ALI-3).",
+        "operationId": "deleteFoodGroup",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/FoodGroupId"
+            }
+          }
+        ],
+        "responses": {
+          "204": {},
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/food-groups/{id}/merge": {
+      "post": {
+        "tags": [
+          "foods"
+        ],
+        "summary": "Fusionne la famille dans une autre (R-ALI-3).",
+        "operationId": "mergeFoodGroup",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/FoodGroupId"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MergeGroupInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {},
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/foods": {
+      "get": {
+        "tags": [
+          "foods"
+        ],
+        "summary": "Recherche d'aliments, sans accents ni casse, par nom et alias (ALI-06).",
+        "operationId": "searchFoods",
+        "parameters": [
+          {
+            "name": "q",
+            "in": "query",
+            "description": "Mots recherchés dans le nom et les alias, sans accents ni casse.",
+            "required": false,
+            "schema": {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          },
+          {
+            "name": "group_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/FoodGroupId"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          {
+            "name": "include_hidden",
+            "in": "query",
+            "description": "Inclure les aliments Ciqual masqués (R-ALI-52).",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/FoodSummary"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "foods"
+        ],
+        "operationId": "createFood",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FoodInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreatedFood"
+                }
+              }
+            }
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/foods/{id}": {
+      "get": {
+        "tags": [
+          "foods"
+        ],
+        "summary": "Fiche d'un aliment : réglages, valeurs nutritionnelles, unités propres, produits.",
+        "operationId": "getFood",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/FoodId"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FoodDetail"
+                }
+              }
+            }
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "foods"
+        ],
+        "operationId": "updateFood",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/FoodId"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FoodInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {},
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "foods"
+        ],
+        "summary": "Supprime un aliment inutilisé.",
+        "operationId": "deleteFood",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/FoodId"
+            }
+          }
+        ],
+        "responses": {
+          "204": {},
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/foods/{id}/nutrients": {
+      "put": {
+        "tags": [
+          "foods"
+        ],
+        "summary": "Saisit des valeurs nutritionnelles ; `null` rend une valeur inconnue (R-ALI-11, R-ALI-20).",
+        "operationId": "setFoodNutrients",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/FoodId"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NutrientsInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {},
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/foods/{id}/nutrients/{code}/restore": {
+      "post": {
+        "tags": [
+          "foods"
+        ],
+        "summary": "Rétablit la valeur Ciqual d'un nutriment (R-ALI-11).",
+        "operationId": "restoreCiqualNutrient",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/FoodId"
+            }
+          },
+          {
+            "name": "code",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {},
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/foods/{id}/tracking-mode": {
+      "post": {
+        "tags": [
+          "foods"
+        ],
+        "summary": "Change le mode de suivi de l'aliment et convertit ses lots (R-STK-21).",
+        "operationId": "changeTrackingMode",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/FoodId"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TrackingModeInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {},
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/foods/{id}/units": {
+      "post": {
+        "tags": [
+          "foods"
+        ],
+        "summary": "Ajoute une unité propre à l'aliment (R-ALI-32).",
+        "operationId": "addFoodUnit",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/FoodId"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UnitInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreatedUnit"
+                }
+              }
+            }
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/foods/{id}/units/{unit}": {
+      "put": {
+        "tags": [
+          "foods"
+        ],
+        "operationId": "updateFoodUnit",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/FoodId"
+            }
+          },
+          {
+            "name": "unit",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/UnitId"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UnitInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {},
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "foods"
+        ],
+        "operationId": "deleteFoodUnit",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/FoodId"
+            }
+          },
+          {
+            "name": "unit",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/UnitId"
+            }
+          }
+        ],
+        "responses": {
+          "204": {},
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/health": {
+      "get": {
+        "tags": [
+          "system"
+        ],
+        "summary": "Le serveur répond (sans authentification).",
+        "operationId": "health",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Health"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/inventories": {
+      "post": {
+        "tags": [
+          "stock"
+        ],
+        "summary": "Inventaire : quantité constatée de chaque lot, écarts conservés (R-STK-40).",
+        "operationId": "recordInventory",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/InventoryInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InventoryResult"
+                }
+              }
+            }
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/locations": {
+      "get": {
+        "tags": [
+          "stock"
+        ],
+        "summary": "Emplacements, dans l'ordre d'affichage (STK-01).",
+        "operationId": "listLocations",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Location"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "stock"
+        ],
+        "operationId": "createLocation",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LocationInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreatedLocation"
+                }
+              }
+            }
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/locations/{id}": {
+      "put": {
+        "tags": [
+          "stock"
+        ],
+        "operationId": "updateLocation",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/LocationId"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LocationInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {},
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "stock"
+        ],
+        "summary": "Supprime un emplacement qui n'a jamais contenu de lot.",
+        "operationId": "deleteLocation",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/LocationId"
+            }
+          }
+        ],
+        "responses": {
+          "204": {},
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/lots": {
+      "get": {
+        "tags": [
+          "stock"
+        ],
+        "summary": "Lots avec leur quantité calculée et leur état de péremption (STK-04).",
+        "operationId": "listLots",
+        "parameters": [
+          {
+            "name": "location_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/LocationId"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          {
+            "name": "food_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/FoodId"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          {
+            "name": "include_depleted",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Lot"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "stock"
+        ],
+        "summary": "Ajoute un ou plusieurs lots (STK-02, R-STK-6).",
+        "operationId": "createLots",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LotInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreatedLots"
+                }
+              }
+            }
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/lots/{id}": {
+      "get": {
+        "tags": [
+          "stock"
+        ],
+        "summary": "Un lot et son journal, du plus récent au plus ancien (STK-03).",
+        "operationId": "getLot",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/LotId"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LotDetail"
+                }
+              }
+            }
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "stock"
+        ],
+        "summary": "Corrige la péremption, le prix ou la note d'un lot.",
+        "operationId": "updateLot",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/LotId"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LotUpdate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {},
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/lots/{id}/adjust": {
+      "post": {
+        "tags": [
+          "stock"
+        ],
+        "summary": "Correction manuelle de la quantité ou de l'état.",
+        "operationId": "adjustLot",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/LotId"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdjustInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {},
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/lots/{id}/check": {
+      "post": {
+        "tags": [
+          "stock"
+        ],
+        "summary": "« Encore bon » : garde un lot à date dépassée jusqu'à une nouvelle date limite (R-STK-37).",
+        "operationId": "checkLot",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/LotId"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CheckInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {},
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/lots/{id}/consume": {
+      "post": {
+        "tags": [
+          "stock"
+        ],
+        "summary": "Sortie d'un lot consommé (R-STK-3).",
+        "operationId": "consumeLot",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/LotId"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ConsumeInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {},
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/lots/{id}/move": {
+      "post": {
+        "tags": [
+          "stock"
+        ],
+        "summary": "Déplace tout ou partie d'un lot ; congèle ou décongèle selon l'emplacement (R-STK-15, R-STK-32, R-STK-33).",
+        "operationId": "moveLot",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/LotId"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MoveInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MoveResult"
+                }
+              }
+            }
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/lots/{id}/open": {
+      "post": {
+        "tags": [
+          "stock"
+        ],
+        "summary": "Ouverture d'un lot (R-STK-31).",
+        "operationId": "openLot",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/LotId"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DateInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {},
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/lots/{id}/waste": {
+      "post": {
+        "tags": [
+          "stock"
+        ],
+        "summary": "Produit jeté, avec son motif (R-STK-13).",
+        "operationId": "wasteLot",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/LotId"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WasteInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {},
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/movements/{id}/reverse": {
+      "post": {
+        "tags": [
+          "stock"
+        ],
+        "summary": "Annule un mouvement, ou tout son lot d'opérations (R-STK-11, R-STK-12).",
+        "operationId": "reverseMovement",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/MovementId"
+            }
+          }
+        ],
+        "responses": {
+          "204": {},
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/products": {
+      "get": {
+        "tags": [
+          "foods"
+        ],
+        "summary": "Recherche de produits, par code-barres ou par nom (ALI-05, ALI-06).",
+        "operationId": "searchProducts",
+        "parameters": [
+          {
+            "name": "q",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          },
+          {
+            "name": "barcode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Product"
+                  }
+                }
+              }
+            }
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "foods"
+        ],
+        "operationId": "createProduct",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProductInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreatedProduct"
+                }
+              }
+            }
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/products/{id}": {
+      "get": {
+        "tags": [
+          "foods"
+        ],
+        "operationId": "getProduct",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/ProductId"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Product"
+                }
+              }
+            }
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "foods"
+        ],
+        "operationId": "updateProduct",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/ProductId"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProductInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {},
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "foods"
+        ],
+        "operationId": "deleteProduct",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/ProductId"
+            }
+          }
+        ],
+        "responses": {
+          "204": {},
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/settings": {
+      "get": {
+        "tags": [
+          "system"
+        ],
+        "summary": "Réglages généraux.",
+        "operationId": "getSettings",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AppSettings"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "system"
+        ],
+        "operationId": "updateSettings",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AppSettings"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {},
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/system/info": {
+      "get": {
+        "tags": [
+          "system"
+        ],
+        "summary": "Version et dernière sauvegarde (réglages, « À propos »).",
+        "operationId": "systemInfo",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SystemInfo"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/units": {
+      "get": {
+        "tags": [
+          "foods"
+        ],
+        "summary": "Unités générales de saisie (ALI-04).",
+        "operationId": "listUnits",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Unit"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "AdjustInput": {
+        "type": "object",
+        "properties": {
+          "amount": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/Amount",
+                "description": "Écart signé (lot en `QUANTITY`)."
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "date": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date"
+          },
+          "note": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "presence": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/PresenceState",
+                "description": "Nouvel état (lot en `PRESENCE`)."
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        }
+      },
+      "Amount": {
+        "type": "integer",
+        "format": "int64",
+        "description": "Quantité en unités de stockage : mg, µL ou millième de pièce (ADR-0001)"
+      },
+      "AppSettings": {
+        "type": "object",
+        "required": [
+          "soon_days"
+        ],
+        "properties": {
+          "soon_days": {
+            "type": "integer",
+            "format": "int32",
+            "description": "Seuil « bientôt » général, en jours ; un emplacement peut avoir le sien (R-GAS-2).",
+            "minimum": 0
+          }
+        }
+      },
+      "AuthStatus": {
+        "type": "object",
+        "required": [
+          "authenticated",
+          "password_set"
+        ],
+        "properties": {
+          "authenticated": {
+            "type": "boolean"
+          },
+          "password_set": {
+            "type": "boolean",
+            "description": "Faux tant que `foodflow set-password` n'a pas été lancé sur le serveur."
+          }
+        }
+      },
+      "BatchId": {
+        "type": "string",
+        "format": "uuid",
+        "description": "Lot d'opérations validées ensemble, annulées ensemble (R-STK-12)."
+      },
+      "CheckInput": {
+        "type": "object",
+        "properties": {
+          "date": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date"
+          },
+          "until": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date",
+            "description": "Nouvelle date limite ; le lendemain par défaut (R-STK-37)."
+          }
+        }
+      },
+      "ConsumeInput": {
+        "type": "object",
+        "properties": {
+          "amount": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/Amount",
+                "description": "Quantité sortie (lot en `QUANTITY`)."
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "date": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date"
+          },
+          "note": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "presence": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/PresenceState",
+                "description": "Nouvel état (lot en `PRESENCE`) : cuisiner ne le change pas d'office (R-STK-22)."
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        }
+      },
+      "CreatedFood": {
+        "type": "object",
+        "required": [
+          "id"
+        ],
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/FoodId"
+          }
+        }
+      },
+      "CreatedGroup": {
+        "type": "object",
+        "required": [
+          "id"
+        ],
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/FoodGroupId"
+          }
+        }
+      },
+      "CreatedLocation": {
+        "type": "object",
+        "required": [
+          "id"
+        ],
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/LocationId"
+          }
+        }
+      },
+      "CreatedLots": {
+        "type": "object",
+        "required": [
+          "ids"
+        ],
+        "properties": {
+          "ids": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LotId"
+            }
+          }
+        }
+      },
+      "CreatedProduct": {
+        "type": "object",
+        "required": [
+          "id"
+        ],
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/ProductId"
+          }
+        }
+      },
+      "CreatedUnit": {
+        "type": "object",
+        "required": [
+          "id"
+        ],
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/UnitId"
+          }
+        }
+      },
+      "Dashboard": {
+        "type": "object",
+        "required": [
+          "priority",
+          "expired_count",
+          "soon_count",
+          "lot_count"
+        ],
+        "properties": {
+          "expired_count": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "lot_count": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "priority": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Lot"
+            },
+            "description": "À consommer en priorité (R-GAS-1) : lots `SOON`, à date dépassée ou à date à compléter, triés par\ndate limite effective ; et lots à vérifier (R-STK-3), même épuisés, jusqu'à ce qu'un inventaire\nconfirme l'écart."
+          },
+          "soon_count": {
+            "type": "integer",
+            "minimum": 0
+          }
+        }
+      },
+      "DateInput": {
+        "type": "object",
+        "properties": {
+          "date": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date"
+          }
+        }
+      },
+      "EffectiveExpiry": {
+        "type": "object",
+        "description": "Date limite effective. `strict` : dépassée, le lot est `EXPIRED` ; sinon `PAST_BEST_BEFORE` (R-STK-35).",
+        "required": [
+          "date",
+          "strict"
+        ],
+        "properties": {
+          "date": {
+            "type": "string",
+            "format": "date"
+          },
+          "strict": {
+            "type": "boolean"
+          }
+        }
+      },
+      "EffectiveSettings": {
+        "type": "object",
+        "description": "Réglages effectifs, après héritage (R-ALI-2). Sans valeur dans toute la chaîne : quantité, en masse.",
+        "required": [
+          "stock_measure",
+          "tracking_mode"
+        ],
+        "properties": {
+          "frozen_shelf_life_days": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int32",
+            "minimum": 0
+          },
+          "nutrition_group": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/NutritionGroup"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "opened_shelf_life_days": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int32",
+            "minimum": 0
+          },
+          "portion_amount": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/Amount"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "portion_measure": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/Measure"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "shelf_life_days": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int32",
+            "minimum": 0
+          },
+          "stock_measure": {
+            "$ref": "#/components/schemas/Measure"
+          },
+          "thawed_shelf_life_days": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int32",
+            "minimum": 0
+          },
+          "tracking_mode": {
+            "$ref": "#/components/schemas/TrackingMode"
+          }
+        }
+      },
+      "ExpiryKind": {
+        "type": "string",
+        "description": "Mention de péremption d'un lot.",
+        "enum": [
+          "USE_BY",
+          "BEST_BEFORE",
+          "NONE"
+        ]
+      },
+      "ExpiryStatus": {
+        "type": "string",
+        "description": "État de péremption d'un lot à une date (R-STK-35).",
+        "enum": [
+          "OK",
+          "SOON",
+          "EXPIRED",
+          "PAST_BEST_BEFORE"
+        ]
+      },
+      "FoodDetail": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/FoodSummary"
+          },
+          {
+            "type": "object",
+            "required": [
+              "aliases",
+              "nutrient_basis",
+              "settings",
+              "nutrients",
+              "units",
+              "products"
+            ],
+            "properties": {
+              "aliases": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "density_mg_per_ml": {
+                "type": [
+                  "integer",
+                  "null"
+                ],
+                "format": "int64"
+              },
+              "minimum_stock": {
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/Amount"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "nutrient_basis": {
+                "$ref": "#/components/schemas/NutrientBasis"
+              },
+              "nutrients": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/FoodNutrient"
+                },
+                "description": "Valeurs connues ; un nutriment absent est inconnu (R-ALI-20)."
+              },
+              "piece_weight_mg": {
+                "type": [
+                  "integer",
+                  "null"
+                ],
+                "format": "int64"
+              },
+              "preferred_product_id": {
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/ProductId"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "products": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/Product"
+                }
+              },
+              "settings": {
+                "$ref": "#/components/schemas/Settings",
+                "description": "Réglages propres ; `null` = hérité de la famille."
+              },
+              "units": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/Unit"
+                }
+              }
+            }
+          }
+        ]
+      },
+      "FoodGroup": {
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "path",
+          "settings",
+          "effective",
+          "food_count",
+          "product_count"
+        ],
+        "properties": {
+          "ciqual_code": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "effective": {
+            "$ref": "#/components/schemas/EffectiveSettings"
+          },
+          "food_count": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "id": {
+            "$ref": "#/components/schemas/FoodGroupId"
+          },
+          "name": {
+            "type": "string"
+          },
+          "parent_id": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/FoodGroupId"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "path": {
+            "type": "string",
+            "description": "Chemin depuis la racine (« Produits laitiers › Laits »)."
+          },
+          "product_count": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "reference_food_id": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/FoodId"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "settings": {
+            "$ref": "#/components/schemas/Settings",
+            "description": "Réglages propres ; `null` = hérité."
+          }
+        }
+      },
+      "FoodGroupId": {
+        "type": "string",
+        "format": "uuid"
+      },
+      "FoodGroupInput": {
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "parent_id": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/FoodGroupId"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "reference_food_id": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/FoodId"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "settings": {
+            "$ref": "#/components/schemas/Settings"
+          }
+        }
+      },
+      "FoodId": {
+        "type": "string",
+        "format": "uuid"
+      },
+      "FoodInput": {
+        "type": "object",
+        "required": [
+          "group_id",
+          "name"
+        ],
+        "properties": {
+          "aliases": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "density_mg_per_ml": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int64"
+          },
+          "group_id": {
+            "$ref": "#/components/schemas/FoodGroupId"
+          },
+          "hidden": {
+            "type": "boolean"
+          },
+          "minimum_stock": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/Amount"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "name": {
+            "type": "string"
+          },
+          "nutrient_basis": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/NutrientBasis"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "piece_weight_mg": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int64"
+          },
+          "preferred_product_id": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/ProductId"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "settings": {
+            "$ref": "#/components/schemas/Settings"
+          }
+        }
+      },
+      "FoodNutrient": {
+        "type": "object",
+        "required": [
+          "code",
+          "value",
+          "estimated",
+          "source"
+        ],
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "estimated": {
+            "type": "boolean"
+          },
+          "reference_value": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int64",
+            "description": "Valeur Ciqual remplacée par la saisie, qu'on peut rétablir (R-ALI-11)."
+          },
+          "source": {
+            "$ref": "#/components/schemas/ValueSource"
+          },
+          "value": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "FoodSummary": {
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "group_id",
+          "group_path",
+          "hidden",
+          "effective"
+        ],
+        "properties": {
+          "ciqual_code": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "effective": {
+            "$ref": "#/components/schemas/EffectiveSettings"
+          },
+          "group_id": {
+            "$ref": "#/components/schemas/FoodGroupId"
+          },
+          "group_path": {
+            "type": "string"
+          },
+          "hidden": {
+            "type": "boolean"
+          },
+          "id": {
+            "$ref": "#/components/schemas/FoodId"
+          },
+          "name": {
+            "type": "string"
+          }
+        }
+      },
+      "Health": {
+        "type": "object",
+        "required": [
+          "status"
+        ],
+        "properties": {
+          "status": {
+            "type": "string"
+          }
+        }
+      },
+      "InventoryEntry": {
+        "type": "object",
+        "required": [
+          "lot_id"
+        ],
+        "properties": {
+          "amount": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/Amount",
+                "description": "Quantité constatée (lot en `QUANTITY`) ; 0 pour un lot absent."
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "lot_id": {
+            "$ref": "#/components/schemas/LotId"
+          },
+          "presence": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/PresenceState",
+                "description": "État constaté (lot en `PRESENCE`)."
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        }
+      },
+      "InventoryInput": {
+        "type": "object",
+        "required": [
+          "entries"
+        ],
+        "properties": {
+          "date": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date"
+          },
+          "entries": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/InventoryEntry"
+            }
+          }
+        }
+      },
+      "InventoryResult": {
+        "type": "object",
+        "required": [
+          "batch_id"
+        ],
+        "properties": {
+          "batch_id": {
+            "$ref": "#/components/schemas/BatchId"
+          }
+        }
+      },
+      "LastBackup": {
+        "type": "object",
+        "required": [
+          "at",
+          "file",
+          "reason"
+        ],
+        "properties": {
+          "at": {
+            "type": "string"
+          },
+          "file": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          }
+        }
+      },
+      "Location": {
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "kind",
+          "position",
+          "lot_count"
+        ],
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/LocationId"
+          },
+          "kind": {
+            "$ref": "#/components/schemas/LocationKind"
+          },
+          "lot_count": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Lots non épuisés."
+          },
+          "name": {
+            "type": "string"
+          },
+          "position": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "soon_days": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int32",
+            "description": "Seuil « bientôt » propre, en jours ; `null` : réglage général (R-GAS-2).",
+            "minimum": 0
+          }
+        }
+      },
+      "LocationId": {
+        "type": "string",
+        "format": "uuid"
+      },
+      "LocationInput": {
+        "type": "object",
+        "required": [
+          "name",
+          "kind"
+        ],
+        "properties": {
+          "kind": {
+            "$ref": "#/components/schemas/LocationKind"
+          },
+          "name": {
+            "type": "string"
+          },
+          "position": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int64"
+          },
+          "soon_days": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int32",
+            "minimum": 0
+          }
+        }
+      },
+      "LocationKind": {
+        "type": "string",
+        "description": "Nature d'un emplacement : détermine les durées de conservation qui s'appliquent.",
+        "enum": [
+          "PANTRY",
+          "FRIDGE",
+          "FREEZER"
+        ]
+      },
+      "LoginInput": {
+        "type": "object",
+        "required": [
+          "password"
+        ],
+        "properties": {
+          "password": {
+            "type": "string"
+          }
+        }
+      },
+      "Lot": {
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "location_id",
+          "location_name",
+          "location_kind",
+          "tracking_mode",
+          "measure",
+          "expiry_kind",
+          "expiry_missing",
+          "status",
+          "stocked_on",
+          "needs_review",
+          "depleted"
+        ],
+        "properties": {
+          "brand": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "checked_until": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date"
+          },
+          "depleted": {
+            "type": "boolean"
+          },
+          "effective_expiry": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/EffectiveExpiry"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "expiry_date": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date"
+          },
+          "expiry_kind": {
+            "$ref": "#/components/schemas/ExpiryKind"
+          },
+          "expiry_missing": {
+            "type": "boolean",
+            "description": "Date de péremption à compléter (R-COU-51)."
+          },
+          "food_id": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/FoodId",
+                "description": "Aliment du lot : le sien, ou celui de son produit."
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "food_name": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Aliment ou famille de rattachement d'un produit."
+          },
+          "frozen_on": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date"
+          },
+          "id": {
+            "$ref": "#/components/schemas/LotId"
+          },
+          "location_id": {
+            "$ref": "#/components/schemas/LocationId"
+          },
+          "location_kind": {
+            "$ref": "#/components/schemas/LocationKind"
+          },
+          "location_name": {
+            "type": "string"
+          },
+          "measure": {
+            "$ref": "#/components/schemas/Measure"
+          },
+          "name": {
+            "type": "string",
+            "description": "Nom affiché : le produit (et sa marque), ou l'aliment."
+          },
+          "needs_review": {
+            "type": "boolean",
+            "description": "Écart à vérifier (R-STK-3)."
+          },
+          "note": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "opened_on": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date"
+          },
+          "presence": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/PresenceState",
+                "description": "État (lot en `PRESENCE`)."
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "product_id": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/ProductId"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "quantity": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/Amount",
+                "description": "Quantité calculée (lot en `QUANTITY`, R-STK-2)."
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "status": {
+            "$ref": "#/components/schemas/ExpiryStatus"
+          },
+          "stocked_on": {
+            "type": "string",
+            "format": "date"
+          },
+          "thawed_on": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date"
+          },
+          "tracking_mode": {
+            "$ref": "#/components/schemas/TrackingMode"
+          },
+          "unit_price": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/Money"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        }
+      },
+      "LotDetail": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/Lot"
+          },
+          {
+            "type": "object",
+            "required": [
+              "movements"
+            ],
+            "properties": {
+              "movements": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/StockMovement"
+                }
+              }
+            }
+          }
+        ]
+      },
+      "LotId": {
+        "type": "string",
+        "format": "uuid"
+      },
+      "LotInput": {
+        "type": "object",
+        "required": [
+          "location_id",
+          "expiry_kind"
+        ],
+        "properties": {
+          "amount": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/Amount",
+                "description": "Quantité par lot, dans la mesure de stock (lot en `QUANTITY`)."
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "count": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int32",
+            "description": "Nombre de lots identiques à créer (pack de yaourts, R-STK-6) ; 1 par défaut.",
+            "minimum": 0
+          },
+          "date": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date",
+            "description": "Date d'entrée en stock ; aujourd'hui par défaut."
+          },
+          "expiry_date": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date"
+          },
+          "expiry_kind": {
+            "$ref": "#/components/schemas/ExpiryKind"
+          },
+          "expiry_missing": {
+            "type": "boolean",
+            "description": "Date de péremption à saisir plus tard (R-COU-51)."
+          },
+          "food_id": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/FoodId"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "location_id": {
+            "$ref": "#/components/schemas/LocationId"
+          },
+          "note": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "origin": {
+            "$ref": "#/components/schemas/LotOrigin"
+          },
+          "presence": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/PresenceState",
+                "description": "État initial (lot en `PRESENCE`) ; disponible par défaut."
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "product_id": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/ProductId"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "unit_price": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/Money",
+                "description": "Prix payé pour un lot."
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        }
+      },
+      "LotOrigin": {
+        "type": "string",
+        "description": "Origine d'un lot saisi à la main.",
+        "enum": [
+          "PURCHASE",
+          "ADJUSTMENT"
+        ]
+      },
+      "LotUpdate": {
+        "type": "object",
+        "required": [
+          "expiry_kind"
+        ],
+        "properties": {
+          "expiry_date": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date"
+          },
+          "expiry_kind": {
+            "$ref": "#/components/schemas/ExpiryKind"
+          },
+          "expiry_missing": {
+            "type": "boolean"
+          },
+          "note": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "unit_price": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/Money"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        }
+      },
+      "Measure": {
+        "type": "string",
+        "description": "Grandeur d'une quantité (glossaire : mesure).",
+        "enum": [
+          "MASS",
+          "VOLUME",
+          "COUNT"
+        ]
+      },
+      "MergeGroupInput": {
+        "type": "object",
+        "required": [
+          "into"
+        ],
+        "properties": {
+          "into": {
+            "$ref": "#/components/schemas/FoodGroupId"
+          }
+        }
+      },
+      "Money": {
+        "type": "integer",
+        "format": "int64",
+        "description": "Montant en centimes d'euro (ADR-0001)"
+      },
+      "MoveInput": {
+        "type": "object",
+        "required": [
+          "to_location_id"
+        ],
+        "properties": {
+          "amount": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/Amount",
+                "description": "Quantité déplacée ; tout le lot si absente (R-STK-15)."
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "date": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date"
+          },
+          "to_location_id": {
+            "$ref": "#/components/schemas/LocationId"
+          }
+        }
+      },
+      "MoveResult": {
+        "type": "object",
+        "properties": {
+          "created_lot_id": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/LotId",
+                "description": "Nouveau lot créé par un déplacement partiel (R-STK-15)."
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        }
+      },
+      "MovementId": {
+        "type": "string",
+        "format": "uuid"
+      },
+      "MovementKind": {
+        "type": "string",
+        "description": "Type d'un mouvement de stock (R-STK-10).",
+        "enum": [
+          "PURCHASE",
+          "COOKED",
+          "LEFTOVER",
+          "PREPARED",
+          "WASTE",
+          "MOVE",
+          "ADJUSTMENT",
+          "INVENTORY",
+          "OPENED",
+          "CHECKED"
+        ]
+      },
+      "NutrientBasis": {
+        "type": "string",
+        "description": "Base des valeurs nutritionnelles (glossaire).",
+        "enum": [
+          "PER_100_G",
+          "PER_100_ML"
+        ]
+      },
+      "NutrientValueInput": {
+        "type": "object",
+        "required": [
+          "code"
+        ],
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "estimated": {
+            "type": "boolean"
+          },
+          "value": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int64",
+            "description": "`null` : valeur inconnue (R-ALI-20)."
+          }
+        }
+      },
+      "NutrientsInput": {
+        "type": "object",
+        "required": [
+          "values"
+        ],
+        "properties": {
+          "values": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/NutrientValueInput"
+            }
+          }
+        }
+      },
+      "NutritionGroup": {
+        "type": "string",
+        "description": "Groupe des repères de consommation (spec 04), attaché aux familles.",
+        "enum": [
+          "VEGETABLES",
+          "FRUITS",
+          "LEGUMES",
+          "WHOLE_GRAINS",
+          "REFINED_STARCHES",
+          "DAIRY",
+          "POULTRY",
+          "RED_MEAT",
+          "PROCESSED_MEAT",
+          "FISH",
+          "FATTY_FISH",
+          "EGGS",
+          "NUTS",
+          "ADDED_FATS",
+          "SWEET_PRODUCTS",
+          "SALTY_SNACKS",
+          "SUGARY_DRINKS",
+          "OTHER"
+        ]
+      },
+      "PresenceState": {
+        "type": "string",
+        "description": "État d'un lot suivi en présence.",
+        "enum": [
+          "AVAILABLE",
+          "LOW",
+          "OUT"
+        ]
+      },
+      "Problem": {
+        "type": "object",
+        "description": "Corps d'une réponse d'erreur (`application/problem+json`).",
+        "required": [
+          "type",
+          "title",
+          "status",
+          "code"
+        ],
+        "properties": {
+          "code": {
+            "type": "string",
+            "description": "Code stable de l'erreur (ex. `SPLIT_SUM_MISMATCH`)."
+          },
+          "field": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Champ de la requête concerné, si l'erreur en vise un."
+          },
+          "retry_after": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int64",
+            "description": "Pour `TOO_MANY_ATTEMPTS` : délai d'attente en secondes.",
+            "minimum": 0
+          },
+          "rule": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Règle métier concernée (ex. `R-TRX-10`)."
+          },
+          "status": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 0
+          },
+          "title": {
+            "type": "string",
+            "description": "Message lisible, en français."
+          },
+          "type": {
+            "type": "string",
+            "description": "Toujours `about:blank` : le champ `code` identifie l'erreur."
+          }
+        }
+      },
+      "Product": {
+        "type": "object",
+        "required": [
+          "id",
+          "attached_to",
+          "name",
+          "stock_measure",
+          "nutrient_basis"
+        ],
+        "properties": {
+          "attached_to": {
+            "type": "string",
+            "description": "Aliment ou famille de rattachement, pour l'affichage."
+          },
+          "barcode": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "brand": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "food_id": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/FoodId"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "group_id": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/FoodGroupId"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "id": {
+            "$ref": "#/components/schemas/ProductId"
+          },
+          "name": {
+            "type": "string"
+          },
+          "nutrient_basis": {
+            "$ref": "#/components/schemas/NutrientBasis"
+          },
+          "package_amount": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/Amount"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "package_units": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int64"
+          },
+          "stock_measure": {
+            "$ref": "#/components/schemas/Measure",
+            "description": "Mesure effective : celle de l'aliment, ou la sienne s'il est rattaché à une famille."
+          }
+        }
+      },
+      "ProductId": {
+        "type": "string",
+        "format": "uuid"
+      },
+      "ProductInput": {
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "properties": {
+          "barcode": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "brand": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "food_id": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/FoodId"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "group_id": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/FoodGroupId"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "name": {
+            "type": "string"
+          },
+          "nutrient_basis": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/NutrientBasis"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "package_amount": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/Amount"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "package_units": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int64"
+          },
+          "stock_measure": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/Measure",
+                "description": "Requise pour un produit rattaché à une famille."
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        }
+      },
+      "Settings": {
+        "type": "object",
+        "description": "Réglages hérités d'une famille ou d'un aliment (R-ALI-2) : `None` signifie « hérité ».",
+        "properties": {
+          "frozen_shelf_life_days": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int32",
+            "minimum": 0
+          },
+          "nutrition_group": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/NutritionGroup"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "opened_shelf_life_days": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int32",
+            "minimum": 0
+          },
+          "portion_amount": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/Amount"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "portion_measure": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/Measure"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "shelf_life_days": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int32",
+            "description": "Durée de conservation sans date de péremption, en jours.",
+            "minimum": 0
+          },
+          "stock_measure": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/Measure"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "thawed_shelf_life_days": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int32",
+            "minimum": 0
+          },
+          "tracking_mode": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/TrackingMode"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        }
+      },
+      "StockMovement": {
+        "type": "object",
+        "required": [
+          "id",
+          "date",
+          "kind",
+          "reversed",
+          "created_at"
+        ],
+        "properties": {
+          "amount": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/Amount"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "batch_id": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/BatchId"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "checked_until": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date"
+          },
+          "created_at": {
+            "type": "string"
+          },
+          "date": {
+            "type": "string",
+            "format": "date"
+          },
+          "from_location_id": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/LocationId"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "id": {
+            "$ref": "#/components/schemas/MovementId"
+          },
+          "kind": {
+            "$ref": "#/components/schemas/MovementKind"
+          },
+          "note": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "presence": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/PresenceState"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "reversed": {
+            "type": "boolean",
+            "description": "Annulé par un mouvement inverse (R-STK-11)."
+          },
+          "reverses_id": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/MovementId"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "shortfall": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/Amount"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "to_location_id": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/LocationId"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "waste_reason": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/WasteReason"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        }
+      },
+      "SystemInfo": {
+        "type": "object",
+        "required": [
+          "version",
+          "schema_version"
+        ],
+        "properties": {
+          "last_backup": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/LastBackup"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "schema_version": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "version": {
+            "type": "string"
+          }
+        }
+      },
+      "TrackingMode": {
+        "type": "string",
+        "description": "Mode de suivi du stock d'un aliment (spec 02, ADR-0003).",
+        "enum": [
+          "QUANTITY",
+          "PRESENCE"
+        ]
+      },
+      "TrackingModeInput": {
+        "type": "object",
+        "required": [
+          "mode"
+        ],
+        "properties": {
+          "date": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date"
+          },
+          "inventory": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/InventoryEntry"
+            },
+            "description": "Pour passer en `QUANTITY` : la quantité constatée de chaque lot non épuisé (R-STK-21)."
+          },
+          "mode": {
+            "$ref": "#/components/schemas/TrackingMode"
+          }
+        }
+      },
+      "Unit": {
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "measure",
+          "amount"
+        ],
+        "properties": {
+          "abbreviation": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "amount": {
+            "$ref": "#/components/schemas/Amount",
+            "description": "Valeur d'une unité dans sa mesure, en unités de stockage (c. à soupe : 15 000 µL)."
+          },
+          "food_id": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/FoodId",
+                "description": "`null` pour une unité générale."
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "id": {
+            "$ref": "#/components/schemas/UnitId"
+          },
+          "measure": {
+            "$ref": "#/components/schemas/Measure"
+          },
+          "name": {
+            "type": "string"
+          },
+          "plural": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        }
+      },
+      "UnitId": {
+        "type": "string",
+        "format": "uuid"
+      },
+      "UnitInput": {
+        "type": "object",
+        "required": [
+          "name",
+          "measure",
+          "amount"
+        ],
+        "properties": {
+          "abbreviation": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "amount": {
+            "$ref": "#/components/schemas/Amount"
+          },
+          "measure": {
+            "$ref": "#/components/schemas/Measure"
+          },
+          "name": {
+            "type": "string"
+          },
+          "plural": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "position": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int64"
+          }
+        }
+      },
+      "ValueSource": {
+        "type": "string",
+        "description": "Origine d'une valeur ou d'un élément du référentiel.",
+        "enum": [
+          "CIQUAL",
+          "OFF",
+          "MANUAL",
+          "COMPUTED"
+        ]
+      },
+      "WasteInput": {
+        "type": "object",
+        "required": [
+          "reason"
+        ],
+        "properties": {
+          "amount": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/Amount",
+                "description": "Quantité jetée ; tout le lot si absente."
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "date": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date"
+          },
+          "note": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "reason": {
+            "$ref": "#/components/schemas/WasteReason"
+          }
+        }
+      },
+      "WasteReason": {
+        "type": "string",
+        "description": "Motif d'un produit jeté (R-STK-13).",
+        "enum": [
+          "EXPIRED",
+          "SPOILED",
+          "OTHER"
+        ]
+      }
+    }
+  },
+  "tags": [
+    {
+      "name": "auth",
+      "description": "Session"
+    },
+    {
+      "name": "foods",
+      "description": "Familles, aliments, produits, unités (spec 01)"
+    },
+    {
+      "name": "stock",
+      "description": "Emplacements, lots, mouvements, inventaire (spec 02)"
+    },
+    {
+      "name": "dashboard",
+      "description": "Tableau de bord (spec 09)"
+    },
+    {
+      "name": "system",
+      "description": "Réglages, export, version"
+    }
+  ]
+}

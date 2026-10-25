@@ -1,0 +1,19 @@
+{
+  "_doc": "Réglages par défaut des familles créées par l'import Ciqual (R-ALI-2, R-ALI-51), appliqués tant que la famille n'est pas modifiée à la main.",
+  "groups": {
+    "0504": { "stock_measure": "VOLUME" },
+    "06": { "stock_measure": "VOLUME" },
+    "0902": { "stock_measure": "VOLUME", "tracking_mode": "PRESENCE" },
+    "1002": { "tracking_mode": "PRESENCE" },
+    "1003": { "tracking_mode": "PRESENCE" },
+    "1004": { "tracking_mode": "PRESENCE" },
+    "1005": { "tracking_mode": "PRESENCE" },
+    "1006": { "tracking_mode": "PRESENCE" },
+    "0402": { "shelf_life_days": 3, "frozen_shelf_life_days": 180, "thawed_shelf_life_days": 1 },
+    "0406": { "shelf_life_days": 2, "frozen_shelf_life_days": 120, "thawed_shelf_life_days": 1 },
+    "0201": { "shelf_life_days": 7, "frozen_shelf_life_days": 240 },
+    "0204": { "shelf_life_days": 7 },
+    "0502": { "opened_shelf_life_days": 3 },
+    "0501": { "stock_measure": "VOLUME", "opened_shelf_life_days": 3 }
+  }
+}

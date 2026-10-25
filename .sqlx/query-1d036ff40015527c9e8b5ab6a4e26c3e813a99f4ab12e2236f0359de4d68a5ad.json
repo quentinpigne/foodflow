@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "UPDATE product SET food_id = ?, group_id = ?, name = ?, brand = ?, barcode = ?, stock_measure = ?,\n             package_amount = ?, package_units = ?, nutrient_basis = ?, updated_at = ?\n         WHERE id = ?",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 11
+    },
+    "nullable": []
+  },
+  "hash": "1d036ff40015527c9e8b5ab6a4e26c3e813a99f4ab12e2236f0359de4d68a5ad"
+}

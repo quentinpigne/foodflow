@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "UPDATE location SET name = ?, name_key = ?, kind = ?, position = ?, soon_days = ?, updated_at = ? WHERE id = ?",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 7
+    },
+    "nullable": []
+  },
+  "hash": "05e0c9edb92f331a33d42ed1f97fb584f9cd04d50b5fd41c619a4371a84a6da7"
+}

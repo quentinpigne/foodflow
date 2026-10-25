@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="windows-1252" ?>
+<TABLE>
+   <ALIM>
+      <alim_code> 9436 </alim_code>
+      <alim_nom_fr> Farine de blé tendre ou froment T55 (pour pains) </alim_nom_fr>
+      <ALIM_NOM_INDEX_FR> Farine </ALIM_NOM_INDEX_FR>
+      <alim_nom_eng> Wheat flour, type 55 (for bread) </alim_nom_eng>
+      <alim_grp_code> 03 </alim_grp_code>
+      <alim_ssgrp_code> 0305 </alim_ssgrp_code>
+      <alim_ssssgrp_code> 030501 </alim_ssssgrp_code>
+   </ALIM>
+   <ALIM>
+      <alim_code> 11058 </alim_code>
+      <alim_nom_fr> Sel blanc alimentaire, iodé, non fluoré (marin, ignigène ou gemme) </alim_nom_fr>
+      <ALIM_NOM_INDEX_FR> Sel iodé, non fluoré </ALIM_NOM_INDEX_FR>
+      <alim_nom_eng> Salt, white (sea, igneous or rock), iodine added, no other enrichment </alim_nom_eng>
+      <alim_grp_code> 10 </alim_grp_code>
+      <alim_ssgrp_code> 1004 </alim_ssgrp_code>
+      <alim_ssssgrp_code> 000000 </alim_ssssgrp_code>
+   </ALIM>
+   <ALIM>
+      <alim_code> 13039 </alim_code>
+      <alim_nom_fr> Pomme, pulpe et peau, crue </alim_nom_fr>
+      <ALIM_NOM_INDEX_FR> Pomme </ALIM_NOM_INDEX_FR>
+      <alim_nom_eng> Apple, pulp and peel, raw </alim_nom_eng>
+      <alim_grp_code> 02 </alim_grp_code>
+      <alim_ssgrp_code> 0204 </alim_ssgrp_code>
+      <alim_ssssgrp_code> 020401 </alim_ssssgrp_code>
+   </ALIM>
+   <ALIM>
+      <alim_code> 17270 </alim_code>
+      <alim_nom_fr> Huile d'olive vierge extra </alim_nom_fr>
+      <ALIM_NOM_INDEX_FR> Huile d'olive vierge extra </ALIM_NOM_INDEX_FR>
+      <alim_nom_eng> Olive oil, extra virgin </alim_nom_eng>
+      <alim_grp_code> 09 </alim_grp_code>
+      <alim_ssgrp_code> 0902 </alim_ssgrp_code>
+      <alim_ssssgrp_code> 000000 </alim_ssssgrp_code>
+   </ALIM>
+   <ALIM>
+      <alim_code> 19041 </alim_code>
+      <alim_nom_fr> Lait demi-écrémé, UHT </alim_nom_fr>
+      <ALIM_NOM_INDEX_FR> Lait demi-écrémé </ALIM_NOM_INDEX_FR>
+      <alim_nom_eng> Milk, semi-skimmed, UHT </alim_nom_eng>
+      <alim_grp_code> 05 </alim_grp_code>
+      <alim_ssgrp_code> 0501 </alim_ssgrp_code>
+      <alim_ssssgrp_code> 050101 </alim_ssssgrp_code>
+   </ALIM>
+   <ALIM>
+      <alim_code> 22000 </alim_code>
+      <alim_nom_fr> Oeuf, cru </alim_nom_fr>
+      <ALIM_NOM_INDEX_FR> œuf cru </ALIM_NOM_INDEX_FR>
+      <alim_nom_eng> Egg, raw </alim_nom_eng>
+      <alim_grp_code> 04 </alim_grp_code>
+      <alim_ssgrp_code> 0410 </alim_ssgrp_code>
+      <alim_ssssgrp_code> 041002 </alim_ssssgrp_code>
+   </ALIM>
+</TABLE>

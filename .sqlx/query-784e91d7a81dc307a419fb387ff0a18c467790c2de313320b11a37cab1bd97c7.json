@@ -1,0 +1,74 @@
+{
+  "db_name": "SQLite",
+  "query": "SELECT code, name, storage_unit, ciqual_code, position FROM nutrient ORDER BY position",
+  "describe": {
+    "columns": [
+      {
+        "name": "code",
+        "ordinal": 0,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "nutrient",
+            "name": "code"
+          }
+        }
+      },
+      {
+        "name": "name",
+        "ordinal": 1,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "nutrient",
+            "name": "name"
+          }
+        }
+      },
+      {
+        "name": "storage_unit",
+        "ordinal": 2,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "nutrient",
+            "name": "storage_unit"
+          }
+        }
+      },
+      {
+        "name": "ciqual_code",
+        "ordinal": 3,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "nutrient",
+            "name": "ciqual_code"
+          }
+        }
+      },
+      {
+        "name": "position",
+        "ordinal": 4,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "nutrient",
+            "name": "position"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Right": 0
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      true,
+      false
+    ]
+  },
+  "hash": "784e91d7a81dc307a419fb387ff0a18c467790c2de313320b11a37cab1bd97c7"
+}

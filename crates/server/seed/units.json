@@ -1,0 +1,17 @@
+{
+  "units": [
+    { "name": "g", "plural": "g", "abbreviation": "g", "measure": "MASS", "amount": 1000 },
+    { "name": "kg", "plural": "kg", "abbreviation": "kg", "measure": "MASS", "amount": 1000000 },
+    { "name": "mg", "plural": "mg", "abbreviation": "mg", "measure": "MASS", "amount": 1 },
+    { "name": "livre", "plural": "livres", "abbreviation": null, "measure": "MASS", "amount": 500000 },
+    { "name": "mL", "plural": "mL", "abbreviation": "mL", "measure": "VOLUME", "amount": 1000 },
+    { "name": "cL", "plural": "cL", "abbreviation": "cL", "measure": "VOLUME", "amount": 10000 },
+    { "name": "dL", "plural": "dL", "abbreviation": "dL", "measure": "VOLUME", "amount": 100000 },
+    { "name": "L", "plural": "L", "abbreviation": "L", "measure": "VOLUME", "amount": 1000000 },
+    { "name": "cuillère à café", "plural": "cuillères à café", "abbreviation": "c. à c.", "measure": "VOLUME", "amount": 5000 },
+    { "name": "cuillère à soupe", "plural": "cuillères à soupe", "abbreviation": "c. à s.", "measure": "VOLUME", "amount": 15000 },
+    { "name": "verre", "plural": "verres", "abbreviation": null, "measure": "VOLUME", "amount": 200000 },
+    { "name": "tasse", "plural": "tasses", "abbreviation": null, "measure": "VOLUME", "amount": 250000 },
+    { "name": "pièce", "plural": "pièces", "abbreviation": "pc", "measure": "COUNT", "amount": 1000 }
+  ]
+}

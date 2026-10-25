@@ -1,0 +1,38 @@
+{
+  "db_name": "SQLite",
+  "query": "SELECT food_id, alias_key FROM food_alias",
+  "describe": {
+    "columns": [
+      {
+        "name": "food_id",
+        "ordinal": 0,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "food_alias",
+            "name": "food_id"
+          }
+        }
+      },
+      {
+        "name": "alias_key",
+        "ordinal": 1,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "food_alias",
+            "name": "alias_key"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Right": 0
+    },
+    "nullable": [
+      false,
+      false
+    ]
+  },
+  "hash": "277ba816bc76cafbac1cb70e56e72ccefe0fd675418a330606df3356dda68ef4"
+}

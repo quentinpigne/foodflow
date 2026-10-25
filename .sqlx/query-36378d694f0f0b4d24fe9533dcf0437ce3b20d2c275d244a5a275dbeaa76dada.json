@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "DELETE FROM food_group WHERE id = ?",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 1
+    },
+    "nullable": []
+  },
+  "hash": "36378d694f0f0b4d24fe9533dcf0437ce3b20d2c275d244a5a275dbeaa76dada"
+}

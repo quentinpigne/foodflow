@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "DELETE FROM food_nutrient WHERE food_id = ? AND nutrient_code = ?",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 2
+    },
+    "nullable": []
+  },
+  "hash": "8a3b57f28c06275d548dcd1c400a194a0e92eb62c5f656d9a298528fb1f945f3"
+}

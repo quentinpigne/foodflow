@@ -1,0 +1,21 @@
+{
+  "db_name": "SQLite",
+  "query": "SELECT (SELECT count(*) FROM product WHERE food_id = ?1)\n                + (SELECT count(*) FROM stock_lot WHERE food_id = ?1)\n                + (SELECT count(*) FROM food_group WHERE reference_food_id = ?1) AS \"n!: i64\"",
+  "describe": {
+    "columns": [
+      {
+        "name": "n!: i64",
+        "ordinal": 0,
+        "type_info": "Integer",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Right": 1
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "c2407de4147a85b1fca3e03e4b70335cc16b1e49850616a17a564d4ca6c27112"
+}

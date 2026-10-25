@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "UPDATE food SET group_id = ?, name = ?, name_key = ?, hidden = ?, nutrient_basis = ?, density_mg_per_ml = ?,\n             piece_weight_mg = ?, nutrition_group = ?, stock_measure = ?, tracking_mode = ?, shelf_life_days = ?,\n             opened_shelf_life_days = ?, frozen_shelf_life_days = ?, thawed_shelf_life_days = ?, portion_measure = ?,\n             portion_amount = ?, minimum_stock = ?, preferred_product_id = ?, user_modified = ?, updated_at = ?\n         WHERE id = ?",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 21
+    },
+    "nullable": []
+  },
+  "hash": "cb67e2ce99b89f52e89d8286c6c245dc1447e820a1a2ddb1cc0df161d30832a9"
+}

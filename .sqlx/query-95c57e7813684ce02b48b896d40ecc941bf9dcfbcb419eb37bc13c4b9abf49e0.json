@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "INSERT INTO food_nutrient (food_id, nutrient_code, value, estimated, source, reference_value)\n         VALUES (?, ?, ?, ?, ?, ?)\n         ON CONFLICT (food_id, nutrient_code) DO UPDATE SET value = excluded.value, estimated = excluded.estimated,\n             source = excluded.source, reference_value = excluded.reference_value",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 6
+    },
+    "nullable": []
+  },
+  "hash": "95c57e7813684ce02b48b896d40ecc941bf9dcfbcb419eb37bc13c4b9abf49e0"
+}
