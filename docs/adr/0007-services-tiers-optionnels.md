@@ -38,6 +38,8 @@ Option 3.
 - **La réponse d'un service tiers est une proposition** soumise à validation (ADR-0005) ; une proposition
   de menu par l'IA est contrôlée par le domaine (recettes existantes, préférences, objectifs) avant
   affichage.
+- Les **notifications push** s'activent appareil par appareil, à la demande de l'utilisateur ; leur
+  contenu est chiffré pour le seul appareil destinataire.
 - **Ciqual est importée en local** et n'est pas un service tiers à l'exécution.
 - Les réponses d'Open Food Facts sont mises en cache dans la base : un produit déjà connu ne déclenche
   plus d'appel.

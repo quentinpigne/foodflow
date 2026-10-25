@@ -124,8 +124,8 @@ Recettes pour finir la crème et les courgettes :
 - Étant donné 20 cL de crème ouverte à finir avant mercredi et un repas prévu mardi qui en utilise 8 cL,
   alors la crème apparaît avec « 12 cL sans usage prévu » (R-GAS-4).
 - Étant donné le seuil `SOON` du frigo à 1 jour et celui par défaut à 3 jours, alors un yaourt au frigo
-  dont la DLC est dans 2 jours n'est pas `SOON`, et un paquet de pâtes au placard (seuil par défaut)
-  le serait (R-GAS-2).
+  dont la DLC est dans 2 jours n'est pas `SOON`, alors qu'un paquet de pâtes au placard (sans seuil
+  propre) dont la DDM est dans 2 jours l'est (R-GAS-2).
 - Étant donné des courgettes `SOON` et de la crème sans usage prévu, alors un velouté qui utilise les deux
   est classé avant une quiche qui n'utilise que les courgettes, et deux appels donnent le même classement
   (R-GAS-20).
