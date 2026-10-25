@@ -202,6 +202,28 @@ service à chaque mouvement concerné, et vérifiées par un test de cohérence 
 | `archived` | booléen | R-REC-2 |
 | `created_at`, `updated_at` | `Timestamp` | |
 
+### `RecipePhase` (ADR-0015)
+
+| Champ | Type | Contraintes |
+|---|---|---|
+| `id` | `Id` | PK |
+| `recipe_id` | `Id` | FK `Recipe` |
+| `position` | entier | unique par recette |
+| `kind` | `ACTIVE` \| `PASSIVE` | |
+| `minutes` | entier | > 0 |
+| `label` | texte ? | « Mijoter », « Enfourner » |
+| `equipment_ids` | `Json` | liste d'identifiants `Equipment` |
+
+Quand une recette a des phases, `active_minutes` et `passive_minutes` en sont la somme par nature.
+
+### `Equipment`
+
+| Champ | Type | Contraintes |
+|---|---|---|
+| `id` | `Id` | PK |
+| `name` | texte | unique (« Four », « Feux », « Robot ») |
+| `capacity` | entier | ≥ 1 |
+
 ### `RecipeTag`
 
 | Champ | Type | Contraintes |
@@ -421,6 +443,7 @@ Consommation réelle, enregistrée à la validation (R-PLA-31), base du bilan r�
 |---|---|---|
 | `PrepSession.id` | `Id` | PK |
 | `PrepSession.date`, `start_time`, `available_minutes` | `Date`, heure, entier | |
+| `PrepSession.cooks` | entier | ≥ 1 (R-PLA-42) |
 | `PrepSession.status` | `PLANNED` \| `DONE` \| `SKIPPED` | |
 | `PrepSession.validation_batch_id` | `Id` ? | |
 | `PrepItem.id`, `session_id`, `recipe_id` | `Id` | |

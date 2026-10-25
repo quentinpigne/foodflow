@@ -32,6 +32,8 @@ a été consignée (ADR, spec).
 | Q18 | Semaine type par défaut | Semaine 10 / 20 / 30 min, week-end 20 / 30 / 45 min ; aucune session de préparation par défaut (2026-10-25) | ADR-0011 |
 | — | Date de péremption dépassée | L'utilisateur décide : jeter, ou garder avec une nouvelle date limite (2026-10-25) | spec 02, R-STK-37 |
 | — | Choix des specs 01 et 02 | Validés (2026-10-25) | specs 01, 02 |
+| — | Spec 05, ADR-0013, ADR-0014 | Validés (2026-10-25) | spec 05 |
+| — | Ordre de cuisson d'une session | Optimisé dès la V1 (2026-10-25) | ADR-0015 |
 | — | Spec 04 | Validée (2026-10-25) | spec 04 |
 | — | Composition d'un repas | Plusieurs éléments, composition type par créneau (2026-10-25) | spec 05 |
 | — | Repas routiniers | Repas habituels repris par défaut (2026-10-25) | spec 05 |

@@ -1,9 +1,10 @@
 # Spec 05 — Planification
 
-Statut : **Brouillon** (2026-10-25)
+Statut : **Validée** (2026-10-25)
 Modèle : [Member, Preference, SlotSchedule, SlotRole, HabitualMeal, Meal, MealItem, PrepSession, GenerationRun](../modele-de-donnees.md#planification--spec-05)
 Décisions : ADR-0004 (foyer, convives, préférences), ADR-0005 (validation), ADR-0011 (temps, batch
-cooking), ADR-0012 (restes), ADR-0013 (génération déterministe), ADR-0014 (génération par IA)
+cooking), ADR-0012 (restes), ADR-0013 (génération déterministe), ADR-0014 (génération par IA),
+ADR-0015 (ordonnancement)
 
 ## Concepts
 
@@ -119,8 +120,16 @@ Bilan prévu : énergie 1 980 kcal/j ✔ · fruits et légumes 4,2 portions/j �
   rendement), un emplacement de rangement, et les repas qu'elle sert.
 - **R-PLA-41** — La quantité d'une préparation = Σ des besoins des repas qu'elle sert (mis à l'échelle de
   leurs convives) ; elle peut être augmentée à la main.
-- **R-PLA-42** — Le temps de la session = Σ des temps actifs de ses préparations (une préparation compte
-  une fois, quelle que soit sa quantité, R-REC-15) ; un dépassement du temps disponible est signalé.
+- **R-PLA-42** — Une session a un **nombre de cuisiniers** (1 par défaut). Sa durée est celle de son
+  **planning** (ADR-0015) : ordre des phases de ses préparations, en parallèle quand les cuisiniers et
+  les équipements le permettent ; une préparation compte une fois, quelle que soit sa quantité
+  (R-REC-15). Un dépassement du temps disponible est signalé.
+- **R-PLA-45** — Le planning de la session s'affiche en **mode cuisine** : frise par cuisinier et par
+  équipement, prochaine action à faire et minuteurs. Il est recalculé si l'on ajoute, retire ou modifie
+  une préparation.
+- **R-PLA-46** — Un repas cuisiné sur place a aussi un planning (ses éléments ensemble), calé pour finir à
+  l'heure limite : il donne l'**heure de début** conseillée, et le repas est signalé si elle précède
+  l'heure à partir de laquelle on peut cuisiner.
 - **R-PLA-43** — Une préparation ne sert un repas que si sa date limite (date de la session +
   conservation au frigo, ou durée au congélateur si elle est rangée au congélateur) couvre la date du
   repas. Rangée au congélateur, elle demande une **décongélation** la veille du repas, rappelée sur le
@@ -178,7 +187,8 @@ Bilan prévu : énergie 1 980 kcal/j ✔ · fruits et légumes 4,2 portions/j �
 | PLA-11 | V1 | Génération déterministe : proposition, raisons, acceptation partielle, autre proposition |
 | PLA-12 | V1 | Génération par IA (option, désactivée par défaut) |
 | PLA-13 | V1 | Copier une semaine passée comme point de départ |
-| PLA-14 | V2 | Ordre de cuisson optimisé d'une session de préparation (parallélisme, four) |
+| PLA-14 | V1 | Ordonnancement d'une session et d'un repas : planning, mode cuisine, heure de début conseillée (ADR-0015) |
+| PLA-15 | V1 | Équipements de la cuisine et leur capacité |
 
 ### Critères d'acceptation
 

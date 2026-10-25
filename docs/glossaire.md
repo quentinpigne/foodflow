@@ -116,6 +116,10 @@ Langage commun du projet. Chaque terme métier a **un seul** nom français (docu
 | Portions cuisinées | `cooked portions` | Portions préparées pour un élément ; au-delà des équivalents adulte, la différence est un reste prévu. |
 | Repas verrouillé | `locked` | Repas que la génération ne modifie pas. |
 | Consommation réelle | `MealIngredientUse` | Ce qui a été utilisé et mangé, enregistré à la validation ; base du bilan réel. |
+| Phase | `RecipePhase` | Partie active ou passive d'une recette, avec sa durée et les équipements qu'elle occupe (ADR-0015). |
+| Équipement | `Equipment` | Appareil de la cuisine (four, feux, robot) et sa capacité. |
+| Planning | `schedule` | Ordre et horaires des phases d'une session ou d'un repas, calculés par l'ordonnancement (ADR-0015). |
+| Cuisiniers | `cooks` | Nombre de personnes qui cuisinent pendant une session ; une phase active en occupe une. |
 | Préparation | `PrepItem` | Recette cuisinée dans une session de préparation, pour un ou plusieurs repas. |
 | Signalement | `warning` | Anomalie non bloquante d'un repas, d'une journée ou d'une semaine. |
 | Génération | `GenerationRun` | Proposition de menus, déterministe (ADR-0013) ou par IA (ADR-0014), en attente d'acceptation. |

@@ -3,7 +3,8 @@
 Statut : **Validée** (2026-10-25)
 Modèle : [Recipe, RecipeIngredient, RecipeStep, RecipeDraft, IngredientMapping](../modele-de-donnees.md#recettes--spec-03)
 Décisions : ADR-0003 (aliments et familles), ADR-0004 (convives), ADR-0005 (revue des imports),
-ADR-0007 (services tiers), ADR-0008 (export), ADR-0011 (temps et préparation à l'avance)
+ADR-0007 (services tiers), ADR-0008 (export), ADR-0011 (temps et préparation à l'avance),
+ADR-0015 (phases et ordonnancement)
 
 ## Concepts
 
@@ -92,10 +93,13 @@ Par portion (adulte) : 640 kcal · P 32 g · G 52 g · L 33 g · coût ≈ 2,10 
 ### Temps et préparation à l'avance (ADR-0011)
 
 - **R-REC-40** — Une recette a un **temps actif** et un **temps passif** (minutes, ≥ 0), hors
-  sous-recettes.
-- **R-REC-41** — **Temps total d'une recette cuisinée sur place** = ses temps actif et passif + ceux de
-  ses sous-recettes, comptés à la suite (estimation prudente : le parallélisme n'est pas modélisé).
-  Le temps actif total est la somme des temps actifs.
+  sous-recettes. Elle peut décrire ses **phases** (ADR-0015) : suite ordonnée de phases actives ou
+  passives, avec leur durée et les équipements qu'elles occupent ; ses temps actif et passif en sont
+  alors déduits. Sans phases, elle a une phase active puis une phase passive, sans équipement.
+- **R-REC-41** — **Temps total d'une recette cuisinée sur place** = durée du **planning** de la recette
+  et de ses sous-recettes (ADR-0015) : une sous-recette se termine avant que la recette commence, et
+  les phases passives se recouvrent quand les cuisiniers et les équipements le permettent. Le temps
+  actif total reste la somme des temps actifs.
 - **R-REC-42** — Une recette **se prépare à l'avance** si elle déclare sa **conservation au frigo**
   (jours). Elle peut aussi déclarer qu'elle est **congelable**, avec une durée au congélateur, et un
   **temps de finition** (minutes, actif) pour le jour du repas.
@@ -174,7 +178,7 @@ Par portion (adulte) : 640 kcal · P 32 g · G 52 g · L 33 g · coût ≈ 2,10 
 | REC-16 | V1 | Aliment de reste ; recettes qui utilisent un reste (par sous-recette ou par aliment de reste) |
 | REC-13 | V2 | Substitutions proposées pour un ingrédient (une famille, ou un aliment de remplacement déclaré) |
 | REC-14 | V2 | Import d'une page sans JSON-LD par extraction IA (service tiers optionnel) |
-| REC-15 | V2 | Ustensiles et appareils (four, robot) et leurs conflits dans une session de préparation |
+| REC-15 | V1 | Phases d'une recette et équipements qu'elles occupent (ADR-0015) |
 
 ### Critères d'acceptation
 
@@ -186,6 +190,9 @@ Par portion (adulte) : 640 kcal · P 32 g · G 52 g · L 33 g · coût ≈ 2,10 
 - Étant donné des lasagnes qui utilisent 900 g de sauce bolognaise, et une sauce bolognaise dont le
   rendement est de 1 800 g, alors les lasagnes comptent la moitié des ingrédients de la sauce, et leur
   temps actif total ajoute celui de la sauce (R-REC-12, R-REC-41).
+- Étant donné une sauce (20 min actives puis 1 h 30 passives) et un gratin (15 min actives puis 45 min de
+  four), sans sous-recette entre eux, cuisinés par un cuisinier, alors le planning taille le gratin
+  pendant que la sauce mijote et dure 1 h 50, et non 2 h 50 (R-REC-41, ADR-0015).
 - Étant donné une recette A qui utilise B, quand j'ajoute A comme ingrédient de B, alors c'est refusé
   (R-REC-30).
 - Étant donné une recette dont un ingrédient est « 2 verres de farine » sans densité connue, alors ses

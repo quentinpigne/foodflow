@@ -1,6 +1,6 @@
 # ADR-0013 — Génération déterministe des menus
 
-- **Statut** : Proposé
+- **Statut** : Accepté (2026-10-25)
 - **Date** : 2026-10-25
 - **Concerne** : `PLA`, `NUT`, `STK`, `REC`, ADR-0004, ADR-0005, ADR-0011, ADR-0012
 

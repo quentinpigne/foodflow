@@ -1,6 +1,6 @@
 # ADR-0014 — Génération de menus par IA
 
-- **Statut** : Proposé
+- **Statut** : Accepté (2026-10-25)
 - **Date** : 2026-10-25
 - **Concerne** : `PLA`, `REC`, ADR-0005, ADR-0007, ADR-0013
 

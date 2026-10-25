@@ -2,7 +2,7 @@
 
 - **Statut** : Accepté (2026-10-25)
 - **Date** : 2026-10-25
-- **Concerne** : `REC`, `PLA`, `STK`, ADR-0002, ADR-0004, ADR-0005
+- **Concerne** : `REC`, `PLA`, `STK`, ADR-0002, ADR-0004, ADR-0005, ADR-0015
 
 ## Contexte
 
@@ -69,16 +69,16 @@ Temps actif et temps passif ; préparation à l'avance par recette entière et p
 
 ### Planification
 - Les générations, déterministe ou par IA, respectent : temps actif sur place (ou de finition) ≤ temps
-  disponible du créneau ; heure limite respectée compte tenu du temps passif ; Σ des temps actifs d'une
-  session ≤ son temps disponible ; conservation des préparations.
+  disponible du créneau ; heure limite respectée selon le planning du repas ; durée du planning d'une
+  session ≤ son temps disponible (ADR-0015) ; conservation des préparations.
 - La saisie manuelle n'est pas bloquée : un dépassement est **signalé**, pas interdit.
 
 ## Conséquences
 
 - Le lot de « restes » (ADR-0002) devient un cas particulier du **lot de préparation** : une recette
   cuisinée dont il reste des portions.
-- La durée d'une session est **estimée** par la somme des temps actifs ; le parallélisme réel (un plat au
-  four pendant qu'on en prépare un autre) n'est pas modélisé en V1 : l'estimation est prudente.
+- La durée d'une session est celle de son **planning**, qui exploite les temps passifs et respecte les
+  équipements (ADR-0015, dès la V1).
 - La liste de courses d'une semaine doit être faite **avant** la session de préparation : les besoins
   de la session sont datés du jour de la session, pas du jour des repas.
 - Les recettes importées n'ont souvent qu'un temps de préparation et un temps de cuisson : ils sont

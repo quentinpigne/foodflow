@@ -30,5 +30,6 @@ retenu et ses conséquences. Il sert à comprendre plus tard *pourquoi* le proje
 | [0010](0010-lecture-de-cashflow.md) | Foodflow lit Cashflow par son API | Accepté |
 | [0011](0011-temps-disponible-et-preparation-a-l-avance.md) | Temps disponible et préparation à l'avance (batch cooking) | Accepté |
 | [0012](0012-gestion-des-restes.md) | Gestion des restes | Accepté |
-| [0013](0013-generation-deterministe-des-menus.md) | Génération déterministe des menus | Proposé |
-| [0014](0014-generation-par-ia.md) | Génération de menus par IA | Proposé |
+| [0013](0013-generation-deterministe-des-menus.md) | Génération déterministe des menus | Accepté |
+| [0014](0014-generation-par-ia.md) | Génération de menus par IA | Accepté |
+| [0015](0015-ordonnancement-des-preparations.md) | Ordonnancement des préparations | Proposé |
