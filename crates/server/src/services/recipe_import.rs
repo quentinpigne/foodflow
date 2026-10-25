@@ -28,7 +28,8 @@ use crate::readers::jsonld;
 pub struct StartImport {
     /// Adresse d'une page de recette.
     pub url: Option<String>,
-    /// Ou le contenu d'un fichier schema.org/Recipe JSON-LD (export d'une recette, R-REC-70).
+    /// Ou le contenu d'un fichier schema.org/Recipe JSON-LD (export d'une recette, R-REC-70). Avec `url`,
+    /// les données lues dans la page par le navigateur : la page n'est pas retéléchargée (R-REC-72).
     pub json_ld: Option<String>,
 }
 
@@ -191,18 +192,20 @@ fn existing(kitchen: &Kitchen, url: Option<&str>) -> Vec<RecipeRef> {
 /// Lance un import : télécharge la page (ou lit le JSON-LD fourni), analyse, et crée un brouillon (R-REC-61).
 pub async fn start(db: &Db, data: &DataDir, fetcher: &dyn Fetcher, input: &StartImport) -> AppResult<RecipeDraft> {
     let url = input.url.as_deref().map(str::trim).filter(|u| !u.is_empty());
+    if let Some(url) = url {
+        check_url(url).map_err(|e| AppError::invalid_field("INVALID_URL", "url", e.to_string()))?;
+    }
     let values = match (url, input.json_ld.as_deref()) {
-        (Some(url), _) => {
-            check_url(url).map_err(|e| AppError::invalid_field("INVALID_URL", "url", e.to_string()))?;
+        (_, Some(text)) => serde_json::from_str(text).map(|v| vec![v]).map_err(|_| {
+            AppError::invalid_field("INVALID_JSON_LD", "json_ld", "ce fichier n'est pas du JSON-LD valide")
+        })?,
+        (Some(url), None) => {
             let page = fetcher
                 .get(url)
                 .await
                 .map_err(|e| AppError::invalid_field("PAGE_UNREACHABLE", "url", format!("page inaccessible : {e}")))?;
             jsonld::extract(&String::from_utf8_lossy(&page.body))
         }
-        (None, Some(text)) => serde_json::from_str(text).map(|v| vec![v]).map_err(|_| {
-            AppError::invalid_field("INVALID_JSON_LD", "json_ld", "ce fichier n'est pas du JSON-LD valide")
-        })?,
         (None, None) => {
             return Err(AppError::invalid_field("REQUIRED", "url", "une adresse ou un fichier JSON-LD est requis"));
         }

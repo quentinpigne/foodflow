@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test';
 
-import { login } from './helpers';
+import { isMobile, login } from './helpers';
 
 test('recettes : chercher, ouvrir et mettre à l’échelle (REC-02, REC-09)', async ({ page }) => {
   await login(page);
@@ -70,4 +70,57 @@ test('objectifs : la version en vigueur et les créneaux de repas (NUT-01, NUT-0
   await expect(page.getByText('18 critères')).toBeVisible();
   await expect(page.getByText('En vigueur : non modifiable')).toBeVisible();
   await expect(page.getByText('Total : 100 %')).toBeVisible();
+});
+
+const PAGES = 'http://127.0.0.1:3199/e2e-pages';
+
+test('import par lot : une par une, erreurs à part, revue enchaînée (REC-17, R-REC-69)', async ({
+  page,
+}) => {
+  await login(page);
+  await page.goto('/recettes/import');
+  await page
+    .getByLabel('Adresses des recettes')
+    .fill(
+      `${PAGES}/gratin-graph.html\n${PAGES}/absente.html\n${PAGES}/crepes-simple.html\n${PAGES}/gratin-graph.html`,
+    );
+  await expect(page.getByText('3 adresse(s)')).toBeVisible();
+  await page.getByRole('button', { name: 'Importer', exact: true }).click();
+  await expect(page.getByText('Lot en cours · 3 / 3')).toBeVisible({ timeout: 20_000 });
+  await expect(page.getByText(/ne publie pas de recette/)).toBeVisible();
+  // L'adresse en échec reste dans le champ, pour réessayer.
+  await expect(page.getByLabel('Adresses des recettes')).toHaveValue(`${PAGES}/absente.html`);
+
+  // Les brouillons se relisent à la suite, dans l'ordre du lot.
+  await page.getByRole('link', { name: 'Relire' }).click();
+  await expect(page.getByLabel('Nom')).toHaveValue('Gratin de courgettes');
+  await page.getByRole('button', { name: 'Abandonner l’import' }).click();
+  await page.getByRole('dialog').getByRole('button', { name: 'Abandonner' }).click();
+  await expect(page.getByLabel('Nom')).toHaveValue("Pâte à crêpes de l'Ouest");
+  await page.getByRole('button', { name: 'Abandonner l’import' }).click();
+  await page.getByRole('dialog').getByRole('button', { name: 'Abandonner' }).click();
+  await expect(page.getByRole('heading', { name: 'Importer des recettes' })).toBeVisible();
+});
+
+test('envoi depuis le navigateur : favori ou partage (REC-18, R-REC-72)', async ({ page }) => {
+  await login(page);
+  if (isMobile(page)) {
+    // Partage vers la PWA : l'adresse arrive dans le texte partagé.
+    const text = `Regarde ${PAGES}/crepes-simple.html`;
+    await page.goto(`/recettes/import?title=Cr%C3%AApes&text=${encodeURIComponent(text)}`);
+  } else {
+    await page.goto('/recettes/import');
+    const href = await page.getByRole('link', { name: 'Envoyer à Foodflow' }).getAttribute('href');
+    expect(href).toMatch(/^javascript:/);
+    // Le favori, cliqué sur la page d'une recette, ouvre Foodflow dans un nouvel onglet.
+    await page.goto(`${PAGES}/crepes-simple.html`);
+    const opened = page.context().waitForEvent('page');
+    await page.evaluate((code) => new Function(code)(), decodeURIComponent(href!.slice(11)));
+    page = await opened;
+  }
+  await expect(page.getByRole('heading', { name: 'Revue de l’import' })).toBeVisible();
+  await expect(page.getByLabel('Nom')).toHaveValue("Pâte à crêpes de l'Ouest");
+  await page.getByRole('button', { name: 'Abandonner l’import' }).click();
+  await page.getByRole('dialog').getByRole('button', { name: 'Abandonner' }).click();
+  await expect(page.getByRole('heading', { name: 'Importer des recettes' })).toBeVisible();
 });

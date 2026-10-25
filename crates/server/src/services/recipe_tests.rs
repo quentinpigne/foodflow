@@ -208,3 +208,25 @@ async fn r_rec_70_export_and_reimport() {
     assert_eq!(draft.payload.steps.len(), 2);
     assert_eq!(draft.payload.portions.as_deref(), Some("4"));
 }
+
+/// Envoi depuis le navigateur : le JSON-LD lu dans la page est importé sans retélécharger la page, et
+/// l'adresse de la page devient l'origine de la recette (R-REC-72).
+#[tokio::test]
+async fn r_rec_72_json_ld_sent_with_page_url() {
+    let (db, dir) = setup().await;
+    let data = DataDir::new(dir.path());
+    // Le client ne connaît aucune page : un téléchargement échouerait.
+    let fetcher = crate::clients::web::StaticFetcher { pages: Default::default() };
+    let scripts = serde_json::json!([
+        { "@context": "https://schema.org", "@type": "WebSite", "name": "Un site" },
+        { "@context": "https://schema.org", "@type": "Recipe", "name": "Soupe envoyée", "recipeIngredient": ["2 tomates"] }
+    ]);
+    let input =
+        StartImport { url: Some("https://exemple.test/recettes/soupe".into()), json_ld: Some(scripts.to_string()) };
+    let draft = recipe_import::start(&db, &data, &fetcher, &input).await.unwrap();
+    assert_eq!(draft.payload.name, "Soupe envoyée");
+    assert_eq!(draft.source_url.as_deref(), Some("https://exemple.test/recettes/soupe"));
+
+    let invalid = StartImport { url: Some("ftp://exemple.test".into()), json_ld: Some(scripts.to_string()) };
+    assert!(recipe_import::start(&db, &data, &fetcher, &invalid).await.is_err(), "adresse vérifiée");
+}

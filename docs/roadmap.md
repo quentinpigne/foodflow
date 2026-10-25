@@ -41,6 +41,8 @@ Objectif : un carnet de recettes avec des valeurs nutritionnelles honnêtes.
 - REC-01, REC-02, REC-03, REC-05 — saisie, mise à l'échelle, valeurs nutritionnelles, temps et
   préparation à l'avance
 - REC-06 (sous-recettes), REC-07 (import par URL), REC-08 (mode cuisine), REC-09 à REC-12, REC-16
+- REC-17 (import par lot), REC-18 (envoi depuis le navigateur), ajoutées le 2026-10-25 : saisir des
+  centaines de recettes une à une serait trop long, et aucune base de recettes ouverte en français ne convient
 - NUT-01 à NUT-03 — objectif versionné, groupes et portions, modèle PNNS
 
 **Critère de sortie** : 20 recettes réelles saisies ou importées, dont la revue d'import prend moins de
@@ -48,7 +50,8 @@ Objectif : un carnet de recettes avec des valeurs nutritionnelles honnêtes.
 
 **État (2026-10-25)** : tout est implémenté. Le bilan NUT-04 passe en phase 3 : il porte sur des repas,
 qui n'existent qu'avec la planification. Les phases de préparation et les équipements (ADR-0015) sont
-dans le domaine (ordonnancement) mais pas encore en base ni à l'écran. Reste à faire l'essai réel du
+dans le domaine (ordonnancement) mais pas encore en base ni à l'écran. Le partage vers Foodflow depuis le téléphone (REC-18) demande l'application
+installée, donc le HTTPS (Q16) ; le manifeste est en place, le service worker viendra avec la phase 4. Reste à faire l'essai réel du
 critère de sortie.
 
 ## Phase 3 — Planification et validation (MVP)

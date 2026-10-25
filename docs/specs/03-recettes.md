@@ -152,6 +152,18 @@ Par portion (adulte) : 640 kcal · P 32 g · G 52 g · L 33 g · coût ≈ 2,10 
   on peut tout de même créer une autre recette.
 - **R-REC-68** — L'image est téléchargée au moment de l'import et conservée localement ; la recette ne
   dépend plus du site d'origine.
+- **R-REC-69** — L'**import par lot** accepte une liste d'adresses (une par ligne, ou un texte qui en
+  contient). Les adresses en double, et celles qui ont déjà un brouillon en attente, sont écartées ; les
+  autres sont importées **une par une**, avec une pause entre deux pages, jamais en parallèle. Chacune
+  donne un brouillon ou une erreur affichée à côté de son adresse ; un échec n'arrête pas le lot. La
+  revue enchaîne ensuite les brouillons : valider ou abandonner l'un ouvre le suivant.
+- **R-REC-71** — Foodflow ne parcourt jamais un site de lui-même (ni liens, ni plan du site) : il ne
+  télécharge que les pages que l'utilisateur lui a désignées.
+- **R-REC-72** — **Envoi depuis le navigateur** : un favori (« bookmarklet ») lit les données JSON-LD de la
+  page affichée et les ouvre dans Foodflow avec l'adresse de la page ; le serveur ne retélécharge pas la
+  page, et l'adresse devient l'URL d'origine. Sur le téléphone, Foodflow installé (PWA) reçoit les
+  adresses partagées depuis une autre application et en lance l'import. Les deux mènent à la revue
+  habituelle (R-REC-61).
 
 ### Export
 
@@ -179,6 +191,8 @@ Par portion (adulte) : 640 kcal · P 32 g · G 52 g · L 33 g · coût ≈ 2,10 
 | REC-13 | V2 | Substitutions proposées pour un ingrédient (une famille, ou un aliment de remplacement déclaré) |
 | REC-14 | V2 | Import d'une page sans JSON-LD par extraction IA (service tiers optionnel) |
 | REC-15 | V1 | Phases d'une recette et équipements qu'elles occupent (ADR-0015) |
+| REC-17 | V1 | Import par lot d'adresses, revue enchaînée des brouillons |
+| REC-18 | V1 | Envoi depuis le navigateur : favori sur l'ordinateur, partage vers la PWA sur le téléphone |
 
 ### Critères d'acceptation
 

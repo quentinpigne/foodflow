@@ -895,6 +895,9 @@ export class RecipeEditor {
         target = (await firstValueFrom(this.api.createRecipe({ body }))).id;
       }
       this.version.bump();
+      if (draft && (await this.openNextDraft(draft, 'Recette enregistrée'))) {
+        return;
+      }
       this.snack.open('Recette enregistrée', undefined, { duration: 3000 });
       await this.router.navigate(['/recettes', target]);
     } catch (error) {
@@ -915,7 +918,23 @@ export class RecipeEditor {
     });
     if (ok) {
       await firstValueFrom(this.api.discardRecipeDraft({ id: draft }));
-      await this.router.navigate(['/recettes/import']);
+      if (!(await this.openNextDraft(draft, 'Import abandonné'))) {
+        await this.router.navigate(['/recettes/import']);
+      }
     }
+  }
+
+  /** Revue enchaînée d'un lot (R-REC-69) : ouvre le plus ancien brouillon restant, s'il y en a un. */
+  private async openNextDraft(done: string, message: string): Promise<boolean> {
+    const drafts = (await firstValueFrom(this.api.listRecipeDrafts())).filter((d) => d.id !== done);
+    const next = drafts.at(-1);
+    if (!next) {
+      return false;
+    }
+    const left = drafts.length === 1 ? 'dernier brouillon' : `${drafts.length} brouillons restants`;
+    this.snack.open(`${message} · ${left}`, undefined, { duration: 3000 });
+    await this.router.navigate(['/recettes/import', next.id]);
+    window.scrollTo(0, 0);
+    return true;
   }
 }

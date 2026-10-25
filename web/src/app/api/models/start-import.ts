@@ -4,7 +4,8 @@
 export interface StartImport {
 
   /**
-   * Ou le contenu d'un fichier schema.org/Recipe JSON-LD (export d'une recette, R-REC-70).
+   * Ou le contenu d'un fichier schema.org/Recipe JSON-LD (export d'une recette, R-REC-70). Avec `url`,
+   * les données lues dans la page par le navigateur : la page n'est pas retéléchargée (R-REC-72).
    */
   json_ld?: (string | null);
 
