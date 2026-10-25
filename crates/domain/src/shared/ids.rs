@@ -61,6 +61,11 @@ define_id!(
     GoalTemplateId,
     CriterionId,
     MealSlotId,
+    MemberId,
+    MealId,
+    MealItemId,
+    HabitualMealId,
+    SlotRoleId,
 );
 
 #[cfg(test)]

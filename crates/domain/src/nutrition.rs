@@ -3,6 +3,8 @@
 //! Le bilan d'une période (R-NUT-40 à R-NUT-44) se calcule sur les repas : il arrive avec la planification
 //! (spec 05).
 
+pub mod assessment;
+
 use std::collections::{BTreeMap, HashMap};
 
 use rust_decimal::Decimal;
@@ -168,6 +170,31 @@ pub fn group_portions(
             && portion.is_positive()
         {
             *out.entry(info.group).or_default() += quantity * Decimal::from(1_000) / portion.to_decimal();
+        }
+    }
+    out
+}
+
+/// Quantité de chaque groupe nutritionnel dans des besoins développés, en mg (critère `GROUP_AMOUNT`). Une
+/// quantité non convertible en masse ne compte pas.
+pub fn group_amounts(
+    needs: &[Need],
+    facts: &HashMap<FoodId, GroupFacts>,
+    reference_foods: &HashMap<FoodGroupId, FoodId>,
+) -> BTreeMap<NutritionGroup, Decimal> {
+    let mut out: BTreeMap<NutritionGroup, Decimal> = BTreeMap::new();
+    for need in needs.iter().filter(|n| !n.to_taste && !n.optional) {
+        let food = match need.target {
+            Target::Food(food) => Some(food),
+            Target::Group(group) => reference_foods.get(&group).copied(),
+            Target::Recipe(_) => None,
+        };
+        let (Some(info), Some(amount), Some(from)) = (food.and_then(|f| facts.get(&f)), need.amount, need.measure)
+        else {
+            continue;
+        };
+        if let Ok(quantity) = convert_exact(amount, from, Measure::Mass, info.conversions) {
+            *out.entry(info.group).or_default() += quantity;
         }
     }
     out

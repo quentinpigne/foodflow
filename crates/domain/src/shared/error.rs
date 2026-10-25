@@ -95,6 +95,22 @@ pub enum DomainError {
     InvalidCriterion(&'static str),
     #[error("les parts d'énergie des créneaux actifs totalisent 100 %")]
     EnergySharesNotFull,
+
+    // ----- Planification (spec 05)
+    #[error("un membre du foyer porte déjà ce nom")]
+    MemberNameTaken,
+    #[error("l'heure à partir de laquelle on cuisine précède l'heure limite")]
+    InvalidSchedule,
+    #[error("il y a déjà un repas sur ce créneau ce jour-là")]
+    MealSlotTaken,
+    #[error("un élément de repas est une recette cuisinée, une part d'un lot ou un aliment")]
+    MealItemContent,
+    #[error("un repas validé ne se modifie pas : annuler d'abord sa validation")]
+    MealValidated,
+    #[error("seul un repas prévu se valide")]
+    MealNotPlanned,
+    #[error("un repas habituel de ce nom existe déjà")]
+    HabitualMealNameTaken,
 }
 
 impl DomainError {
@@ -143,6 +159,13 @@ impl DomainError {
             GoalVersionLocked => "GOAL_VERSION_LOCKED",
             InvalidCriterion(_) => "INVALID_CRITERION",
             EnergySharesNotFull => "ENERGY_SHARES_NOT_FULL",
+            MemberNameTaken => "MEMBER_NAME_TAKEN",
+            InvalidSchedule => "INVALID_SCHEDULE",
+            MealSlotTaken => "MEAL_SLOT_TAKEN",
+            MealItemContent => "MEAL_ITEM_CONTENT",
+            MealValidated => "MEAL_VALIDATED",
+            MealNotPlanned => "MEAL_NOT_PLANNED",
+            HabitualMealNameTaken => "HABITUAL_MEAL_NAME_TAKEN",
         }
     }
 
@@ -180,6 +203,12 @@ impl DomainError {
             GoalVersionLocked => "R-NUT-3",
             InvalidCriterion(_) => "R-NUT-10",
             EnergySharesNotFull => "R-NUT-30",
+            MemberNameTaken | HabitualMealNameTaken => return None,
+            InvalidSchedule => "R-PLA-1",
+            MealSlotTaken => "R-PLA-10",
+            MealItemContent => "R-PLA-12",
+            MealValidated => "R-PLA-31",
+            MealNotPlanned => "R-PLA-30",
         })
     }
 }

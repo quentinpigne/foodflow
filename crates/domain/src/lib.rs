@@ -5,6 +5,7 @@
 
 pub mod foods;
 pub mod nutrition;
+pub mod planning;
 pub mod recipes;
 pub mod scheduling;
 pub mod shared;

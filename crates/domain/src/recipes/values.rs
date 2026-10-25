@@ -43,7 +43,8 @@ pub struct Totals {
 }
 
 impl Totals {
-    fn empty(codes: &[&str]) -> Self {
+    /// Totaux nuls pour les nutriments `codes`.
+    pub fn empty(codes: &[&str]) -> Self {
         let nutrients = codes
             .iter()
             .map(|c| {
@@ -65,7 +66,8 @@ impl Totals {
         out
     }
 
-    fn missing_everywhere(&mut self, label: &str) {
+    /// Signale `label` comme manquant pour tous les nutriments : le total devient incomplet (R-ALI-20).
+    pub fn missing_everywhere(&mut self, label: &str) {
         for total in self.nutrients.values_mut() {
             if !total.missing.iter().any(|m| m == label) {
                 total.missing.push(label.to_owned());
@@ -73,7 +75,8 @@ impl Totals {
         }
     }
 
-    fn add(&mut self, other: &Totals) {
+    /// Ajoute d'autres totaux : valeurs sommées, estimations et manques réunis.
+    pub fn add(&mut self, other: &Totals) {
         for (code, part) in &other.nutrients {
             if let Some(total) = self.nutrients.get_mut(code) {
                 total.value += part.value;
@@ -167,6 +170,28 @@ fn food_part(
         }
     }
     out
+}
+
+/// Totaux d'une quantité d'aliment (R-ALI-23), dans la mesure donnée (à défaut, sa mesure de stock) ; `label`
+/// nomme l'aliment dans la liste des manques.
+pub fn food_totals(
+    book: &RecipeBook,
+    food: FoodId,
+    amount: Decimal,
+    measure: Option<Measure>,
+    label: &str,
+    codes: &[&str],
+) -> Totals {
+    let ingredient = Ingredient {
+        target: Target::Food(food),
+        amount: None,
+        measure,
+        to_taste: false,
+        optional: false,
+        fixed: false,
+        label: label.to_owned(),
+    };
+    food_part(book, food, &ingredient, amount, codes, false)
 }
 
 /// Facteur pour passer des totaux de la recette à une portion adulte, ou à 100 g ou 100 mL de préparation
