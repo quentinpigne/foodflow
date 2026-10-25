@@ -31,6 +31,9 @@ Objectif : décrire sa cuisine et tenir un stock exact.
 **Critère de sortie** : la table Ciqual est importée ; le contenu réel du frigo, du congélateur et du
 placard est saisi ; après une semaine de mouvements et un inventaire, les écarts sont expliqués.
 
+**État (2026-10-25)** : tout est implémenté sauf le HTTPS et le renouvellement du certificat, en attente
+de Q16. Reste à faire l'essai réel du critère de sortie.
+
 ## Phase 2 — Recettes et nutrition (MVP)
 
 Objectif : un carnet de recettes avec des valeurs nutritionnelles honnêtes.
