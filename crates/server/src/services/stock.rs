@@ -6,7 +6,7 @@
 use std::collections::HashMap;
 
 use foodflow_domain::foods::TrackingMode;
-use foodflow_domain::shared::ids::{BatchId, FoodId, LocationId, LotId, MovementId, ProductId};
+use foodflow_domain::shared::ids::{BatchId, FoodId, LocationId, LotId, MovementId, ProductId, RecipeId};
 use foodflow_domain::stock::expiry::{self, EffectiveExpiry, ExpiryInput};
 use foodflow_domain::stock::journal::{self, LotState};
 use foodflow_domain::stock::{ExpiryKind, ExpiryStatus, LocationKind, MovementKind, PresenceState, WasteReason};
@@ -31,6 +31,8 @@ pub struct Lot {
     pub product_id: Option<ProductId>,
     /// Aliment du lot : le sien, ou celui de son produit.
     pub food_id: Option<FoodId>,
+    /// Lot de préparation ou de restes (STK-08) : la recette, en portions.
+    pub recipe_id: Option<RecipeId>,
     /// Nom affiché : le produit (et sa marque), ou l'aliment.
     pub name: String,
     pub brand: Option<String>,
@@ -101,6 +103,7 @@ pub struct LotQuery {
 /// Ce qu'il faut pour présenter des lots : référentiel, emplacements, réglages.
 pub struct Context {
     catalog: Catalog,
+    recipes: HashMap<RecipeId, String>,
     locations: HashMap<LocationId, LocationRow>,
     soon_days: u32,
     today: Date,
@@ -111,7 +114,8 @@ impl Context {
         let catalog = Catalog::load(&mut *conn).await?;
         let locations = db::locations::list(&mut *conn).await?.into_iter().map(|l| (l.id, l)).collect();
         let soon_days = super::settings::get(&mut *conn).await?.soon_days;
-        Ok(Self { catalog, locations, soon_days, today })
+        let recipes = db::recipes::list(&mut *conn).await?.into_iter().map(|r| (r.id, r.name)).collect();
+        Ok(Self { catalog, recipes, locations, soon_days, today })
     }
 
     fn settings(&self, lot: &LotRow) -> Option<super::catalog::EffectiveSettings> {
@@ -144,7 +148,12 @@ impl Context {
         let product = lot.product_id.and_then(|p| self.catalog.products.get(&p));
         let food_id = lot.food_id.or(product.and_then(|p| p.food_id));
         let food = food_id.and_then(|f| self.catalog.foods.get(&f));
-        let name = product.map(|p| p.name.clone()).or(food.map(|f| f.name.clone())).unwrap_or_default();
+        let recipe = lot.recipe_id.and_then(|r| self.recipes.get(&r));
+        let name = product
+            .map(|p| p.name.clone())
+            .or(food.map(|f| f.name.clone()))
+            .or(recipe.map(|r| format!("Restes : {r}")))
+            .unwrap_or_default();
         let food_name = match product {
             Some(p) => food.map(|f| f.name.clone()).or(p.group_id.map(|g| self.catalog.group_path(g))),
             None => None,
@@ -154,6 +163,7 @@ impl Context {
             id: lot.id,
             product_id: lot.product_id,
             food_id,
+            recipe_id: lot.recipe_id,
             name,
             brand: product.and_then(|p| p.brand.clone()),
             food_name,
@@ -388,6 +398,7 @@ pub async fn create(db: &Db, input: &LotInput, today: Date) -> AppResult<Vec<Lot
             id: LotId::new(),
             product_id: input.product_id,
             food_id: input.food_id,
+            recipe_id: None,
             location_id: input.location_id,
             tracking_mode: settings.tracking_mode,
             measure: settings.stock_measure,
@@ -714,9 +725,16 @@ pub async fn reverse(db: &Db, movement_id: MovementId, today: Date) -> AppResult
         Some(batch) => db::stock::movements_of_batch(&mut *tx, batch).await?,
         None => vec![target],
     };
-    let context = Context::load(&mut tx, today).await?;
+    reverse_movements(&mut tx, targets, today).await?;
+    tx.commit().await?;
+    Ok(())
+}
+
+async fn reverse_movements(conn: &mut SqliteConnection, targets: Vec<MovementRow>, today: Date) -> AppResult<()> {
+    let tx = conn;
+    let context = Context::load(&mut *tx, today).await?;
     for original in targets.iter().filter(|m| m.reverses_id.is_none()) {
-        let mut loaded = Loaded::load(&mut tx, original.lot_id).await?;
+        let mut loaded = Loaded::load(&mut *tx, original.lot_id).await?;
         let domain: Vec<_> = loaded.movements.iter().map(MovementRow::to_domain).collect();
         let amount = journal::reversal_of(&original.to_domain(), &domain)?;
         // L'annulation est datée comme le mouvement annulé : un inventaire postérieur l'a déjà constaté, on
@@ -739,7 +757,7 @@ pub async fn reverse(db: &Db, movement_id: MovementId, today: Date) -> AppResult
             batch_id: original.batch_id,
             ..movement(original.lot_id, original.date, original.kind)
         };
-        loaded.record(&mut tx, row).await?;
+        loaded.record(&mut *tx, row).await?;
         // Copies de lecture touchées par le mouvement annulé.
         match original.kind {
             MovementKind::Opened => loaded.lot.opened_on = None,
@@ -766,10 +784,105 @@ pub async fn reverse(db: &Db, movement_id: MovementId, today: Date) -> AppResult
             }
             _ => {}
         }
-        loaded.save(&mut tx).await?;
+        loaded.save(&mut *tx).await?;
     }
-    tx.commit().await?;
     Ok(())
+}
+
+// ===================================================================== Pour la validation des repas
+
+/// Lots non épuisés des aliments donnés (produits rattachés compris) ou des recettes données, avec leur
+/// quantité et leur état de péremption : les candidats d'une sortie de repas (R-STK-36).
+pub(crate) async fn available_lots(
+    conn: &mut SqliteConnection,
+    today: Date,
+    foods: &std::collections::HashSet<FoodId>,
+    recipes: &std::collections::HashSet<RecipeId>,
+) -> AppResult<Vec<Lot>> {
+    let context = Context::load(&mut *conn, today).await?;
+    let lots = db::stock::list(&mut *conn, None, None, false).await?;
+    let mut movements: HashMap<LotId, Vec<MovementRow>> = HashMap::new();
+    for m in db::stock::movements_of_active_lots(&mut *conn, false).await? {
+        movements.entry(m.lot_id).or_default().push(m);
+    }
+    let mut views: Vec<Lot> = lots
+        .iter()
+        .map(|lot| context.view(lot, state_of(lot, movements.get(&lot.id).map_or(&[][..], Vec::as_slice))))
+        .filter(|l| l.food_id.is_some_and(|f| foods.contains(&f)) || l.recipe_id.is_some_and(|r| recipes.contains(&r)))
+        .collect();
+    sort_by_expiry(&mut views);
+    Ok(views)
+}
+
+/// Un lot, avec sa quantité et son état, dans une transaction ouverte.
+pub(crate) async fn get_in(conn: &mut SqliteConnection, id: LotId, today: Date) -> AppResult<Lot> {
+    let context = Context::load(&mut *conn, today).await?;
+    let lot = db::stock::find(&mut *conn, id).await?.ok_or(AppError::NotFound("lot"))?;
+    let movements = db::stock::movements_of_lot(&mut *conn, id).await?;
+    Ok(context.view(&lot, state_of(&lot, &movements)))
+}
+
+/// Sortie d'un lot pour un repas validé (R-PLA-30) : datée, bornée à la quantité (R-STK-3), rattachée au lot
+/// d'opérations de la validation (R-STK-12). Renvoie le mouvement et la quantité réellement sortie.
+pub(crate) async fn withdraw(
+    conn: &mut SqliteConnection,
+    lot: LotId,
+    amount: Amount,
+    date: Date,
+    today: Date,
+    batch: BatchId,
+) -> AppResult<(MovementId, Amount)> {
+    let mut loaded = Loaded::load(&mut *conn, lot).await?;
+    loaded.check_date(date, today)?;
+    let mut row = MovementRow { batch_id: Some(batch), ..movement(lot, date, MovementKind::Cooked) };
+    let taken = match loaded.lot.tracking_mode {
+        TrackingMode::Quantity => {
+            let available = loaded.state().quantity.unwrap_or_default();
+            let (taken, shortfall) = journal::bounded_withdrawal(available, amount);
+            row.amount = Some(-taken);
+            if shortfall.is_positive() {
+                row.shortfall = Some(shortfall);
+                loaded.lot.needs_review = true;
+            }
+            taken
+        }
+        // Un lot suivi en présence ne se compte pas : la sortie l'indique sans quantité.
+        TrackingMode::Presence => {
+            row.presence = Some(PresenceState::Available);
+            Amount::ZERO
+        }
+    };
+    let id = row.id;
+    loaded.record(&mut *conn, row).await?;
+    loaded.save(&mut *conn).await?;
+    Ok((id, taken))
+}
+
+/// Crée un lot de restes ou de préparation (STK-08, ADR-0012), avec son mouvement d'entrée dans le lot
+/// d'opérations de la validation.
+pub(crate) async fn create_leftover(
+    conn: &mut SqliteConnection,
+    lot: &LotRow,
+    amount: Amount,
+    kind: MovementKind,
+    batch: BatchId,
+) -> AppResult<()> {
+    if !amount.is_positive() {
+        return Err(DomainError::NotPositive.into());
+    }
+    db::stock::insert(&mut *conn, lot).await?;
+    let entry = MovementRow { amount: Some(amount), batch_id: Some(batch), ..movement(lot.id, lot.stocked_on, kind) };
+    db::stock::insert_movement(&mut *conn, &entry).await?;
+    Ok(())
+}
+
+/// Annule un lot d'opérations dans une transaction ouverte (R-STK-12) : voir `reverse`.
+pub(crate) async fn reverse_batch(conn: &mut SqliteConnection, batch: BatchId, today: Date) -> AppResult<()> {
+    let movements = db::stock::movements_of_batch(&mut *conn, batch).await?;
+    if movements.is_empty() {
+        return Ok(());
+    }
+    reverse_movements(conn, movements, today).await
 }
 
 #[derive(Debug, Deserialize, ToSchema)]

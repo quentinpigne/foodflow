@@ -62,7 +62,7 @@ pub struct FoodDetail {
     pub products: Vec<Product>,
 }
 
-#[derive(Debug, Deserialize, IntoParams)]
+#[derive(Default, Debug, Deserialize, IntoParams)]
 pub struct FoodQuery {
     /// Mots recherchés dans le nom et les alias, sans accents ni casse.
     pub q: Option<String>,

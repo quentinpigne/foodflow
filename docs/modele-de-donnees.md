@@ -149,7 +149,7 @@ Liste de référence, fournie par une migration.
 | Champ | Type | Contraintes |
 |---|---|---|
 | `id` | `Id` | PK |
-| `product_id` / `food_id` / `recipe_id` | `Id` ? | exactement un des trois (R-STK-1) ; `recipe_id` pour un lot de préparation |
+| `product_id` / `food_id` / `recipe_id` | `Id` ? | exactement un des trois (R-STK-1) ; `recipe_id` pour un lot de préparation ou de restes, compté en portions (mesure `COUNT`, millièmes de portion) ou dans la mesure du rendement de sa recette |
 | `location_id` | `Id` | FK `Location` ; emplacement courant (le journal garde l'historique) |
 | `measure` | `Measure` | mesure de stock au moment de la création ; les quantités du lot s'y expriment |
 | `stocked_on` | `Date` | entrée en stock ; point de départ d'une durée de conservation sans date (R-STK-30) |
@@ -355,6 +355,8 @@ Rattaché à une version (`goal_id`) **ou** à un modèle (`template_id`).
 | `Member.name` | texte | unique |
 | `Member.adult_equivalent` | `Ratio` | > 0 |
 | `Member.active` | booléen | un membre parti du foyer reste dans l'historique |
+| `Member.position` | entier | ordre d'affichage |
+| `Preference.id` | `Id` | PK |
 | `Preference.member_id` | `Id` | FK `Member` |
 | `Preference.food_id` / `group_id` / `recipe_id` | `Id` ? | exactement un des trois ; unique par membre et cible |
 | `Preference.level` | `LOVES` \| `LIKES` \| `DISLIKES` \| `REFUSES` | |
@@ -394,6 +396,7 @@ Rattaché à une version (`goal_id`) **ou** à un modèle (`template_id`).
 | Champ | Type | Contraintes |
 |---|---|---|
 | `HabitualMeal.id`, `name` | `Id`, texte | nom unique |
+| `HabitualMealItem.id`, `position` | `Id`, entier | position unique par repas habituel |
 | `HabitualMealItem.habitual_meal_id` | `Id` | FK |
 | `HabitualMealItem.food_id` / `product_id` / `recipe_id` | `Id` ? | exactement un des trois |
 | `HabitualMealItem.amount` | `Amount` | **par équivalent adulte** (R-PLA-20) ; portions pour une recette |
@@ -414,8 +417,9 @@ Rattaché à une version (`goal_id`) **ou** à un modèle (`template_id`).
 
 | Champ | Type | Contraintes |
 |---|---|---|
+| `id` | `Id` | PK |
 | `meal_id` | `Id` | FK `Meal` |
-| `member_id` | `Id` ? | FK `Member` ; `NULL` pour un invité |
+| `member_id` | `Id` ? | FK `Member` ; `NULL` pour un invité ; unique par repas |
 | `guest_label` | texte ? | |
 | `adult_equivalent` | `Ratio` | recopié du membre, saisi pour un invité |
 
@@ -427,16 +431,17 @@ Rattaché à une version (`goal_id`) **ou** à un modèle (`template_id`).
 | `meal_id` | `Id` | FK `Meal` |
 | `role_id` | `Id` ? | FK `SlotRole` |
 | `position` | entier | |
-| `source` | `COOK` \| `PREPARED` \| `LOT` \| `FOOD` | R-PLA-12 |
+| `source` | `COOK` \| `PREPARED` \| `LOT` \| `FOOD` | R-PLA-12 ; `PREPARED` arrivera avec les sessions de préparation (PLA-10) |
 | `recipe_id` | `Id` ? | requis si `COOK` ou `PREPARED` |
 | `cooked_portions` | `Amount` ? | `COOK` : portions cuisinées (R-PLA-13) |
 | `prep_item_id` | `Id` ? | FK `PrepItem` ; requis si `PREPARED` |
-| `lot_id` | `Id` ? | FK `StockLot` ; requis si `LOT` |
+| `lot_id` | `Id` ? | FK `StockLot` ; `LOT` : le lot mangé, ou celui des restes de `leftover_of_item_id` une fois son repas validé |
 | `food_id` / `product_id` | `Id` ? | un des deux requis si `FOOD` |
 | `amount` | `Amount` ? | portions servies (`PREPARED`, `LOT`), ou quantité (`FOOD`) |
 | `per_adult_equivalent` | booléen | `FOOD` : quantité par équivalent adulte ou totale |
-| `leftover_of_item_id` | `Id` ? | FK `MealItem` dont c'est le reste prévu (R-PLA-13) |
+| `leftover_of_item_id` | `Id` ? | FK `MealItem` (`COOK`, repas antérieur) dont c'est le reste prévu (R-PLA-13) ; supprimé avec lui |
 | `eaten_ratio` | `Ratio` ? | renseigné à la validation : part mangée (R-PLA-31) |
+| `leftover_lot_id` | `Id` ? | FK `StockLot` : lot des restes déclarés à la validation d'un élément `COOK` (ADR-0012) |
 
 ### `MealIngredientUse`
 
@@ -446,7 +451,9 @@ Consommation réelle, enregistrée à la validation (R-PLA-31), base du bilan r�
 |---|---|---|
 | `meal_item_id` | `Id` | FK `MealItem` |
 | `food_id` / `product_id` / `recipe_id` | `Id` ? | exactement un des trois (`recipe_id` : part de lot de préparation) |
+| `id` | `Id` | PK |
 | `amount` | `Amount` | quantité utilisée |
+| `measure` | `Measure` | mesure de `amount` (`COUNT` pour des portions) |
 | `movement_id` | `Id` ? | FK `StockMovement` ; `NULL` si rien n'est sorti du stock (R-PLA-32) |
 
 ### `PrepSession` et `PrepItem` (ADR-0011)

@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "DELETE FROM meal_ingredient_use WHERE meal_item_id IN (SELECT id FROM meal_item WHERE meal_id = ?)",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 1
+    },
+    "nullable": []
+  },
+  "hash": "1ff42b5c7df43f59ab2424c9927a3988011b514f2c4ac4a714010e83dc6f899b"
+}

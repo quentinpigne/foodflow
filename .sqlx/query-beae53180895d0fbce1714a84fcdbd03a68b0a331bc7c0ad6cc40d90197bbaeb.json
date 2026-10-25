@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "INSERT INTO member (id, name, adult_equivalent, active, position, created_at, updated_at)\n         VALUES (?, ?, ?, ?, ?, ?, ?)\n         ON CONFLICT (id) DO UPDATE SET name = excluded.name, adult_equivalent = excluded.adult_equivalent,\n             active = excluded.active, position = excluded.position, updated_at = excluded.updated_at",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 7
+    },
+    "nullable": []
+  },
+  "hash": "beae53180895d0fbce1714a84fcdbd03a68b0a331bc7c0ad6cc40d90197bbaeb"
+}

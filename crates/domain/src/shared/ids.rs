@@ -66,6 +66,8 @@ define_id!(
     MealItemId,
     HabitualMealId,
     SlotRoleId,
+    /// Ligne de liaison sans nom métier (préférence, convive, élément de repas habituel, consommation).
+    RowId,
 );
 
 #[cfg(test)]

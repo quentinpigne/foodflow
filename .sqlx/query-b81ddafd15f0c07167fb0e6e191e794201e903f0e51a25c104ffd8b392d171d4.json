@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "INSERT INTO stock_lot (id, product_id, food_id, recipe_id, location_id, tracking_mode, measure, expiry_kind,\n             expiry_date, expiry_missing, stocked_on, opened_on, frozen_on, thawed_on, checked_until, unit_price,\n             needs_review, depleted, note, created_at, updated_at)\n         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 21
+    },
+    "nullable": []
+  },
+  "hash": "b81ddafd15f0c07167fb0e6e191e794201e903f0e51a25c104ffd8b392d171d4"
+}

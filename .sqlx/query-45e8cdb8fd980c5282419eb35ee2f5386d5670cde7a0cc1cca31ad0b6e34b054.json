@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "INSERT INTO habitual_meal (id, name, created_at, updated_at) VALUES (?, ?, ?, ?)\n         ON CONFLICT (id) DO UPDATE SET name = excluded.name, updated_at = excluded.updated_at",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 4
+    },
+    "nullable": []
+  },
+  "hash": "45e8cdb8fd980c5282419eb35ee2f5386d5670cde7a0cc1cca31ad0b6e34b054"
+}

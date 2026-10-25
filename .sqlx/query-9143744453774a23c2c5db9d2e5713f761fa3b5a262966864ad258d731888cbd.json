@@ -1,0 +1,86 @@
+{
+  "db_name": "SQLite",
+  "query": "SELECT habitual_meal_id, position, food_id, product_id, recipe_id, amount FROM habitual_meal_item\n         ORDER BY habitual_meal_id, position",
+  "describe": {
+    "columns": [
+      {
+        "name": "habitual_meal_id",
+        "ordinal": 0,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "habitual_meal_item",
+            "name": "habitual_meal_id"
+          }
+        }
+      },
+      {
+        "name": "position",
+        "ordinal": 1,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "habitual_meal_item",
+            "name": "position"
+          }
+        }
+      },
+      {
+        "name": "food_id",
+        "ordinal": 2,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "habitual_meal_item",
+            "name": "food_id"
+          }
+        }
+      },
+      {
+        "name": "product_id",
+        "ordinal": 3,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "habitual_meal_item",
+            "name": "product_id"
+          }
+        }
+      },
+      {
+        "name": "recipe_id",
+        "ordinal": 4,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "habitual_meal_item",
+            "name": "recipe_id"
+          }
+        }
+      },
+      {
+        "name": "amount",
+        "ordinal": 5,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "habitual_meal_item",
+            "name": "amount"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Right": 0
+    },
+    "nullable": [
+      false,
+      false,
+      true,
+      true,
+      true,
+      false
+    ]
+  },
+  "hash": "9143744453774a23c2c5db9d2e5713f761fa3b5a262966864ad258d731888cbd"
+}

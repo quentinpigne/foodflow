@@ -1,0 +1,21 @@
+{
+  "db_name": "SQLite",
+  "query": "SELECT count(*) AS \"n!: i64\" FROM habitual_meal WHERE lower(name) = lower(?1) AND (?2 IS NULL OR id <> ?2)",
+  "describe": {
+    "columns": [
+      {
+        "name": "n!: i64",
+        "ordinal": 0,
+        "type_info": "Integer",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Right": 2
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "1c00296adcc946dbc99e4f72f83ead804a9b344c5a30b9bb345d442819eaa026"
+}

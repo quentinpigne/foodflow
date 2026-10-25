@@ -1,0 +1,134 @@
+{
+  "db_name": "SQLite",
+  "query": "SELECT id, date, slot_id, status, available_active_minutes, earliest_start, ready_by,\n                  locked AS \"locked: bool\", validation_batch_id, note\n           FROM meal WHERE id = ?",
+  "describe": {
+    "columns": [
+      {
+        "name": "id",
+        "ordinal": 0,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "meal",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "name": "date",
+        "ordinal": 1,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "meal",
+            "name": "date"
+          }
+        }
+      },
+      {
+        "name": "slot_id",
+        "ordinal": 2,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "meal",
+            "name": "slot_id"
+          }
+        }
+      },
+      {
+        "name": "status",
+        "ordinal": 3,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "meal",
+            "name": "status"
+          }
+        }
+      },
+      {
+        "name": "available_active_minutes",
+        "ordinal": 4,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "meal",
+            "name": "available_active_minutes"
+          }
+        }
+      },
+      {
+        "name": "earliest_start",
+        "ordinal": 5,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "meal",
+            "name": "earliest_start"
+          }
+        }
+      },
+      {
+        "name": "ready_by",
+        "ordinal": 6,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "meal",
+            "name": "ready_by"
+          }
+        }
+      },
+      {
+        "name": "locked: bool",
+        "ordinal": 7,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "meal",
+            "name": "locked"
+          }
+        }
+      },
+      {
+        "name": "validation_batch_id",
+        "ordinal": 8,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "meal",
+            "name": "validation_batch_id"
+          }
+        }
+      },
+      {
+        "name": "note",
+        "ordinal": 9,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "meal",
+            "name": "note"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Right": 1
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      true,
+      true
+    ]
+  },
+  "hash": "20455556f717487876b0dde47e337dbe45018a55017add7f621d2ca87e885c4d"
+}

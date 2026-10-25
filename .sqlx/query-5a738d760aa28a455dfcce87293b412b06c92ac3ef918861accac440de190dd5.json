@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "INSERT INTO meal_diner (id, meal_id, member_id, guest_label, adult_equivalent) VALUES (?, ?, ?, ?, ?)",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 5
+    },
+    "nullable": []
+  },
+  "hash": "5a738d760aa28a455dfcce87293b412b06c92ac3ef918861accac440de190dd5"
+}

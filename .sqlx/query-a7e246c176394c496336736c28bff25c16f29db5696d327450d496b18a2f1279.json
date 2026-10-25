@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "INSERT INTO habitual_meal_item (id, habitual_meal_id, position, food_id, product_id, recipe_id, amount)\n             VALUES (?, ?, ?, ?, ?, ?, ?)",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 7
+    },
+    "nullable": []
+  },
+  "hash": "a7e246c176394c496336736c28bff25c16f29db5696d327450d496b18a2f1279"
+}

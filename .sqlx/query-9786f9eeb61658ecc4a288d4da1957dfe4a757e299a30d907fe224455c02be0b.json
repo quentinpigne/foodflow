@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "INSERT INTO meal (id, date, slot_id, status, available_active_minutes, earliest_start, ready_by, locked,\n             validation_batch_id, note, created_at, updated_at)\n         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)\n         ON CONFLICT (id) DO UPDATE SET status = excluded.status,\n             available_active_minutes = excluded.available_active_minutes, earliest_start = excluded.earliest_start,\n             ready_by = excluded.ready_by, locked = excluded.locked, validation_batch_id = excluded.validation_batch_id,\n             note = excluded.note, updated_at = excluded.updated_at",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 12
+    },
+    "nullable": []
+  },
+  "hash": "9786f9eeb61658ecc4a288d4da1957dfe4a757e299a30d907fe224455c02be0b"
+}

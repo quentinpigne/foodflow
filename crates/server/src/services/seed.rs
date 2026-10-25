@@ -3,13 +3,15 @@
 //!
 //! - Nutriments et unités générales : données de référence, complétées à chaque démarrage.
 //! - Modèles d'objectif fournis (« Repères PNNS 2019 ») : rechargés à chaque démarrage, non modifiables.
-//! - Emplacements et créneaux de repas : proposés **au premier lancement** seulement, pour ne jamais
-//!   recréer ce que l'utilisateur a supprimé ou renommé.
+//! - Emplacements, créneaux de repas et semaine type : proposés **au premier lancement** seulement, pour
+//!   ne jamais recréer ce que l'utilisateur a supprimé ou renommé.
 
 use foodflow_domain::Ratio;
+use foodflow_domain::foods::NutritionGroup;
 use foodflow_domain::foods::nutrients::NutrientUnit;
 use foodflow_domain::nutrition::Criterion;
-use foodflow_domain::shared::ids::{GoalTemplateId, LocationId, MealSlotId, UnitId};
+use foodflow_domain::recipes::RecipeKind;
+use foodflow_domain::shared::ids::{GoalTemplateId, LocationId, MealSlotId, SlotRoleId, UnitId};
 use foodflow_domain::stock::LocationKind;
 use foodflow_domain::text::normalize;
 use foodflow_domain::{Amount, Measure};
@@ -18,6 +20,7 @@ use serde::Deserialize;
 use crate::db::goals::{Owner, SlotRow, TemplateRow};
 use crate::db::locations::LocationFields;
 use crate::db::nutrients::NutrientRow;
+use crate::db::planning::{RoleRow, ScheduleRow};
 use crate::db::units::UnitFields;
 use crate::db::{self, Db};
 
@@ -47,7 +50,32 @@ struct SlotFile {
 struct SlotSeed {
     name: String,
     energy_share: i64,
+    weekday: TimesSeed,
+    weekend: TimesSeed,
+    #[serde(default)]
+    roles: Vec<RoleSeed>,
 }
+
+#[derive(Deserialize)]
+struct TimesSeed {
+    minutes: u32,
+    earliest_start: String,
+    ready_by: String,
+}
+
+#[derive(Deserialize)]
+struct RoleSeed {
+    name: String,
+    #[serde(default)]
+    required: bool,
+    #[serde(default)]
+    recipe_kinds: Vec<RecipeKind>,
+    #[serde(default)]
+    nutrition_groups: Vec<NutritionGroup>,
+}
+
+/// Horaires par défaut d'un créneau qui n'est pas dans le fichier (créé par l'utilisateur).
+const FALLBACK_TIMES: (u32, &str, &str) = (20, "12:00", "13:00");
 
 #[derive(Debug, Deserialize)]
 pub struct NutrientSeed {
@@ -175,6 +203,59 @@ pub async fn run(db: &Db) -> anyhow::Result<()> {
             }
         }
         db::settings::set(&mut *tx, "seed.meal_slots", &true).await?;
+    }
+
+    // Semaine type et composition type par défaut des créneaux qui n'en ont pas (ADR-0011, spec 05).
+    if db::settings::get::<bool>(&mut *tx, "seed.week_template").await?.is_none() {
+        let seed: SlotFile = serde_json::from_str(SLOTS)?;
+        let schedules = db::planning::schedules(&mut *tx).await?;
+        let roles = db::planning::roles(&mut *tx).await?;
+        for slot in db::goals::slots(&mut *tx).await? {
+            let found = seed.slots.iter().find(|s| s.name == slot.name);
+            if !schedules.iter().any(|s| s.slot_id == slot.id) {
+                for weekday in 1..=7 {
+                    let (minutes, start, ready) = match found {
+                        Some(s) => {
+                            let times = if weekday >= 6 { &s.weekend } else { &s.weekday };
+                            (times.minutes, times.earliest_start.as_str(), times.ready_by.as_str())
+                        }
+                        None => FALLBACK_TIMES,
+                    };
+                    let row = ScheduleRow {
+                        slot_id: slot.id,
+                        weekday,
+                        available_active_minutes: minutes,
+                        earliest_start: db::planning::time_from_db(start)?,
+                        ready_by: db::planning::time_from_db(ready)?,
+                        out_of_home: false,
+                        habitual_meal_id: None,
+                    };
+                    db::planning::upsert_schedule(&mut *tx, &row).await?;
+                }
+            }
+            if let Some(found) = found
+                && !roles.iter().any(|r| r.slot_id == slot.id)
+            {
+                let rows: Vec<RoleRow> = found
+                    .roles
+                    .iter()
+                    .enumerate()
+                    .map(|(position, r)| {
+                        Ok(RoleRow {
+                            id: SlotRoleId::new(),
+                            slot_id: slot.id,
+                            position: i64::try_from(position)?,
+                            name: r.name.clone(),
+                            required: r.required,
+                            recipe_kinds: r.recipe_kinds.clone(),
+                            nutrition_groups: r.nutrition_groups.clone(),
+                        })
+                    })
+                    .collect::<anyhow::Result<_>>()?;
+                db::planning::replace_roles(&mut tx, slot.id, &rows).await?;
+            }
+        }
+        db::settings::set(&mut *tx, "seed.week_template", &true).await?;
     }
 
     tx.commit().await?;

@@ -6,7 +6,7 @@
 
 use foodflow_domain::Date;
 use foodflow_domain::foods::TrackingMode;
-use foodflow_domain::shared::ids::{BatchId, FoodId, LocationId, LotId, MovementId, ProductId};
+use foodflow_domain::shared::ids::{BatchId, FoodId, LocationId, LotId, MovementId, ProductId, RecipeId};
 use foodflow_domain::stock::journal::Movement;
 use foodflow_domain::stock::{ExpiryKind, MovementKind, PresenceState, WasteReason};
 use foodflow_domain::{Amount, Measure, Money};
@@ -23,6 +23,8 @@ pub struct LotRow {
     pub id: LotId,
     pub product_id: Option<ProductId>,
     pub food_id: Option<FoodId>,
+    /// Lot de préparation ou de restes (R-STK-1, ADR-0012) : en portions, ou dans la mesure du rendement.
+    pub recipe_id: Option<RecipeId>,
     pub location_id: LocationId,
     pub tracking_mode: TrackingMode,
     pub measure: Measure,
@@ -47,6 +49,7 @@ macro_rules! lot_row {
             id: id_from_db(&r.id)?,
             product_id: opt_id_from_db(r.product_id.as_deref())?,
             food_id: opt_id_from_db(r.food_id.as_deref())?,
+            recipe_id: opt_id_from_db(r.recipe_id.as_deref())?,
             location_id: id_from_db(&r.location_id)?,
             tracking_mode: enum_from_db(&r.tracking_mode)?,
             measure: enum_from_db(&r.measure)?,
@@ -76,7 +79,7 @@ pub async fn list(
     let location = location.map(|l| l.to_string());
     let food = food.map(|f| f.to_string());
     let rows = sqlx::query!(
-        r#"SELECT s.id, s.product_id, s.food_id, s.location_id, s.tracking_mode, s.measure, s.expiry_kind,
+        r#"SELECT s.id, s.product_id, s.food_id, s.recipe_id, s.location_id, s.tracking_mode, s.measure, s.expiry_kind,
                   s.expiry_date, s.expiry_missing AS "expiry_missing: bool", s.stocked_on, s.opened_on, s.frozen_on,
                   s.thawed_on, s.checked_until, s.unit_price, s.needs_review AS "needs_review: bool",
                   s.depleted AS "depleted: bool", s.note
@@ -97,7 +100,7 @@ pub async fn list(
 pub async fn find(db: impl SqliteExecutor<'_>, id: LotId) -> anyhow::Result<Option<LotRow>> {
     let id = id.to_string();
     let row = sqlx::query!(
-        r#"SELECT id, product_id, food_id, location_id, tracking_mode, measure, expiry_kind, expiry_date,
+        r#"SELECT id, product_id, food_id, recipe_id, location_id, tracking_mode, measure, expiry_kind, expiry_date,
                   expiry_missing AS "expiry_missing: bool", stocked_on, opened_on, frozen_on, thawed_on,
                   checked_until, unit_price, needs_review AS "needs_review: bool", depleted AS "depleted: bool", note
            FROM stock_lot WHERE id = ?"#,
@@ -112,6 +115,7 @@ pub async fn insert(db: impl SqliteExecutor<'_>, lot: &LotRow) -> anyhow::Result
     let id = lot.id.to_string();
     let product = lot.product_id.map(|x| x.to_string());
     let food = lot.food_id.map(|x| x.to_string());
+    let recipe = lot.recipe_id.map(|x| x.to_string());
     let location = lot.location_id.to_string();
     let mode = enum_to_db(&lot.tracking_mode);
     let measure = enum_to_db(&lot.measure);
@@ -125,13 +129,14 @@ pub async fn insert(db: impl SqliteExecutor<'_>, lot: &LotRow) -> anyhow::Result
     let price = lot.unit_price.map(Money::cents);
     let now = timestamp();
     sqlx::query!(
-        "INSERT INTO stock_lot (id, product_id, food_id, location_id, tracking_mode, measure, expiry_kind, expiry_date,
-             expiry_missing, stocked_on, opened_on, frozen_on, thawed_on, checked_until, unit_price, needs_review,
-             depleted, note, created_at, updated_at)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        "INSERT INTO stock_lot (id, product_id, food_id, recipe_id, location_id, tracking_mode, measure, expiry_kind,
+             expiry_date, expiry_missing, stocked_on, opened_on, frozen_on, thawed_on, checked_until, unit_price,
+             needs_review, depleted, note, created_at, updated_at)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
         id,
         product,
         food,
+        recipe,
         location,
         mode,
         measure,

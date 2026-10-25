@@ -1,6 +1,6 @@
 {
   "db_name": "SQLite",
-  "query": "SELECT s.id, s.product_id, s.food_id, s.location_id, s.tracking_mode, s.measure, s.expiry_kind,\n                  s.expiry_date, s.expiry_missing AS \"expiry_missing: bool\", s.stocked_on, s.opened_on, s.frozen_on,\n                  s.thawed_on, s.checked_until, s.unit_price, s.needs_review AS \"needs_review: bool\",\n                  s.depleted AS \"depleted: bool\", s.note\n           FROM stock_lot s LEFT JOIN product p ON p.id = s.product_id\n           WHERE (?1 IS NULL OR s.location_id = ?1)\n             AND (?2 IS NULL OR s.food_id = ?2 OR p.food_id = ?2)\n             AND (?3 OR s.depleted = 0)\n           ORDER BY s.created_at",
+  "query": "SELECT s.id, s.product_id, s.food_id, s.recipe_id, s.location_id, s.tracking_mode, s.measure, s.expiry_kind,\n                  s.expiry_date, s.expiry_missing AS \"expiry_missing: bool\", s.stocked_on, s.opened_on, s.frozen_on,\n                  s.thawed_on, s.checked_until, s.unit_price, s.needs_review AS \"needs_review: bool\",\n                  s.depleted AS \"depleted: bool\", s.note\n           FROM stock_lot s LEFT JOIN product p ON p.id = s.product_id\n           WHERE (?1 IS NULL OR s.location_id = ?1)\n             AND (?2 IS NULL OR s.food_id = ?2 OR p.food_id = ?2)\n             AND (?3 OR s.depleted = 0)\n           ORDER BY s.created_at",
   "describe": {
     "columns": [
       {
@@ -37,8 +37,19 @@
         }
       },
       {
-        "name": "location_id",
+        "name": "recipe_id",
         "ordinal": 3,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "stock_lot",
+            "name": "recipe_id"
+          }
+        }
+      },
+      {
+        "name": "location_id",
+        "ordinal": 4,
         "type_info": "Text",
         "origin": {
           "Table": {
@@ -49,7 +60,7 @@
       },
       {
         "name": "tracking_mode",
-        "ordinal": 4,
+        "ordinal": 5,
         "type_info": "Text",
         "origin": {
           "Table": {
@@ -60,7 +71,7 @@
       },
       {
         "name": "measure",
-        "ordinal": 5,
+        "ordinal": 6,
         "type_info": "Text",
         "origin": {
           "Table": {
@@ -71,7 +82,7 @@
       },
       {
         "name": "expiry_kind",
-        "ordinal": 6,
+        "ordinal": 7,
         "type_info": "Text",
         "origin": {
           "Table": {
@@ -82,7 +93,7 @@
       },
       {
         "name": "expiry_date",
-        "ordinal": 7,
+        "ordinal": 8,
         "type_info": "Text",
         "origin": {
           "Table": {
@@ -93,7 +104,7 @@
       },
       {
         "name": "expiry_missing: bool",
-        "ordinal": 8,
+        "ordinal": 9,
         "type_info": "Integer",
         "origin": {
           "Table": {
@@ -104,7 +115,7 @@
       },
       {
         "name": "stocked_on",
-        "ordinal": 9,
+        "ordinal": 10,
         "type_info": "Text",
         "origin": {
           "Table": {
@@ -115,7 +126,7 @@
       },
       {
         "name": "opened_on",
-        "ordinal": 10,
+        "ordinal": 11,
         "type_info": "Text",
         "origin": {
           "Table": {
@@ -126,7 +137,7 @@
       },
       {
         "name": "frozen_on",
-        "ordinal": 11,
+        "ordinal": 12,
         "type_info": "Text",
         "origin": {
           "Table": {
@@ -137,7 +148,7 @@
       },
       {
         "name": "thawed_on",
-        "ordinal": 12,
+        "ordinal": 13,
         "type_info": "Text",
         "origin": {
           "Table": {
@@ -148,7 +159,7 @@
       },
       {
         "name": "checked_until",
-        "ordinal": 13,
+        "ordinal": 14,
         "type_info": "Text",
         "origin": {
           "Table": {
@@ -159,7 +170,7 @@
       },
       {
         "name": "unit_price",
-        "ordinal": 14,
+        "ordinal": 15,
         "type_info": "Integer",
         "origin": {
           "Table": {
@@ -170,7 +181,7 @@
       },
       {
         "name": "needs_review: bool",
-        "ordinal": 15,
+        "ordinal": 16,
         "type_info": "Integer",
         "origin": {
           "Table": {
@@ -181,7 +192,7 @@
       },
       {
         "name": "depleted: bool",
-        "ordinal": 16,
+        "ordinal": 17,
         "type_info": "Integer",
         "origin": {
           "Table": {
@@ -192,7 +203,7 @@
       },
       {
         "name": "note",
-        "ordinal": 17,
+        "ordinal": 18,
         "type_info": "Text",
         "origin": {
           "Table": {
@@ -207,6 +218,7 @@
     },
     "nullable": [
       false,
+      true,
       true,
       true,
       false,
@@ -226,5 +238,5 @@
       true
     ]
   },
-  "hash": "7dd8cf76ce76b223da1fd719945771a93656f922d214c60f9a1af263f54908c0"
+  "hash": "5d2e1034d132dd5789d0f7f7ff476517a8ab4c08317f74eeb522775db3e8c9a0"
 }

@@ -20,6 +20,8 @@ import { deleteGoalTemplate } from '../fn/goals/delete-goal-template';
 import { DeleteGoalTemplate$Params } from '../fn/goals/delete-goal-template';
 import { deleteGoalVersion } from '../fn/goals/delete-goal-version';
 import { DeleteGoalVersion$Params } from '../fn/goals/delete-goal-version';
+import { getAssessment } from '../fn/goals/get-assessment';
+import { GetAssessment$Params } from '../fn/goals/get-assessment';
 import { GoalTemplate } from '../models/goal-template';
 import { GoalVersion } from '../models/goal-version';
 import { listGoalTemplates } from '../fn/goals/list-goal-templates';
@@ -29,6 +31,7 @@ import { ListGoalVersions$Params } from '../fn/goals/list-goal-versions';
 import { listMealSlots } from '../fn/goals/list-meal-slots';
 import { ListMealSlots$Params } from '../fn/goals/list-meal-slots';
 import { MealSlot } from '../models/meal-slot';
+import { NutritionAssessment } from '../models/nutrition-assessment';
 import { saveMealSlots } from '../fn/goals/save-meal-slots';
 import { SaveMealSlots$Params } from '../fn/goals/save-meal-slots';
 import { updateGoalVersion } from '../fn/goals/update-goal-version';
@@ -36,12 +39,47 @@ import { UpdateGoalVersion$Params } from '../fn/goals/update-goal-version';
 
 
 /**
- * Objectifs nutritionnels, modèles, créneaux (spec 04)
+ * Objectifs nutritionnels, modèles, créneaux, bilan (spec 04)
  */
 @Injectable({ providedIn: 'root' })
 export class GoalsService extends BaseService {
   constructor(config: ApiConfiguration, http: HttpClient) {
     super(config, http);
+  }
+
+  /** Path part for operation `getAssessment()` */
+  static readonly GetAssessmentPath = '/api/v1/assessment';
+
+  /**
+   * Bilan nutritionnel prévu ou réel d'une période (NUT-04).
+   *
+   *
+   *
+   * This method provides access to the full `HttpResponse`, allowing access to response headers.
+   * To access only the response body, use `getAssessment()` instead.
+   *
+   * This method doesn't expect any request body.
+   */
+  getAssessment$Response(params: GetAssessment$Params, context?: HttpContext): Observable<StrictHttpResponse<NutritionAssessment>> {
+    const obs = getAssessment(this.http, this.rootUrl, params, context);
+    return obs;
+  }
+
+  /**
+   * Bilan nutritionnel prévu ou réel d'une période (NUT-04).
+   *
+   *
+   *
+   * This method provides access only to the response body.
+   * To access the full response (for headers, for example), `getAssessment$Response()` instead.
+   *
+   * This method doesn't expect any request body.
+   */
+  getAssessment(params: GetAssessment$Params, context?: HttpContext): Observable<NutritionAssessment> {
+    const resp = this.getAssessment$Response(params, context);
+    return resp.pipe(
+      map((r: StrictHttpResponse<NutritionAssessment>): NutritionAssessment => r.body)
+    );
   }
 
   /** Path part for operation `listGoalTemplates()` */

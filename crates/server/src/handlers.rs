@@ -7,6 +7,7 @@ pub mod foods;
 pub mod goals;
 pub mod groups;
 pub mod locations;
+pub mod planning;
 pub mod products;
 pub mod recipe_drafts;
 pub mod recipes;

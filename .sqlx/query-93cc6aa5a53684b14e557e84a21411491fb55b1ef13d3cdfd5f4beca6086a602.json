@@ -1,0 +1,74 @@
+{
+  "db_name": "SQLite",
+  "query": "SELECT id, name, adult_equivalent, active AS \"active: bool\", position FROM member ORDER BY position, name",
+  "describe": {
+    "columns": [
+      {
+        "name": "id",
+        "ordinal": 0,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "member",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "name": "name",
+        "ordinal": 1,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "member",
+            "name": "name"
+          }
+        }
+      },
+      {
+        "name": "adult_equivalent",
+        "ordinal": 2,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "member",
+            "name": "adult_equivalent"
+          }
+        }
+      },
+      {
+        "name": "active: bool",
+        "ordinal": 3,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "member",
+            "name": "active"
+          }
+        }
+      },
+      {
+        "name": "position",
+        "ordinal": 4,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "member",
+            "name": "position"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Right": 0
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "93cc6aa5a53684b14e557e84a21411491fb55b1ef13d3cdfd5f4beca6086a602"
+}

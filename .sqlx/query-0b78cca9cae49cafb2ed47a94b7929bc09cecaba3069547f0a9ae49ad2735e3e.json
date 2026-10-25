@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "INSERT INTO slot_role (id, slot_id, position, name, required, recipe_kinds, nutrition_groups)\n             VALUES (?, ?, ?, ?, ?, ?, ?)\n             ON CONFLICT (id) DO UPDATE SET position = excluded.position, name = excluded.name,\n                 required = excluded.required, recipe_kinds = excluded.recipe_kinds,\n                 nutrition_groups = excluded.nutrition_groups",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 7
+    },
+    "nullable": []
+  },
+  "hash": "0b78cca9cae49cafb2ed47a94b7929bc09cecaba3069547f0a9ae49ad2735e3e"
+}

@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "UPDATE meal_item SET position = -position - 1 WHERE meal_id = ?",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 1
+    },
+    "nullable": []
+  },
+  "hash": "5b1a30b1581a14d588ec2a89447d2893048f8b37942e355a1f895fd3c2d89175"
+}

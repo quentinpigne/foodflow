@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "DELETE FROM slot_role WHERE id = ?",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 1
+    },
+    "nullable": []
+  },
+  "hash": "94ed2f6debffcf174f7ea49b4f5b6815eb3575929a01af55f87829308fe85c71"
+}

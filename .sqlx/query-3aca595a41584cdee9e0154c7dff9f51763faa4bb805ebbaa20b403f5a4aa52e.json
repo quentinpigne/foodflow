@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "INSERT INTO slot_schedule (slot_id, weekday, available_active_minutes, earliest_start, ready_by, out_of_home,\n             habitual_meal_id)\n         VALUES (?, ?, ?, ?, ?, ?, ?)\n         ON CONFLICT (slot_id, weekday) DO UPDATE SET available_active_minutes = excluded.available_active_minutes,\n             earliest_start = excluded.earliest_start, ready_by = excluded.ready_by,\n             out_of_home = excluded.out_of_home, habitual_meal_id = excluded.habitual_meal_id",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 7
+    },
+    "nullable": []
+  },
+  "hash": "3aca595a41584cdee9e0154c7dff9f51763faa4bb805ebbaa20b403f5a4aa52e"
+}

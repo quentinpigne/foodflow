@@ -1,0 +1,98 @@
+{
+  "db_name": "SQLite",
+  "query": "SELECT id, slot_id, position, name, required AS \"required: bool\", recipe_kinds, nutrition_groups\n           FROM slot_role ORDER BY position",
+  "describe": {
+    "columns": [
+      {
+        "name": "id",
+        "ordinal": 0,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "slot_role",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "name": "slot_id",
+        "ordinal": 1,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "slot_role",
+            "name": "slot_id"
+          }
+        }
+      },
+      {
+        "name": "position",
+        "ordinal": 2,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "slot_role",
+            "name": "position"
+          }
+        }
+      },
+      {
+        "name": "name",
+        "ordinal": 3,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "slot_role",
+            "name": "name"
+          }
+        }
+      },
+      {
+        "name": "required: bool",
+        "ordinal": 4,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "slot_role",
+            "name": "required"
+          }
+        }
+      },
+      {
+        "name": "recipe_kinds",
+        "ordinal": 5,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "slot_role",
+            "name": "recipe_kinds"
+          }
+        }
+      },
+      {
+        "name": "nutrition_groups",
+        "ordinal": 6,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "slot_role",
+            "name": "nutrition_groups"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Right": 0
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "ae27a5c5191524ce4a37b9b6e397bed64c4914ebcf3529e8d78e8a750a06b794"
+}

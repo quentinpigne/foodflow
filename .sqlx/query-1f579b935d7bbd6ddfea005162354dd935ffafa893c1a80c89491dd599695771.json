@@ -1,0 +1,74 @@
+{
+  "db_name": "SQLite",
+  "query": "SELECT member_id, food_id, group_id, recipe_id, level FROM preference ORDER BY rowid",
+  "describe": {
+    "columns": [
+      {
+        "name": "member_id",
+        "ordinal": 0,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "preference",
+            "name": "member_id"
+          }
+        }
+      },
+      {
+        "name": "food_id",
+        "ordinal": 1,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "preference",
+            "name": "food_id"
+          }
+        }
+      },
+      {
+        "name": "group_id",
+        "ordinal": 2,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "preference",
+            "name": "group_id"
+          }
+        }
+      },
+      {
+        "name": "recipe_id",
+        "ordinal": 3,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "preference",
+            "name": "recipe_id"
+          }
+        }
+      },
+      {
+        "name": "level",
+        "ordinal": 4,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "preference",
+            "name": "level"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Right": 0
+    },
+    "nullable": [
+      false,
+      true,
+      true,
+      true,
+      false
+    ]
+  },
+  "hash": "1f579b935d7bbd6ddfea005162354dd935ffafa893c1a80c89491dd599695771"
+}

@@ -1,6 +1,7 @@
 //! Services : un par cas d'usage. Ils ouvrent la transaction SQLite, chargent les données, appellent le
 //! domaine et écrivent le résultat (architecture.md). Aucun calcul métier ici.
 
+pub mod assessment;
 pub mod auth;
 pub mod backup;
 pub mod catalog;
@@ -11,8 +12,11 @@ pub mod export;
 pub mod foods;
 pub mod goals;
 pub mod groups;
+pub mod household;
 pub mod images;
 pub mod locations;
+pub mod meal_validation;
+pub mod meals;
 pub mod products;
 pub mod recipe_import;
 pub mod recipes;
@@ -20,6 +24,7 @@ pub mod seed;
 pub mod settings;
 pub mod stock;
 pub mod units;
+pub mod week;
 
 use crate::error::{AppError, AppResult};
 
@@ -42,6 +47,8 @@ pub fn required(value: &str, field: &'static str, max: usize) -> AppResult<Strin
 
 #[cfg(test)]
 mod matching_tests;
+#[cfg(test)]
+mod planning_tests;
 #[cfg(test)]
 mod recipe_tests;
 #[cfg(test)]

@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "DELETE FROM member_presence WHERE member_id = ?",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 1
+    },
+    "nullable": []
+  },
+  "hash": "cf6c78ddcdb1871a48a4fa6b5340db16cf7ed0b80d36ca96b59dd7db8f46c9cf"
+}

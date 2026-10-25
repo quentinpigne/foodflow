@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "DELETE FROM meal_diner WHERE meal_id = ?",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 1
+    },
+    "nullable": []
+  },
+  "hash": "439e029773ccb566aa8e876794c804afa7b6c1da46d43b9712df6b37cb0a4f86"
+}

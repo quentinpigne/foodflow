@@ -13,6 +13,7 @@ import { Measure } from '../models/measure';
 import { Money } from '../models/money';
 import { PresenceState } from '../models/presence-state';
 import { ProductId } from '../models/product-id';
+import { RecipeId } from '../models/recipe-id';
 import { TrackingMode } from '../models/tracking-mode';
 export interface Lot {
   brand?: (string | null);
@@ -53,6 +54,7 @@ export interface Lot {
   presence?: (PresenceState | null);
   product_id?: (ProductId | null);
   quantity?: (Amount | null);
+  recipe_id?: (RecipeId | null);
   status: ExpiryStatus;
   stocked_on: string;
   thawed_on?: (string | null);

@@ -8,6 +8,7 @@ pub mod goals;
 pub mod groups;
 pub mod locations;
 pub mod nutrients;
+pub mod planning;
 pub mod products;
 pub mod recipes;
 pub mod settings;

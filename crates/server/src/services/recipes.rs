@@ -319,7 +319,7 @@ impl Kitchen {
     }
 
     /// Effectif d'un aliment pour les portions des groupes.
-    fn group_facts(&self) -> HashMap<FoodId, GroupFacts> {
+    pub fn group_facts(&self) -> HashMap<FoodId, GroupFacts> {
         self.catalog
             .foods
             .values()

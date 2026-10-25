@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "INSERT INTO preference (id, member_id, food_id, group_id, recipe_id, level) VALUES (?, ?, ?, ?, ?, ?)",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 6
+    },
+    "nullable": []
+  },
+  "hash": "ad101ccdae37cf6d9b7ff2634f09f6b05ddf7287675a7b732f43d6830942fc95"
+}

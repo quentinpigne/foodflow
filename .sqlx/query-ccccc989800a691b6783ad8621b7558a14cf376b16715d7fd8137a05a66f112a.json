@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "DELETE FROM habitual_meal_item WHERE habitual_meal_id = ?",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 1
+    },
+    "nullable": []
+  },
+  "hash": "ccccc989800a691b6783ad8621b7558a14cf376b16715d7fd8137a05a66f112a"
+}

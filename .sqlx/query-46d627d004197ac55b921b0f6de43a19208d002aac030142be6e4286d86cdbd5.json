@@ -1,0 +1,194 @@
+{
+  "db_name": "SQLite",
+  "query": "SELECT id, meal_id, role_id, position, source, recipe_id, cooked_portions, lot_id, leftover_of_item_id,\n                  food_id, product_id, amount, per_adult_equivalent AS \"per_adult_equivalent: bool\", eaten_ratio,\n                  leftover_lot_id\n           FROM meal_item WHERE id = ?",
+  "describe": {
+    "columns": [
+      {
+        "name": "id",
+        "ordinal": 0,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "meal_item",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "name": "meal_id",
+        "ordinal": 1,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "meal_item",
+            "name": "meal_id"
+          }
+        }
+      },
+      {
+        "name": "role_id",
+        "ordinal": 2,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "meal_item",
+            "name": "role_id"
+          }
+        }
+      },
+      {
+        "name": "position",
+        "ordinal": 3,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "meal_item",
+            "name": "position"
+          }
+        }
+      },
+      {
+        "name": "source",
+        "ordinal": 4,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "meal_item",
+            "name": "source"
+          }
+        }
+      },
+      {
+        "name": "recipe_id",
+        "ordinal": 5,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "meal_item",
+            "name": "recipe_id"
+          }
+        }
+      },
+      {
+        "name": "cooked_portions",
+        "ordinal": 6,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "meal_item",
+            "name": "cooked_portions"
+          }
+        }
+      },
+      {
+        "name": "lot_id",
+        "ordinal": 7,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "meal_item",
+            "name": "lot_id"
+          }
+        }
+      },
+      {
+        "name": "leftover_of_item_id",
+        "ordinal": 8,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "meal_item",
+            "name": "leftover_of_item_id"
+          }
+        }
+      },
+      {
+        "name": "food_id",
+        "ordinal": 9,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "meal_item",
+            "name": "food_id"
+          }
+        }
+      },
+      {
+        "name": "product_id",
+        "ordinal": 10,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "meal_item",
+            "name": "product_id"
+          }
+        }
+      },
+      {
+        "name": "amount",
+        "ordinal": 11,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "meal_item",
+            "name": "amount"
+          }
+        }
+      },
+      {
+        "name": "per_adult_equivalent: bool",
+        "ordinal": 12,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "meal_item",
+            "name": "per_adult_equivalent"
+          }
+        }
+      },
+      {
+        "name": "eaten_ratio",
+        "ordinal": 13,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "meal_item",
+            "name": "eaten_ratio"
+          }
+        }
+      },
+      {
+        "name": "leftover_lot_id",
+        "ordinal": 14,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "meal_item",
+            "name": "leftover_lot_id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Right": 1
+    },
+    "nullable": [
+      false,
+      false,
+      true,
+      false,
+      false,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      false,
+      true,
+      true
+    ]
+  },
+  "hash": "46d627d004197ac55b921b0f6de43a19208d002aac030142be6e4286d86cdbd5"
+}

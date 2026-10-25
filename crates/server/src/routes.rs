@@ -3,6 +3,7 @@
 
 mod auth;
 mod foods;
+mod planning;
 mod recipes;
 mod static_files;
 mod stock;
@@ -26,7 +27,8 @@ use crate::state::AppState;
         (name = "foods", description = "Familles, aliments, produits, unités (spec 01)"),
         (name = "stock", description = "Emplacements, lots, mouvements, inventaire (spec 02)"),
         (name = "recipes", description = "Recettes, import, export (spec 03)"),
-        (name = "goals", description = "Objectifs nutritionnels, modèles, créneaux (spec 04)"),
+        (name = "goals", description = "Objectifs nutritionnels, modèles, créneaux, bilan (spec 04)"),
+        (name = "planning", description = "Foyer, semaine type, repas, validation (spec 05)"),
         (name = "dashboard", description = "Tableau de bord (spec 09)"),
         (name = "system", description = "Réglages, export, version"),
     )
@@ -34,7 +36,12 @@ use crate::state::AppState;
 struct ApiDoc;
 
 fn protected_routes() -> OpenApiRouter<AppState> {
-    auth::protected().merge(foods::router()).merge(stock::router()).merge(recipes::router()).merge(system::protected())
+    auth::protected()
+        .merge(foods::router())
+        .merge(stock::router())
+        .merge(recipes::router())
+        .merge(planning::router())
+        .merge(system::protected())
 }
 
 /// Routes de l'API. Sans état (génération du contrat), le middleware de session n'est pas branché.

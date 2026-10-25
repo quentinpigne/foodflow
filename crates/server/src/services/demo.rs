@@ -7,17 +7,21 @@
 use anyhow::{Context, anyhow};
 use chrono::Days;
 use foodflow_domain::foods::{NutrientBasis, NutritionGroup, TrackingMode};
+use foodflow_domain::planning::ItemSource;
 use foodflow_domain::recipes::{RecipeKind, Target, Yield};
 use foodflow_domain::shared::ids::{FoodGroupId, FoodId, LocationId, ProductId, UnitId};
 use foodflow_domain::stock::{ExpiryKind, LocationKind, PresenceState, WasteReason};
-use foodflow_domain::{Amount, Date, Measure, Money};
+use foodflow_domain::{Amount, Date, Measure, Money, Ratio};
 
 use super::foods::{FoodInput, NutrientValueInput, NutrientsInput};
 use super::goals::{self, NewVersionInput};
 use super::groups::FoodGroupInput;
+use super::household::{self, MemberInput, SlotDay};
+use super::meals;
 use super::products::ProductInput;
 use super::recipes::{self, IngredientInput, RecipeInput, Step};
 use super::stock::{self, ConsumeInput, DateInput, LotInput, LotOrigin, MoveInput, WasteInput};
+use super::week::{self, HabitualItem, HabitualMealInput, SlotTemplateInput};
 use super::{auth, foods, groups, locations, products, seed};
 use crate::db::Db;
 use crate::db::groups::Settings;
@@ -625,7 +629,7 @@ pub async fn load(db: &Db, today: Date) -> anyhow::Result<()> {
         steps: vec![step("Cuire les pâtes.", Some(10)), step("Réchauffer la sauce, servir avec le fromage.", None)],
         tags: &["rapide"],
     });
-    recipes::create(db, &pasta_dish).await.map_err(fail)?;
+    let pasta_dish = recipes::create(db, &pasta_dish).await.map_err(fail)?;
     let mut gratin = recipe(Draft {
         name: "Gratin de courgettes",
         kind: RecipeKind::Main,
@@ -644,7 +648,7 @@ pub async fn load(db: &Db, today: Date) -> anyhow::Result<()> {
         tags: &["légumes"],
     });
     gratin.fridge_days = Some(2);
-    recipes::create(db, &gratin).await.map_err(fail)?;
+    let gratin = recipes::create(db, &gratin).await.map_err(fail)?;
     let crepes = recipe(Draft {
         name: "Crêpes",
         kind: RecipeKind::Dessert,
@@ -663,12 +667,107 @@ pub async fn load(db: &Db, today: Date) -> anyhow::Result<()> {
         ],
         tags: &["chandeleur"],
     });
-    recipes::create(db, &crepes).await.map_err(fail)?;
+    let crepes = recipes::create(db, &crepes).await.map_err(fail)?;
 
     // Objectif du foyer : le modèle PNNS, en vigueur depuis un mois (R-NUT-4).
     let pnns = goals::templates(db).await.map_err(fail)?.into_iter().find(|t| t.builtin).context("modèle PNNS")?;
     let version = NewVersionInput { valid_from: d(30)?, note: None, template_id: Some(pnns.id), copy_from: None };
     goals::create_version(db, &version, today).await.map_err(fail)?;
+
+    // Foyer fictif : deux adultes et un enfant, qui déjeune à la cantine en semaine (ADR-0004, R-PLA-2).
+    let template = week::template(db).await.map_err(fail)?;
+    let slot = |name: &str| template.iter().find(|s| s.name == name).map(|s| s.slot_id).context("créneau");
+    let lunch = slot("Déjeuner")?;
+    for (name, coefficient, absences) in [
+        ("Alex", 1_000, vec![]),
+        ("Sam", 1_000, vec![]),
+        ("Lou", 600, (1..=5).map(|weekday| SlotDay { slot_id: lunch, weekday }).collect()),
+    ] {
+        let input = MemberInput {
+            name: name.into(),
+            adult_equivalent: Ratio::from_thousandths(coefficient),
+            active: true,
+            absences,
+            preferences: vec![],
+        };
+        household::save_member(db, None, &input).await.map_err(fail)?;
+    }
+    // Petit-déjeuner habituel : un bol de lait par équivalent adulte (R-PLA-20, R-PLA-21).
+    let habitual = HabitualMealInput {
+        name: "Bol de lait".into(),
+        items: vec![HabitualItem {
+            food_id: Some(milk),
+            product_id: None,
+            recipe_id: None,
+            amount: Amount::from_raw(250_000),
+            name: String::new(),
+            measure: None,
+        }],
+    };
+    let habitual = week::save_habitual(db, None, &habitual).await.map_err(fail)?;
+    if let Some(breakfast) = template.iter().find(|s| s.name == "Petit-déjeuner") {
+        let mut days = breakfast.days.clone();
+        for day in &mut days {
+            day.habitual_meal_id = Some(habitual);
+        }
+        let input = SlotTemplateInput { days, roles: breakfast.roles.clone() };
+        week::save_template(db, breakfast.slot_id, &input).await.map_err(fail)?;
+    }
+    // Quelques repas : le gratin de la veille, cuisiné pour plus, se finit ce midi (R-PLA-13).
+    let dinner = slot("Dîner")?;
+    let main = |meal: &meals::Meal| meal.diners.clone();
+    let plat = template
+        .iter()
+        .find(|s| s.slot_id == dinner)
+        .and_then(|s| s.roles.iter().find(|r| r.required))
+        .and_then(|r| r.id);
+    let cooked = |recipe, portions| meals::MealItem {
+        id: None,
+        role_id: plat,
+        source: ItemSource::Cook,
+        recipe_id: Some(recipe),
+        cooked_portions: Some(Amount::from_raw(portions)),
+        lot_id: None,
+        leftover_of_item_id: None,
+        food_id: None,
+        product_id: None,
+        amount: None,
+        per_adult_equivalent: false,
+        name: String::new(),
+        measure: None,
+        planned_leftover: None,
+        leftover_deadline: None,
+        eaten_ratio: None,
+    };
+    let plan = |date: Date, slot_id, items: Vec<meals::MealItem>| async move {
+        let id = meals::create(db, &meals::NewMeal { date, slot_id }).await.map_err(fail)?;
+        let meal = meals::get(db, id, today).await.map_err(fail)?;
+        let input = meals::MealInput {
+            status: meal.status,
+            available_active_minutes: meal.available_active_minutes,
+            earliest_start: meal.earliest_start,
+            ready_by: meal.ready_by,
+            locked: false,
+            note: None,
+            diners: main(&meal),
+            items,
+        };
+        meals::update(db, id, &input).await.map_err(fail)?;
+        meals::get(db, id, today).await.map_err(fail)
+    };
+    let yesterday = plan(d(1)?, dinner, vec![cooked(gratin, 6_000)]).await?;
+    let leftovers = meals::MealItem {
+        role_id: None,
+        source: ItemSource::Lot,
+        recipe_id: None,
+        cooked_portions: None,
+        leftover_of_item_id: yesterday.items.first().and_then(|i| i.id),
+        amount: Some(Amount::from_raw(2_600)),
+        ..cooked(gratin, 1)
+    };
+    plan(today, lunch, vec![leftovers]).await?;
+    plan(a(1)?, dinner, vec![cooked(pasta_dish, 2_600)]).await?;
+    plan(a(2)?, dinner, vec![cooked(crepes, 2_600)]).await?;
     Ok(())
 }
 

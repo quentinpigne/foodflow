@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "UPDATE meal_item SET eaten_ratio = NULL, leftover_lot_id = NULL WHERE meal_id = ?",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 1
+    },
+    "nullable": []
+  },
+  "hash": "951de39d09a26ef28f4c347189daa9f9719244f61302cfebdaa45ee2c95175f3"
+}

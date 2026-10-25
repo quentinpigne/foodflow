@@ -10,6 +10,61 @@
     "version": "0.1.0"
   },
   "paths": {
+    "/api/v1/assessment": {
+      "get": {
+        "tags": [
+          "goals"
+        ],
+        "summary": "Bilan nutritionnel prévu ou réel d'une période (NUT-04).",
+        "operationId": "getAssessment",
+        "parameters": [
+          {
+            "name": "start",
+            "in": "query",
+            "description": "Premier jour.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "days",
+            "in": "query",
+            "description": "Nombre de jours (7 par défaut, 31 au plus).",
+            "required": false,
+            "schema": {
+              "type": [
+                "integer",
+                "null"
+              ],
+              "format": "int32",
+              "minimum": 0
+            }
+          },
+          {
+            "name": "actual",
+            "in": "query",
+            "description": "Bilan réel (repas validés) plutôt que prévu (R-NUT-41).",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NutritionAssessment"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/auth/login": {
       "post": {
         "tags": [
@@ -990,6 +1045,124 @@
         }
       }
     },
+    "/api/v1/habitual-meals": {
+      "get": {
+        "tags": [
+          "planning"
+        ],
+        "summary": "Repas habituels (PLA-08).",
+        "operationId": "listHabitualMeals",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/HabitualMeal"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "planning"
+        ],
+        "operationId": "createHabitualMeal",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HabitualMealInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreatedHabitualMeal"
+                }
+              }
+            }
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/habitual-meals/{id}": {
+      "put": {
+        "tags": [
+          "planning"
+        ],
+        "operationId": "updateHabitualMeal",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/HabitualMealId"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HabitualMealInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {},
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "planning"
+        ],
+        "operationId": "deleteHabitualMeal",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/HabitualMealId"
+            }
+          }
+        ],
+        "responses": {
+          "204": {}
+        }
+      }
+    },
     "/api/v1/health": {
       "get": {
         "tags": [
@@ -1663,6 +1836,396 @@
         }
       }
     },
+    "/api/v1/meals": {
+      "post": {
+        "tags": [
+          "planning"
+        ],
+        "summary": "Crée un repas d'après la semaine type (R-PLA-5, R-PLA-21).",
+        "operationId": "createMeal",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NewMeal"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreatedMeal"
+                }
+              }
+            }
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/meals/validation": {
+      "post": {
+        "tags": [
+          "planning"
+        ],
+        "summary": "Valide plusieurs repas avec les valeurs proposées (R-PLA-33).",
+        "operationId": "validateMeals",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BatchValidationInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BatchValidationResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/meals/{id}": {
+      "get": {
+        "tags": [
+          "planning"
+        ],
+        "operationId": "getMeal",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/MealId"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Meal"
+                }
+              }
+            }
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "planning"
+        ],
+        "operationId": "updateMeal",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/MealId"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MealInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {},
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "planning"
+        ],
+        "operationId": "deleteMeal",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/MealId"
+            }
+          }
+        ],
+        "responses": {
+          "204": {},
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/meals/{id}/validation": {
+      "get": {
+        "tags": [
+          "planning"
+        ],
+        "summary": "Sorties de stock et restes proposés pour valider un repas (R-PLA-30).",
+        "operationId": "getMealValidation",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/MealId"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationProposal"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "planning"
+        ],
+        "summary": "Valide un repas (PLA-04).",
+        "operationId": "validateMeal",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/MealId"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ValidationInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {},
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "planning"
+        ],
+        "summary": "Annule la validation d'un repas (R-PLA-34).",
+        "operationId": "unvalidateMeal",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/MealId"
+            }
+          }
+        ],
+        "responses": {
+          "204": {},
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/members": {
+      "get": {
+        "tags": [
+          "planning"
+        ],
+        "summary": "Membres du foyer, avec leurs absences par défaut et leurs préférences (PLA-01, PLA-06).",
+        "operationId": "listMembers",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Member"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "planning"
+        ],
+        "operationId": "createMember",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MemberInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreatedMember"
+                }
+              }
+            }
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/members/{id}": {
+      "put": {
+        "tags": [
+          "planning"
+        ],
+        "operationId": "updateMember",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/MemberId"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MemberInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {},
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "planning"
+        ],
+        "summary": "Supprime un membre, ou le désactive s'il a déjà été convive.",
+        "operationId": "deleteMember",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/MemberId"
+            }
+          }
+        ],
+        "responses": {
+          "204": {}
+        }
+      }
+    },
     "/api/v1/movements/{id}/reverse": {
       "post": {
         "tags": [
@@ -1682,6 +2245,91 @@
         ],
         "responses": {
           "204": {},
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/plan": {
+      "get": {
+        "tags": [
+          "planning"
+        ],
+        "summary": "Repas d'une période, jour par jour, avec leurs signalements (PLA-03, PLA-05).",
+        "operationId": "getPlan",
+        "parameters": [
+          {
+            "name": "start",
+            "in": "query",
+            "description": "Premier jour.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "days",
+            "in": "query",
+            "description": "Nombre de jours (7 par défaut, 31 au plus).",
+            "required": false,
+            "schema": {
+              "type": [
+                "integer",
+                "null"
+              ],
+              "format": "int32",
+              "minimum": 0
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Plan"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/plan/copy": {
+      "post": {
+        "tags": [
+          "planning"
+        ],
+        "summary": "Copie une semaine passée comme point de départ (PLA-13).",
+        "operationId": "copyPlan",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CopyInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CopyResult"
+                }
+              }
+            }
+          },
           "422": {
             "content": {
               "application/json": {
@@ -2669,6 +3317,69 @@
           }
         }
       }
+    },
+    "/api/v1/week-template": {
+      "get": {
+        "tags": [
+          "planning"
+        ],
+        "summary": "Semaine type : horaires et composition type de chaque créneau actif (PLA-02, PLA-07).",
+        "operationId": "getWeekTemplate",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/SlotTemplate"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/week-template/{slot_id}": {
+      "put": {
+        "tags": [
+          "planning"
+        ],
+        "operationId": "saveSlotTemplate",
+        "parameters": [
+          {
+            "name": "slot_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/MealSlotId"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SlotTemplateInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {},
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -2764,6 +3475,42 @@
         "format": "uuid",
         "description": "Lot d'opérations validées ensemble, annulées ensemble (R-STK-12)."
       },
+      "BatchValidationInput": {
+        "type": "object",
+        "required": [
+          "meal_ids"
+        ],
+        "properties": {
+          "meal_ids": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MealId"
+            }
+          }
+        }
+      },
+      "BatchValidationResult": {
+        "type": "object",
+        "required": [
+          "validated",
+          "failed"
+        ],
+        "properties": {
+          "failed": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FailedValidation"
+            },
+            "description": "Repas non validés, avec la raison."
+          },
+          "validated": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MealId"
+            }
+          }
+        }
+      },
       "CheckInput": {
         "type": "object",
         "properties": {
@@ -2834,6 +3581,54 @@
           }
         }
       },
+      "CopyInput": {
+        "type": "object",
+        "required": [
+          "from",
+          "to"
+        ],
+        "properties": {
+          "days": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int32",
+            "description": "Nombre de jours (7 par défaut).",
+            "minimum": 0
+          },
+          "from": {
+            "type": "string",
+            "format": "date",
+            "description": "Premier jour de la semaine copiée."
+          },
+          "to": {
+            "type": "string",
+            "format": "date",
+            "description": "Premier jour de la semaine de destination."
+          }
+        }
+      },
+      "CopyResult": {
+        "type": "object",
+        "required": [
+          "created",
+          "skipped"
+        ],
+        "properties": {
+          "created": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 0
+          },
+          "skipped": {
+            "type": "integer",
+            "format": "int32",
+            "description": "Repas non copiés : le créneau de destination avait déjà un repas.",
+            "minimum": 0
+          }
+        }
+      },
       "Coverage": {
         "type": "object",
         "required": [
@@ -2886,6 +3681,17 @@
           }
         }
       },
+      "CreatedHabitualMeal": {
+        "type": "object",
+        "required": [
+          "id"
+        ],
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/HabitualMealId"
+          }
+        }
+      },
       "CreatedLocation": {
         "type": "object",
         "required": [
@@ -2908,6 +3714,28 @@
             "items": {
               "$ref": "#/components/schemas/LotId"
             }
+          }
+        }
+      },
+      "CreatedMeal": {
+        "type": "object",
+        "required": [
+          "id"
+        ],
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/MealId"
+          }
+        }
+      },
+      "CreatedMember": {
+        "type": "object",
+        "required": [
+          "id"
+        ],
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/MemberId"
           }
         }
       },
@@ -3038,6 +3866,52 @@
           }
         }
       },
+      "CriterionAssessment": {
+        "type": "object",
+        "description": "Bilan d'un critère : valeur et bornes dans l'unité du critère, arrondies (R-NUT-40).",
+        "required": [
+          "criterion",
+          "status",
+          "missing"
+        ],
+        "properties": {
+          "criterion": {
+            "$ref": "#/components/schemas/Criterion"
+          },
+          "max": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int64"
+          },
+          "min": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int64",
+            "description": "Bornes effectives : tolérance appliquée, cible réduite des repas hors foyer (R-NUT-12, R-NUT-31)."
+          },
+          "missing": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Ce qui rend la valeur incomplète (R-NUT-24)."
+          },
+          "status": {
+            "$ref": "#/components/schemas/Status"
+          },
+          "value": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int64"
+          }
+        }
+      },
       "CriterionKind": {
         "type": "string",
         "enum": [
@@ -3089,6 +3963,117 @@
               "null"
             ],
             "format": "date"
+          }
+        }
+      },
+      "DaySchedule": {
+        "type": "object",
+        "description": "Horaires d'un créneau un jour de la semaine (R-PLA-1, R-PLA-3, R-PLA-21).",
+        "required": [
+          "weekday",
+          "available_active_minutes",
+          "earliest_start",
+          "ready_by"
+        ],
+        "properties": {
+          "available_active_minutes": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 0
+          },
+          "earliest_start": {
+            "type": "string",
+            "description": "« HH:MM ».",
+            "example": "18:30"
+          },
+          "habitual_meal_id": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/HabitualMealId"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "out_of_home": {
+            "type": "boolean"
+          },
+          "ready_by": {
+            "type": "string",
+            "example": "19:30"
+          },
+          "weekday": {
+            "type": "integer",
+            "format": "int32",
+            "description": "1 = lundi … 7 = dimanche.",
+            "minimum": 0
+          }
+        }
+      },
+      "DaySummary": {
+        "type": "object",
+        "required": [
+          "date",
+          "meals",
+          "missing"
+        ],
+        "properties": {
+          "date": {
+            "type": "string",
+            "format": "date"
+          },
+          "energy": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int64",
+            "description": "Énergie par équivalent adulte, en cal ; incomplète si `missing` n'est pas vide."
+          },
+          "meals": {
+            "type": "integer",
+            "format": "int32",
+            "description": "Repas comptés ce jour-là.",
+            "minimum": 0
+          },
+          "missing": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "Diner": {
+        "type": "object",
+        "description": "Un convive d'un repas : un membre, ou un invité (`member_id` vide).",
+        "required": [
+          "adult_equivalent"
+        ],
+        "properties": {
+          "adult_equivalent": {
+            "$ref": "#/components/schemas/Ratio"
+          },
+          "guest_label": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "member_id": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/MemberId"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "name": {
+            "type": "string",
+            "description": "Nom du membre ou libellé de l'invité (lecture seule)."
           }
         }
       },
@@ -3368,6 +4353,21 @@
           "ABSOLUTE",
           "PERCENT_ENERGY"
         ]
+      },
+      "FailedValidation": {
+        "type": "object",
+        "required": [
+          "meal_id",
+          "reason"
+        ],
+        "properties": {
+          "meal_id": {
+            "$ref": "#/components/schemas/MealId"
+          },
+          "reason": {
+            "type": "string"
+          }
+        }
       },
       "FoodDetail": {
         "allOf": [
@@ -3788,6 +4788,106 @@
           }
         }
       },
+      "HabitualItem": {
+        "type": "object",
+        "required": [
+          "amount"
+        ],
+        "properties": {
+          "amount": {
+            "$ref": "#/components/schemas/Amount",
+            "description": "Par équivalent adulte : dans la mesure de stock de l'aliment, en portions pour une recette."
+          },
+          "food_id": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/FoodId"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "measure": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/Measure"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "name": {
+            "type": "string",
+            "description": "Nom et mesure (lecture seule)."
+          },
+          "product_id": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/ProductId"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "recipe_id": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/RecipeId"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        }
+      },
+      "HabitualMeal": {
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "items"
+        ],
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/HabitualMealId"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/HabitualItem"
+            }
+          },
+          "name": {
+            "type": "string"
+          }
+        }
+      },
+      "HabitualMealId": {
+        "type": "string",
+        "format": "uuid"
+      },
+      "HabitualMealInput": {
+        "type": "object",
+        "required": [
+          "name",
+          "items"
+        ],
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/HabitualItem"
+            }
+          },
+          "name": {
+            "type": "string"
+          }
+        }
+      },
       "Health": {
         "type": "object",
         "required": [
@@ -4060,6 +5160,15 @@
           }
         }
       },
+      "ItemSource": {
+        "type": "string",
+        "description": "Provenance d'un élément de repas (R-PLA-12). Les préparations d'une session (`PREPARED`) viendront avec\nles sessions de préparation (PLA-10).",
+        "enum": [
+          "COOK",
+          "LOT",
+          "FOOD"
+        ]
+      },
       "LastBackup": {
         "type": "object",
         "required": [
@@ -4078,6 +5187,130 @@
             "type": "string"
           }
         }
+      },
+      "LeftoverInput": {
+        "type": "object",
+        "description": "Reste déclaré d'une recette cuisinée (ADR-0012) : en portions, ou en quantité de l'aliment de reste.",
+        "required": [
+          "item_id",
+          "amount",
+          "location_id"
+        ],
+        "properties": {
+          "amount": {
+            "$ref": "#/components/schemas/Amount"
+          },
+          "as_food": {
+            "type": "boolean",
+            "description": "Lot de l'aliment de reste de la recette plutôt qu'un lot de la recette."
+          },
+          "item_id": {
+            "$ref": "#/components/schemas/MealItemId"
+          },
+          "location_id": {
+            "$ref": "#/components/schemas/LocationId"
+          }
+        }
+      },
+      "LineInput": {
+        "type": "object",
+        "description": "Une ligne retenue : ce qui a été réellement utilisé, et les lots où on l'a pris.",
+        "required": [
+          "item_id",
+          "target",
+          "used"
+        ],
+        "properties": {
+          "item_id": {
+            "$ref": "#/components/schemas/MealItemId"
+          },
+          "measure": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/Measure"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "takes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TakeInput"
+            }
+          },
+          "target": {
+            "$ref": "#/components/schemas/LineTarget"
+          },
+          "used": {
+            "$ref": "#/components/schemas/Amount",
+            "description": "Quantité réellement utilisée (R-PLA-31) ; au-delà des sorties, utilisée sans sortie (R-PLA-32)."
+          }
+        }
+      },
+      "LineTarget": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "id",
+              "kind"
+            ],
+            "properties": {
+              "id": {
+                "$ref": "#/components/schemas/FoodId"
+              },
+              "kind": {
+                "type": "string",
+                "enum": [
+                  "FOOD"
+                ]
+              }
+            }
+          },
+          {
+            "type": "object",
+            "description": "Une famille « au choix » : n'importe quel aliment de la famille (R-REC-20).",
+            "required": [
+              "id",
+              "kind"
+            ],
+            "properties": {
+              "id": {
+                "$ref": "#/components/schemas/FoodGroupId",
+                "description": "Une famille « au choix » : n'importe quel aliment de la famille (R-REC-20)."
+              },
+              "kind": {
+                "type": "string",
+                "enum": [
+                  "GROUP"
+                ]
+              }
+            }
+          },
+          {
+            "type": "object",
+            "description": "Une part d'un lot de préparation ou de restes.",
+            "required": [
+              "id",
+              "kind"
+            ],
+            "properties": {
+              "id": {
+                "$ref": "#/components/schemas/LotId",
+                "description": "Une part d'un lot de préparation ou de restes."
+              },
+              "kind": {
+                "type": "string",
+                "enum": [
+                  "LOT"
+                ]
+              }
+            }
+          }
+        ],
+        "description": "Ce qu'une ligne de sortie vise."
       },
       "Location": {
         "type": "object",
@@ -4323,6 +5556,17 @@
               }
             ]
           },
+          "recipe_id": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/RecipeId",
+                "description": "Lot de préparation ou de restes (STK-08) : la recette, en portions."
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
           "status": {
             "$ref": "#/components/schemas/ExpiryStatus"
           },
@@ -4490,6 +5734,36 @@
           "ADJUSTMENT"
         ]
       },
+      "LotTake": {
+        "type": "object",
+        "required": [
+          "lot_id",
+          "name",
+          "amount",
+          "status"
+        ],
+        "properties": {
+          "amount": {
+            "$ref": "#/components/schemas/Amount"
+          },
+          "expiry": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date"
+          },
+          "lot_id": {
+            "$ref": "#/components/schemas/LotId"
+          },
+          "name": {
+            "type": "string"
+          },
+          "status": {
+            "$ref": "#/components/schemas/ExpiryStatus"
+          }
+        }
+      },
       "LotUpdate": {
         "type": "object",
         "required": [
@@ -4527,6 +5801,310 @@
           }
         }
       },
+      "Meal": {
+        "type": "object",
+        "required": [
+          "id",
+          "date",
+          "slot_id",
+          "slot_name",
+          "status",
+          "available_active_minutes",
+          "earliest_start",
+          "ready_by",
+          "locked",
+          "diners",
+          "adult_equivalents",
+          "items",
+          "active_minutes",
+          "total_minutes",
+          "signals"
+        ],
+        "properties": {
+          "active_minutes": {
+            "type": "integer",
+            "format": "int32",
+            "description": "Temps actif et temps total des recettes cuisinées sur place.",
+            "minimum": 0
+          },
+          "adult_equivalents": {
+            "$ref": "#/components/schemas/Ratio",
+            "description": "Somme des coefficients des convives (R-PLA-11)."
+          },
+          "available_active_minutes": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 0
+          },
+          "date": {
+            "type": "string",
+            "format": "date"
+          },
+          "diners": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Diner"
+            }
+          },
+          "earliest_start": {
+            "type": "string"
+          },
+          "id": {
+            "$ref": "#/components/schemas/MealId"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MealItem"
+            }
+          },
+          "locked": {
+            "type": "boolean"
+          },
+          "note": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "ready_by": {
+            "type": "string"
+          },
+          "signals": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Signal"
+            }
+          },
+          "slot_id": {
+            "$ref": "#/components/schemas/MealSlotId"
+          },
+          "slot_name": {
+            "type": "string"
+          },
+          "status": {
+            "$ref": "#/components/schemas/MealStatus"
+          },
+          "total_minutes": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 0
+          }
+        }
+      },
+      "MealId": {
+        "type": "string",
+        "format": "uuid"
+      },
+      "MealInput": {
+        "type": "object",
+        "required": [
+          "status",
+          "available_active_minutes",
+          "earliest_start",
+          "ready_by",
+          "diners",
+          "items"
+        ],
+        "properties": {
+          "available_active_minutes": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 0
+          },
+          "diners": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Diner"
+            }
+          },
+          "earliest_start": {
+            "type": "string",
+            "example": "18:30"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MealItem"
+            }
+          },
+          "locked": {
+            "type": "boolean"
+          },
+          "note": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "ready_by": {
+            "type": "string",
+            "example": "19:30"
+          },
+          "status": {
+            "$ref": "#/components/schemas/MealStatus",
+            "description": "`PLANNED`, `SKIPPED` ou `OUT_OF_HOME` ; `DONE` s'obtient par la validation (PLA-04)."
+          }
+        }
+      },
+      "MealItem": {
+        "type": "object",
+        "description": "Un élément de repas (R-PLA-12) : une recette cuisinée, une part d'un lot ou d'un reste prévu, un aliment.",
+        "required": [
+          "source"
+        ],
+        "properties": {
+          "amount": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/Amount",
+                "description": "`LOT` : portions servies (ou quantité) ; `FOOD` : quantité, dans la mesure de stock."
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "cooked_portions": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/Amount",
+                "description": "`COOK` : portions cuisinées, en millièmes (les équivalents adulte du repas par défaut, R-PLA-12)."
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "eaten_ratio": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/Ratio",
+                "description": "Après validation : part mangée, en millièmes (R-PLA-31)."
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "food_id": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/FoodId"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "id": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/MealItemId",
+                "description": "Vide pour un nouvel élément."
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "leftover_deadline": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date"
+          },
+          "leftover_of_item_id": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/MealItemId",
+                "description": "… ou le reste prévu d'un élément cuisiné d'un repas antérieur (R-PLA-13)."
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "lot_id": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/LotId",
+                "description": "`LOT` : un lot de préparation, de restes ou d'aliment de reste…"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "measure": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/Measure",
+                "description": "Mesure de `amount` ; vide pour des portions."
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "name": {
+            "type": "string"
+          },
+          "per_adult_equivalent": {
+            "type": "boolean",
+            "description": "`FOOD` : quantité par équivalent adulte (repas habituel, R-PLA-20) plutôt que totale."
+          },
+          "planned_leftover": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/Amount",
+                "description": "`COOK` : reste prévu (portions cuisinées − équivalents adulte) et sa date limite (R-PLA-13)."
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "product_id": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/ProductId"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "recipe_id": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/RecipeId"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "role_id": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/SlotRoleId"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "source": {
+            "$ref": "#/components/schemas/ItemSource"
+          }
+        }
+      },
+      "MealItemId": {
+        "type": "string",
+        "format": "uuid"
+      },
       "MealSlot": {
         "type": "object",
         "required": [
@@ -4562,6 +6140,16 @@
         "type": "string",
         "format": "uuid"
       },
+      "MealStatus": {
+        "type": "string",
+        "description": "Statut d'un repas (spec 05, « Statuts d'un repas »).",
+        "enum": [
+          "PLANNED",
+          "DONE",
+          "SKIPPED",
+          "OUT_OF_HOME"
+        ]
+      },
       "Measure": {
         "type": "string",
         "description": "Grandeur d'une quantité (glossaire : mesure).",
@@ -4570,6 +6158,79 @@
           "VOLUME",
           "COUNT"
         ]
+      },
+      "Member": {
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "adult_equivalent",
+          "active",
+          "absences",
+          "preferences"
+        ],
+        "properties": {
+          "absences": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SlotDay"
+            },
+            "description": "Créneaux où le membre est absent par défaut (R-PLA-2)."
+          },
+          "active": {
+            "type": "boolean"
+          },
+          "adult_equivalent": {
+            "$ref": "#/components/schemas/Ratio",
+            "description": "Équivalent adulte, en millièmes (1,000 pour un adulte, ADR-0004)."
+          },
+          "id": {
+            "$ref": "#/components/schemas/MemberId"
+          },
+          "name": {
+            "type": "string"
+          },
+          "preferences": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PreferenceView"
+            }
+          }
+        }
+      },
+      "MemberId": {
+        "type": "string",
+        "format": "uuid"
+      },
+      "MemberInput": {
+        "type": "object",
+        "required": [
+          "name",
+          "adult_equivalent"
+        ],
+        "properties": {
+          "absences": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SlotDay"
+            }
+          },
+          "active": {
+            "type": "boolean"
+          },
+          "adult_equivalent": {
+            "$ref": "#/components/schemas/Ratio"
+          },
+          "name": {
+            "type": "string"
+          },
+          "preferences": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PreferenceView"
+            }
+          }
+        }
       },
       "MergeGroupInput": {
         "type": "object",
@@ -4651,6 +6312,22 @@
           "OPENED",
           "CHECKED"
         ]
+      },
+      "NewMeal": {
+        "type": "object",
+        "required": [
+          "date",
+          "slot_id"
+        ],
+        "properties": {
+          "date": {
+            "type": "string",
+            "format": "date"
+          },
+          "slot_id": {
+            "$ref": "#/components/schemas/MealSlotId"
+          }
+        }
       },
       "NewVersionInput": {
         "type": "object",
@@ -4764,6 +6441,52 @@
           }
         }
       },
+      "NutritionAssessment": {
+        "type": "object",
+        "required": [
+          "start",
+          "end",
+          "actual",
+          "criteria",
+          "days"
+        ],
+        "properties": {
+          "actual": {
+            "type": "boolean"
+          },
+          "criteria": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CriterionAssessment"
+            }
+          },
+          "days": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DaySummary"
+            }
+          },
+          "end": {
+            "type": "string",
+            "format": "date"
+          },
+          "goal_id": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/NutritionGoalId",
+                "description": "Version de l'objectif en vigueur le premier jour (R-NUT-43) ; vide sans objectif."
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "start": {
+            "type": "string",
+            "format": "date"
+          }
+        }
+      },
       "NutritionGoalId": {
         "type": "string",
         "format": "uuid"
@@ -4798,6 +6521,83 @@
           "DAY",
           "WEEK"
         ]
+      },
+      "Plan": {
+        "type": "object",
+        "required": [
+          "slots",
+          "days"
+        ],
+        "properties": {
+          "days": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PlanDay"
+            }
+          },
+          "slots": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Slot"
+            }
+          }
+        }
+      },
+      "PlanDay": {
+        "type": "object",
+        "required": [
+          "date",
+          "meals",
+          "empty_slots"
+        ],
+        "properties": {
+          "date": {
+            "type": "string",
+            "format": "date"
+          },
+          "empty_slots": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MealSlotId"
+            },
+            "description": "Créneaux actifs sans repas ce jour-là (R-PLA-50)."
+          },
+          "meals": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Meal"
+            }
+          }
+        }
+      },
+      "PreferenceLevel": {
+        "type": "string",
+        "description": "Niveau d'une préférence d'un membre (ADR-0004).",
+        "enum": [
+          "LOVES",
+          "LIKES",
+          "DISLIKES",
+          "REFUSES"
+        ]
+      },
+      "PreferenceView": {
+        "type": "object",
+        "required": [
+          "target",
+          "level"
+        ],
+        "properties": {
+          "level": {
+            "$ref": "#/components/schemas/PreferenceLevel"
+          },
+          "target": {
+            "$ref": "#/components/schemas/Target"
+          },
+          "target_name": {
+            "type": "string",
+            "description": "Nom de l'aliment, de la famille ou de la recette (lecture seule)."
+          }
+        }
       },
       "PresenceState": {
         "type": "string",
@@ -5020,6 +6820,143 @@
                 "type": "null"
               }
             ]
+          }
+        }
+      },
+      "ProposedItem": {
+        "type": "object",
+        "required": [
+          "item_id",
+          "name",
+          "source",
+          "freezable",
+          "lines",
+          "unquantified"
+        ],
+        "properties": {
+          "cooked_portions": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/Amount",
+                "description": "`COOK` : portions cuisinées et reste prévu, proposé comme reste déclaré."
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "freezable": {
+            "type": "boolean"
+          },
+          "item_id": {
+            "$ref": "#/components/schemas/MealItemId"
+          },
+          "leftover_food_id": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/FoodId",
+                "description": "Aliment de reste de la recette, s'il y en a un (ADR-0012)."
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "leftover_food_name": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "lines": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ProposedLine"
+            }
+          },
+          "name": {
+            "type": "string"
+          },
+          "planned_leftover": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/Amount"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "recipe_id": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/RecipeId"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "source": {
+            "$ref": "#/components/schemas/ItemSource"
+          },
+          "unquantified": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Ingrédients sans quantité convertible : utilisés, sans sortie (R-PLA-32)."
+          }
+        }
+      },
+      "ProposedLine": {
+        "type": "object",
+        "description": "Un besoin d'un élément et les lots où le prendre (R-STK-36).",
+        "required": [
+          "target",
+          "name",
+          "needed",
+          "takes",
+          "to_confirm",
+          "shortfall"
+        ],
+        "properties": {
+          "measure": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/Measure",
+                "description": "Mesure des quantités ; vide pour des portions."
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "name": {
+            "type": "string"
+          },
+          "needed": {
+            "$ref": "#/components/schemas/Amount"
+          },
+          "shortfall": {
+            "$ref": "#/components/schemas/Amount",
+            "description": "Quantité que les lots ne couvrent pas : utilisée sans sortie de stock (R-PLA-32)."
+          },
+          "takes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LotTake"
+            }
+          },
+          "target": {
+            "$ref": "#/components/schemas/LineTarget"
+          },
+          "to_confirm": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LotTake"
+            },
+            "description": "Lots à date dépassée, à confirmer « encore bon » avant d'y puiser (R-STK-37)."
           }
         }
       },
@@ -5520,6 +7457,301 @@
           }
         }
       },
+      "Signal": {
+        "oneOf": [
+          {
+            "type": "object",
+            "description": "Temps actif des recettes cuisinées sur place supérieur au temps actif disponible.",
+            "required": [
+              "needed",
+              "available",
+              "kind"
+            ],
+            "properties": {
+              "available": {
+                "type": "integer",
+                "format": "int32",
+                "minimum": 0
+              },
+              "kind": {
+                "type": "string",
+                "enum": [
+                  "TIME_EXCEEDED"
+                ]
+              },
+              "needed": {
+                "type": "integer",
+                "format": "int32",
+                "minimum": 0
+              }
+            }
+          },
+          {
+            "type": "object",
+            "description": "Temps total (actif et passif) supérieur au temps entre l'heure de début et l'heure limite.",
+            "required": [
+              "needed",
+              "available",
+              "kind"
+            ],
+            "properties": {
+              "available": {
+                "type": "integer",
+                "format": "int32",
+                "minimum": 0
+              },
+              "kind": {
+                "type": "string",
+                "enum": [
+                  "READY_BY_EXCEEDED"
+                ]
+              },
+              "needed": {
+                "type": "integer",
+                "format": "int32",
+                "minimum": 0
+              }
+            }
+          },
+          {
+            "type": "object",
+            "description": "Un convive présent refuse un élément.",
+            "required": [
+              "member",
+              "item",
+              "kind"
+            ],
+            "properties": {
+              "item": {
+                "type": "string"
+              },
+              "kind": {
+                "type": "string",
+                "enum": [
+                  "REFUSED"
+                ]
+              },
+              "member": {
+                "$ref": "#/components/schemas/MemberId"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "description": "Un rôle obligatoire de la composition type est vide (R-PLA-14).",
+            "required": [
+              "role",
+              "kind"
+            ],
+            "properties": {
+              "kind": {
+                "type": "string",
+                "enum": [
+                  "REQUIRED_ROLE_EMPTY"
+                ]
+              },
+              "role": {
+                "type": "string"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "description": "Reste prévu non affecté à un repas ultérieur, en millièmes de portion (R-PLA-13).",
+            "required": [
+              "portions",
+              "kind"
+            ],
+            "properties": {
+              "kind": {
+                "type": "string",
+                "enum": [
+                  "LEFTOVER_UNASSIGNED"
+                ]
+              },
+              "portions": {
+                "$ref": "#/components/schemas/Amount"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "description": "Reste prévu affecté à un repas après sa date limite.",
+            "required": [
+              "deadline",
+              "kind"
+            ],
+            "properties": {
+              "deadline": {
+                "type": "string",
+                "format": "date"
+              },
+              "kind": {
+                "type": "string",
+                "enum": [
+                  "LEFTOVER_PAST_DEADLINE"
+                ]
+              }
+            }
+          },
+          {
+            "type": "object",
+            "description": "Repas passé, ni validé, ni sauté, ni hors foyer (R-PLA-35).",
+            "required": [
+              "kind"
+            ],
+            "properties": {
+              "kind": {
+                "type": "string",
+                "enum": [
+                  "TO_VALIDATE"
+                ]
+              }
+            }
+          },
+          {
+            "type": "object",
+            "description": "Repas prévu sans convive : ni cuisiné ni compté (R-PLA-11).",
+            "required": [
+              "kind"
+            ],
+            "properties": {
+              "kind": {
+                "type": "string",
+                "enum": [
+                  "NO_DINER"
+                ]
+              }
+            }
+          }
+        ],
+        "description": "Une situation à revoir sur un repas."
+      },
+      "Slot": {
+        "type": "object",
+        "required": [
+          "id",
+          "name"
+        ],
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/MealSlotId"
+          },
+          "name": {
+            "type": "string"
+          }
+        }
+      },
+      "SlotDay": {
+        "type": "object",
+        "description": "Un créneau, un jour de la semaine (1 = lundi … 7 = dimanche).",
+        "required": [
+          "slot_id",
+          "weekday"
+        ],
+        "properties": {
+          "slot_id": {
+            "$ref": "#/components/schemas/MealSlotId"
+          },
+          "weekday": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 0
+          }
+        }
+      },
+      "SlotRole": {
+        "type": "object",
+        "description": "Un rôle de la composition type (R-PLA-14).",
+        "required": [
+          "name"
+        ],
+        "properties": {
+          "id": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/SlotRoleId",
+                "description": "Vide pour un nouveau rôle."
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "name": {
+            "type": "string"
+          },
+          "nutrition_groups": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/NutritionGroup"
+            }
+          },
+          "recipe_kinds": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RecipeKind"
+            }
+          },
+          "required": {
+            "type": "boolean"
+          }
+        }
+      },
+      "SlotRoleId": {
+        "type": "string",
+        "format": "uuid"
+      },
+      "SlotTemplate": {
+        "type": "object",
+        "required": [
+          "slot_id",
+          "name",
+          "days",
+          "roles"
+        ],
+        "properties": {
+          "days": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DaySchedule"
+            }
+          },
+          "name": {
+            "type": "string"
+          },
+          "roles": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SlotRole"
+            }
+          },
+          "slot_id": {
+            "$ref": "#/components/schemas/MealSlotId"
+          }
+        }
+      },
+      "SlotTemplateInput": {
+        "type": "object",
+        "required": [
+          "days",
+          "roles"
+        ],
+        "properties": {
+          "days": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DaySchedule"
+            }
+          },
+          "roles": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SlotRole"
+            }
+          }
+        }
+      },
       "StartImport": {
         "type": "object",
         "properties": {
@@ -5538,6 +7770,17 @@
             "description": "Adresse d'une page de recette."
           }
         }
+      },
+      "Status": {
+        "type": "string",
+        "description": "Statut d'un critère sur une période (R-NUT-40).",
+        "enum": [
+          "MET",
+          "BELOW",
+          "ABOVE",
+          "INCOMPLETE",
+          "NOT_APPLICABLE"
+        ]
       },
       "Step": {
         "type": "object",
@@ -5709,6 +7952,21 @@
           },
           "version": {
             "type": "string"
+          }
+        }
+      },
+      "TakeInput": {
+        "type": "object",
+        "required": [
+          "lot_id",
+          "amount"
+        ],
+        "properties": {
+          "amount": {
+            "$ref": "#/components/schemas/Amount"
+          },
+          "lot_id": {
+            "$ref": "#/components/schemas/LotId"
           }
         }
       },
@@ -5911,6 +8169,61 @@
           }
         }
       },
+      "ValidationInput": {
+        "type": "object",
+        "properties": {
+          "leftovers": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LeftoverInput"
+            }
+          },
+          "lines": {
+            "type": [
+              "array",
+              "null"
+            ],
+            "items": {
+              "$ref": "#/components/schemas/LineInput"
+            },
+            "description": "Lignes retenues ; vide : la proposition telle quelle (validation groupée, R-PLA-33)."
+          }
+        }
+      },
+      "ValidationProposal": {
+        "type": "object",
+        "required": [
+          "meal_id",
+          "date",
+          "items"
+        ],
+        "properties": {
+          "date": {
+            "type": "string",
+            "format": "date"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ProposedItem"
+            }
+          },
+          "leftover_location_id": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/LocationId",
+                "description": "Emplacement proposé pour les restes : le premier réfrigérateur."
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "meal_id": {
+            "$ref": "#/components/schemas/MealId"
+          }
+        }
+      },
       "ValueSource": {
         "type": "string",
         "description": "Origine d'une valeur ou d'un élément du référentiel.",
@@ -6068,7 +8381,11 @@
     },
     {
       "name": "goals",
-      "description": "Objectifs nutritionnels, modèles, créneaux (spec 04)"
+      "description": "Objectifs nutritionnels, modèles, créneaux, bilan (spec 04)"
+    },
+    {
+      "name": "planning",
+      "description": "Foyer, semaine type, repas, validation (spec 05)"
     },
     {
       "name": "dashboard",

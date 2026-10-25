@@ -1,9 +1,41 @@
 {
-  "_doc": "Créneaux de repas proposés au premier lancement, avec leur part de l'énergie de la journée (Q13, R-NUT-30), en millièmes.",
+  "_doc": "Créneaux de repas proposés au premier lancement, avec leur part de l'énergie de la journée (Q13, R-NUT-30), en millièmes ; leur semaine type par défaut (ADR-0011, Q18 : temps actif du lundi au vendredi, puis du week-end ; heures « HH:MM ») et leur composition type (spec 05 : plat, accompagnement, laitage ou fruit le midi et le soir ; repas habituel le matin et au goûter).",
   "slots": [
-    { "name": "Petit-déjeuner", "energy_share": 250 },
-    { "name": "Déjeuner", "energy_share": 350 },
-    { "name": "Goûter", "energy_share": 100 },
-    { "name": "Dîner", "energy_share": 300 }
+    {
+      "name": "Petit-déjeuner",
+      "energy_share": 250,
+      "weekday": { "minutes": 10, "earliest_start": "07:00", "ready_by": "07:45" },
+      "weekend": { "minutes": 20, "earliest_start": "08:00", "ready_by": "09:30" },
+      "roles": []
+    },
+    {
+      "name": "Déjeuner",
+      "energy_share": 350,
+      "weekday": { "minutes": 20, "earliest_start": "11:45", "ready_by": "12:30" },
+      "weekend": { "minutes": 30, "earliest_start": "11:30", "ready_by": "12:45" },
+      "roles": [
+        { "name": "Plat", "required": true, "recipe_kinds": ["MAIN"] },
+        { "name": "Accompagnement", "recipe_kinds": ["SIDE"] },
+        { "name": "Laitage ou fruit", "recipe_kinds": ["DESSERT"], "nutrition_groups": ["DAIRY", "FRUITS"] }
+      ]
+    },
+    {
+      "name": "Goûter",
+      "energy_share": 100,
+      "weekday": { "minutes": 10, "earliest_start": "16:00", "ready_by": "16:30" },
+      "weekend": { "minutes": 10, "earliest_start": "16:00", "ready_by": "16:30" },
+      "roles": []
+    },
+    {
+      "name": "Dîner",
+      "energy_share": 300,
+      "weekday": { "minutes": 30, "earliest_start": "18:30", "ready_by": "19:30" },
+      "weekend": { "minutes": 45, "earliest_start": "18:00", "ready_by": "19:30" },
+      "roles": [
+        { "name": "Plat", "required": true, "recipe_kinds": ["MAIN"] },
+        { "name": "Accompagnement", "recipe_kinds": ["SIDE"] },
+        { "name": "Laitage ou fruit", "recipe_kinds": ["DESSERT"], "nutrition_groups": ["DAIRY", "FRUITS"] }
+      ]
+    }
   ]
 }

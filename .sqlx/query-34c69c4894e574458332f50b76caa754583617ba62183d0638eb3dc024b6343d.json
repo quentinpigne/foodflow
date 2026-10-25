@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "INSERT INTO member_presence (member_id, slot_id, weekday, present) VALUES (?, ?, ?, ?)",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 4
+    },
+    "nullable": []
+  },
+  "hash": "34c69c4894e574458332f50b76caa754583617ba62183d0638eb3dc024b6343d"
+}

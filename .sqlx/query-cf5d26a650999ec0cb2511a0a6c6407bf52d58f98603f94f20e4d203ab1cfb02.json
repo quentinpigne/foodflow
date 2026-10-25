@@ -1,0 +1,98 @@
+{
+  "db_name": "SQLite",
+  "query": "SELECT slot_id, weekday, available_active_minutes, earliest_start, ready_by,\n                  out_of_home AS \"out_of_home: bool\", habitual_meal_id\n           FROM slot_schedule ORDER BY weekday",
+  "describe": {
+    "columns": [
+      {
+        "name": "slot_id",
+        "ordinal": 0,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "slot_schedule",
+            "name": "slot_id"
+          }
+        }
+      },
+      {
+        "name": "weekday",
+        "ordinal": 1,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "slot_schedule",
+            "name": "weekday"
+          }
+        }
+      },
+      {
+        "name": "available_active_minutes",
+        "ordinal": 2,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "slot_schedule",
+            "name": "available_active_minutes"
+          }
+        }
+      },
+      {
+        "name": "earliest_start",
+        "ordinal": 3,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "slot_schedule",
+            "name": "earliest_start"
+          }
+        }
+      },
+      {
+        "name": "ready_by",
+        "ordinal": 4,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "slot_schedule",
+            "name": "ready_by"
+          }
+        }
+      },
+      {
+        "name": "out_of_home: bool",
+        "ordinal": 5,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "slot_schedule",
+            "name": "out_of_home"
+          }
+        }
+      },
+      {
+        "name": "habitual_meal_id",
+        "ordinal": 6,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "slot_schedule",
+            "name": "habitual_meal_id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Right": 0
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      true
+    ]
+  },
+  "hash": "cf5d26a650999ec0cb2511a0a6c6407bf52d58f98603f94f20e4d203ab1cfb02"
+}

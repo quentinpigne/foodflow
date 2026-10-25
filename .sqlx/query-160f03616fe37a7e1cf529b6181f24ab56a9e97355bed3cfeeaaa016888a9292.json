@@ -1,0 +1,62 @@
+{
+  "db_name": "SQLite",
+  "query": "SELECT d.meal_id, d.member_id, d.guest_label, d.adult_equivalent\n         FROM meal_diner d JOIN meal m ON m.id = d.meal_id WHERE m.date BETWEEN ? AND ? ORDER BY d.rowid",
+  "describe": {
+    "columns": [
+      {
+        "name": "meal_id",
+        "ordinal": 0,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "meal_diner",
+            "name": "meal_id"
+          }
+        }
+      },
+      {
+        "name": "member_id",
+        "ordinal": 1,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "meal_diner",
+            "name": "member_id"
+          }
+        }
+      },
+      {
+        "name": "guest_label",
+        "ordinal": 2,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "meal_diner",
+            "name": "guest_label"
+          }
+        }
+      },
+      {
+        "name": "adult_equivalent",
+        "ordinal": 3,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "meal_diner",
+            "name": "adult_equivalent"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Right": 2
+    },
+    "nullable": [
+      false,
+      true,
+      true,
+      false
+    ]
+  },
+  "hash": "160f03616fe37a7e1cf529b6181f24ab56a9e97355bed3cfeeaaa016888a9292"
+}

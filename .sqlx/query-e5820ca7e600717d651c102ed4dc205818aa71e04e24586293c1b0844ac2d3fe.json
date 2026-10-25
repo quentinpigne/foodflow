@@ -1,0 +1,62 @@
+{
+  "db_name": "SQLite",
+  "query": "SELECT member_id, slot_id, weekday, present AS \"present: bool\" FROM member_presence",
+  "describe": {
+    "columns": [
+      {
+        "name": "member_id",
+        "ordinal": 0,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "member_presence",
+            "name": "member_id"
+          }
+        }
+      },
+      {
+        "name": "slot_id",
+        "ordinal": 1,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "member_presence",
+            "name": "slot_id"
+          }
+        }
+      },
+      {
+        "name": "weekday",
+        "ordinal": 2,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "member_presence",
+            "name": "weekday"
+          }
+        }
+      },
+      {
+        "name": "present: bool",
+        "ordinal": 3,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "member_presence",
+            "name": "present"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Right": 0
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "e5820ca7e600717d651c102ed4dc205818aa71e04e24586293c1b0844ac2d3fe"
+}

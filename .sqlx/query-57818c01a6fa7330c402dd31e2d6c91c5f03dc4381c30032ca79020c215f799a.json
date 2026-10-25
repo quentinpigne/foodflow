@@ -1,0 +1,98 @@
+{
+  "db_name": "SQLite",
+  "query": "SELECT u.meal_item_id, u.food_id, u.product_id, u.recipe_id, u.amount, u.measure, u.movement_id\n         FROM meal_ingredient_use u JOIN meal_item i ON i.id = u.meal_item_id JOIN meal m ON m.id = i.meal_id\n         WHERE m.date BETWEEN ? AND ? ORDER BY u.rowid",
+  "describe": {
+    "columns": [
+      {
+        "name": "meal_item_id",
+        "ordinal": 0,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "meal_ingredient_use",
+            "name": "meal_item_id"
+          }
+        }
+      },
+      {
+        "name": "food_id",
+        "ordinal": 1,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "meal_ingredient_use",
+            "name": "food_id"
+          }
+        }
+      },
+      {
+        "name": "product_id",
+        "ordinal": 2,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "meal_ingredient_use",
+            "name": "product_id"
+          }
+        }
+      },
+      {
+        "name": "recipe_id",
+        "ordinal": 3,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "meal_ingredient_use",
+            "name": "recipe_id"
+          }
+        }
+      },
+      {
+        "name": "amount",
+        "ordinal": 4,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "meal_ingredient_use",
+            "name": "amount"
+          }
+        }
+      },
+      {
+        "name": "measure",
+        "ordinal": 5,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "meal_ingredient_use",
+            "name": "measure"
+          }
+        }
+      },
+      {
+        "name": "movement_id",
+        "ordinal": 6,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "meal_ingredient_use",
+            "name": "movement_id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Right": 2
+    },
+    "nullable": [
+      false,
+      true,
+      true,
+      true,
+      false,
+      false,
+      true
+    ]
+  },
+  "hash": "57818c01a6fa7330c402dd31e2d6c91c5f03dc4381c30032ca79020c215f799a"
+}

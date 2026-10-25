@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "DELETE FROM preference WHERE member_id = ?",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 1
+    },
+    "nullable": []
+  },
+  "hash": "3ce4e4bd0daa3b19ce4bd41d69ccdcad917539ad4f526e9cef9b8066620de93f"
+}

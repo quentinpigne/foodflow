@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "UPDATE meal_item SET lot_id = ? WHERE leftover_of_item_id = ?",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 2
+    },
+    "nullable": []
+  },
+  "hash": "a33f192f1a559cb0d348ee3c9afee951e11f29b1fb3a903cdfc8b0a193ffa97c"
+}

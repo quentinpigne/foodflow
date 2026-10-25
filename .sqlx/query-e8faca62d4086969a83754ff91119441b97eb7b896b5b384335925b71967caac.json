@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "UPDATE slot_role SET position = -position - 1 WHERE slot_id = ?",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 1
+    },
+    "nullable": []
+  },
+  "hash": "e8faca62d4086969a83754ff91119441b97eb7b896b5b384335925b71967caac"
+}

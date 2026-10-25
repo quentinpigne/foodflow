@@ -73,7 +73,7 @@ fn yield_columns(y: &Yield) -> (&'static str, Option<i64>, Option<String>, Optio
     }
 }
 
-fn target_from(food: Option<&str>, group: Option<&str>, recipe: Option<&str>) -> anyhow::Result<Target> {
+pub(crate) fn target_from(food: Option<&str>, group: Option<&str>, recipe: Option<&str>) -> anyhow::Result<Target> {
     Ok(match (food, group, recipe) {
         (Some(f), None, None) => Target::Food(id_from_db(f)?),
         (None, Some(g), None) => Target::Group(id_from_db(g)?),
@@ -82,7 +82,7 @@ fn target_from(food: Option<&str>, group: Option<&str>, recipe: Option<&str>) ->
     })
 }
 
-fn target_columns(target: &Target) -> (Option<String>, Option<String>, Option<String>) {
+pub(crate) fn target_columns(target: &Target) -> (Option<String>, Option<String>, Option<String>) {
     match target {
         Target::Food(id) => (Some(id.to_string()), None, None),
         Target::Group(id) => (None, Some(id.to_string()), None),
