@@ -164,9 +164,12 @@ foodflow/
 │   │   └── src/{shared,foods,stock,recipes,nutrition,planning,
 │   │            shopping,waste,cashflow,reporting}.rs + dossiers homonymes
 │   └── server/                ← binaire `foodflow`
-│       ├── src/api.rs + api/
-│       ├── src/services.rs + services/
-│       ├── src/db.rs + db/
+│       ├── src/main.rs                  ← sous-commandes (serve, ciqual-import, demo…)
+│       ├── src/routes.rs + routes/      ← assemblage des routes par domaine, contrat OpenAPI, fichiers de l'interface
+│       ├── src/handlers.rs + handlers/  ← un handler par route : extraction, appel du service, réponse
+│       ├── src/middleware.rs            ← session
+│       ├── src/services.rs + services/  ← un service par cas d'usage, et leurs types d'entrée et de sortie
+│       ├── src/db.rs + db/              ← requêtes sqlx
 │       ├── src/readers.rs + readers/    ← Ciqual XML, JSON-LD
 │       ├── src/clients.rs + clients/    ← Open Food Facts, pages web, IA, Cashflow, Web Push
 │       ├── src/jobs.rs + jobs/          ← tâches de fond
@@ -177,6 +180,14 @@ foodflow/
 ├── openapi.json · .sqlx/ · fixtures/ · deploy/ · docs/
 ├── README.md · CLAUDE.md
 ```
+
+### Découpage du serveur
+
+**Contrairement à Cashflow** (un module `api` qui mélange routes et handlers), le serveur de Foodflow sépare
+ses couches dans des dossiers visibles (demande du propriétaire, 2026-10-25) :
+`routes` → `handlers` → `services` → `db` / `readers` / `clients`. Les routes ne font qu'assembler ; les
+handlers ne calculent pas et n'exécutent pas de requête ; les services ne contiennent pas de calcul métier
+(il va dans `domain`). Les modules restent en fichiers homonymes (`routes.rs` + `routes/`), sans `mod.rs`.
 
 ### Dépendances propres à Foodflow
 
@@ -208,7 +219,8 @@ foodflow/
 
 ### Commandes
 
-Celles de Cashflow, avec le binaire `foodflow` (`cargo run -p foodflow-server -- …`), plus :
+Celles de Cashflow, avec le binaire `foodflow` (`cargo run -p foodflow-server -- …`) qui écoute par défaut
+sur le port **3100** (Cashflow garde le 3000 sur le Mac), plus :
 
 | Tâche | Commande |
 |---|---|

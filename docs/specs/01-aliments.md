@@ -136,7 +136,7 @@ stockées **pour 100 g** ou **pour 100 mL** (la **base nutritionnelle** de l'ali
   des familles, chacune repérée par son code Ciqual. Une famille déplacée ou renommée par l'utilisateur
   le reste après un réimport.
 - **R-ALI-52** — Les aliments Ciqual sont importés **masqués** par défaut sauf une sélection courante
-  (environ 400 aliments bruts usuels, liste versionnée dans le dépôt) ; la recherche peut inclure les
+  (environ 800 aliments bruts usuels, liste `seed/ciqual_selection.json` versionnée dans le dépôt) ; la recherche peut inclure les
   aliments masqués, et en utiliser un l'affiche.
 
 ### Open Food Facts

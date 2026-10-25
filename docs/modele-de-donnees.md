@@ -23,6 +23,8 @@ anti-gaspillage (spec 07), lien avec Cashflow (spec 08). Les autres viendront av
 | `Timestamp` | Instant UTC, réservé à l'audit | ADR-0009 |
 | `Json` | Document JSON validé par un schéma propre au champ | — |
 
+Toutes les tables d'entités ont `created_at` et `updated_at` (`Timestamp`, audit), non répétés ci-dessous.
+
 Correspondance physique : celle de Cashflow (`Id` en `TEXT` de 36 caractères, entiers en `INTEGER`,
 enums en `TEXT` avec `CHECK`, booléens en `INTEGER` 0/1, `Date` avec `CHECK (col = date(col))`).
 
@@ -149,6 +151,10 @@ Liste de référence, fournie par une migration.
 | `id` | `Id` | PK |
 | `product_id` / `food_id` / `recipe_id` | `Id` ? | exactement un des trois (R-STK-1) ; `recipe_id` pour un lot de préparation |
 | `location_id` | `Id` | FK `Location` ; emplacement courant (le journal garde l'historique) |
+| `measure` | `Measure` | mesure de stock au moment de la création ; les quantités du lot s'y expriment |
+| `stocked_on` | `Date` | entrée en stock ; point de départ d'une durée de conservation sans date (R-STK-30) |
+| `expiry_missing` | booléen | date de péremption à compléter (R-COU-51) |
+| `depleted` | booléen | lot épuisé (R-STK-4), copie de lecture tenue à jour à chaque mouvement |
 | `tracking_mode` | `TrackingMode` | figé à la création (R-STK-20), modifié seulement par R-STK-21 |
 | `expiry_kind` | `USE_BY` \| `BEST_BEFORE` \| `NONE` | |
 | `expiry_date` | `Date` ? | requis sauf `NONE` |

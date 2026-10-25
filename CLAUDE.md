@@ -2,6 +2,18 @@
 
 Consignes pour Claude Code sur le projet Foodflow (gestion alimentaire du foyer).
 
+## Commandes
+
+Celles de Cashflow (`docs/architecture.md`, § « Commandes »), avec le binaire `foodflow` sur le port 3100 :
+
+- Tests : `cargo test --workspace` ; `npx ng test --watch=false` dans `web/`.
+- Lint : `cargo fmt --check`, `cargo clippy --workspace --all-targets -- -D warnings`, `npx ng lint`,
+  `npm run format:check`. **Doit passer avant tout commit.**
+- Contrat d'API : `cargo run -p foodflow-server -- openapi > openapi.json` puis `npm run openapi`.
+- `cargo sqlx prepare --workspace` après toute modification de requête SQL (base de schéma : `.env.example`).
+- Base de démonstration : `cargo run -p foodflow-server -- demo` (mot de passe `demo-foodflow`) ;
+  table Ciqual : `cargo run -p foodflow-server -- ciqual-import <dossier des XML>`.
+
 ## Phase actuelle : implémentation de la V1
 
 La conception est terminée et validée (phase 0, 2026-10-25). On implémente la V1 phase par phase
@@ -69,8 +81,10 @@ Celles de Cashflow (`../cashflow/CLAUDE.md`, « Règles de code »), notamment :
 
 - `domain` : aucune I/O, aucun flottant, aucune dépendance à tokio, sqlx, axum ou reqwest ; la date du
   jour est un paramètre.
-- `server` : les routes n'exécutent pas de requête, les services ne calculent pas, toute requête passe
-  par `db`. Les traits sont réservés aux clients de services extérieurs (Open Food Facts, pages web, IA,
+- `server`, découpé en dossiers (**différent de Cashflow**) : `routes/` (assemblage, contrat OpenAPI) →
+  `handlers/` (extraction, appel du service, réponse) → `services/` (cas d'usage) → `db/` (requêtes),
+  `readers/`, `clients/`. Les handlers n'exécutent pas de requête, les services ne calculent pas, toute
+  requête passe par `db`. Les traits sont réservés aux clients de services extérieurs (Open Food Facts, pages web, IA,
   Cashflow, Web Push), pour les remplacer en test : **aucun test n'appelle le réseau**.
 - Pas de `unwrap()`/`expect()` hors tests et démarrage ; erreurs métier en enums `thiserror` qui portent
   le code de la règle `R-*`. Pas d'`unsafe`. Édition 2024, pas de `mod.rs`.

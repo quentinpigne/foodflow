@@ -12,7 +12,8 @@ d'effort. Elles ne doivent pas être prisonnières de l'application.
 ## Décision
 
 Comme Cashflow (ADR-0008 de Cashflow) : un **export JSON complet et versionné**, réimportable, de toutes
-les données saisies (hors données de référence Ciqual, réimportables, et hors cache Open Food Facts), et
+les données (y compris les aliments issus de Ciqual, auxquels les lots et les recettes font référence : la
+restauration ne dépend pas d'un nouvel import de la table), et
 des **sauvegardes automatiques** de la base.
 Les recettes s'exportent aussi une à une au format schema.org/Recipe (JSON-LD), le même format que
 l'import par URL.

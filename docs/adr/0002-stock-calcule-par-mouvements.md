@@ -28,7 +28,7 @@ emplacement ; une date de péremption éventuelle). Chaque lot porte un **journa
 | Type | Origine | Signe |
 |---|---|---|
 | `PURCHASE` | Validation d'une session de courses | + |
-| `COOKED` | Validation d'un repas cuisiné | − |
+| `COOKED` | Validation d'un repas cuisiné, ou sortie manuelle d'un produit consommé | − |
 | `LEFTOVER` | Reste d'un repas remis en stock (crée un lot de préparation) | + |
 | `PREPARED` | Préparation cuisinée à l'avance, en session de préparation (crée un lot de préparation, ADR-0011) | + |
 | `WASTE` | Produit jeté (péremption, abîmé) | − |
