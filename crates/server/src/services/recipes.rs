@@ -49,7 +49,8 @@ impl Kitchen {
         let units = db::units::all(&mut *conn).await?;
         let nutrient_codes = db::nutrients::list(&mut *conn).await?.into_iter().map(|n| n.code).collect();
         let mut values: HashMap<FoodId, HashMap<String, _>> = HashMap::new();
-        for (food, code, value) in db::nutrients::all_food_values(&mut *conn).await? {
+        // Valeurs des aliments utilisés par les recettes seulement : les autres ne servent à aucun calcul ici.
+        for (food, code, value) in db::nutrients::recipe_food_values(&mut *conn).await? {
             values.entry(food).or_default().insert(code, value);
         }
         let mut kitchen =

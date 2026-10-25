@@ -173,3 +173,27 @@ test('revue : créer l’aliment d’un ingrédient inconnu, retenu à l’impor
   await page.getByRole('dialog').getByRole('button', { name: 'Abandonner' }).click();
   await expect(page.getByRole('heading', { name: 'Importer des recettes' })).toBeVisible();
 });
+
+test('choix d’un ingrédient : un aliment existant est proposé, jamais recréé (R-ALI-10)', async ({
+  page,
+}) => {
+  await login(page);
+  await page.goto('/recettes/nouvelle');
+  const picker = page.getByRole('combobox', { name: 'Ingrédient' }).first();
+  await picker.pressSequentially('tomate');
+  await expect(page.getByRole('option', { name: 'Tomate', exact: true })).toBeVisible();
+  // L'aliment existe : pas de « Créer l'aliment » pour ce nom.
+  await expect(page.getByRole('option', { name: /Créer l'aliment/ })).toHaveCount(0);
+
+  // Un nom saisi autrement, puis corrigé en un nom pris : la fenêtre propose l'aliment existant.
+  await picker.fill('');
+  await picker.pressSequentially('tomat');
+  await page.getByRole('option', { name: "Créer l'aliment « tomat »" }).click();
+  const dialog = page.getByRole('dialog');
+  await dialog.getByLabel('Nom').fill('Tomate');
+  await dialog.getByRole('combobox', { name: 'Famille' }).click();
+  await page.getByRole('option').first().click();
+  await dialog.getByRole('button', { name: 'Créer' }).click();
+  await dialog.getByRole('button', { name: "Utiliser l'aliment existant « Tomate »" }).click();
+  await expect(picker).toHaveValue('Tomate');
+});

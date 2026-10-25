@@ -1,6 +1,6 @@
 {
   "db_name": "SQLite",
-  "query": "SELECT food_id, nutrient_code, value, estimated AS \"estimated: bool\", source FROM food_nutrient",
+  "query": "SELECT food_id, nutrient_code, value, estimated AS \"estimated: bool\", source FROM food_nutrient\n           WHERE food_id IN (SELECT food_id FROM recipe_ingredient WHERE food_id IS NOT NULL)\n              OR food_id IN (SELECT reference_food_id FROM food_group WHERE reference_food_id IS NOT NULL)",
   "describe": {
     "columns": [
       {
@@ -70,5 +70,5 @@
       false
     ]
   },
-  "hash": "8e48b36e3fc45c9377db2b3d74e6722407eae9b20de9c2ae3c168448ed4de126"
+  "hash": "3615003a1b5bce3b8fd63d7bc863072c9ba204190762d18ccd1fb39c027d29e2"
 }

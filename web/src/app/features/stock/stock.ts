@@ -15,11 +15,7 @@ import { DataVersion } from '../../core/data-version';
 import { LotRow } from '../../shared/lot-row';
 import { LocationsStore } from '../../shared/stores';
 import { AddLot } from './add-lot';
-
-/** Normalise un texte pour la recherche : minuscules, sans accents. */
-function fold(text: string): string {
-  return text.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
-}
+import { fold } from '../../core/text';
 
 /** Stock (STK-04) : lots par emplacement, triés par date limite effective. */
 @Component({

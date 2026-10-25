@@ -14,22 +14,19 @@ import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { MatDialog } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
-import { debounceTime, firstValueFrom, forkJoin, map, of } from 'rxjs';
+import { debounceTime, firstValueFrom, map, of } from 'rxjs';
 
 import { Target } from '../api/models/target';
 import { FoodsService } from '../api/services/foods.service';
 import { RecipesService } from '../api/services/recipes.service';
 import { DataVersion } from '../core/data-version';
+import { fold } from '../core/text';
 import { NewFood, NewFoodDialog } from './new-food-dialog';
 import { GroupsStore } from './stores';
 
 export interface PickedTarget {
   target: Target;
   name: string;
-}
-
-function fold(text: string): string {
-  return text.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
 }
 
 /** Cible d'un ingrédient (R-REC-20) : un aliment, une famille (« au choix ») ou une sous-recette. */
@@ -53,30 +50,30 @@ function fold(text: string): string {
         [displayWith]="display"
         (optionSelected)="pick($event.option.value)"
       >
-        @if (results.value(); as r) {
-          @if (r.foods.length) {
-            <mat-optgroup label="Aliments">
-              @for (f of r.foods; track f.target.id) {
-                <mat-option [value]="f">{{ f.name }}</mat-option>
-              }
-            </mat-optgroup>
-          }
-          @if (groups().length) {
-            <mat-optgroup label="Familles (au choix)">
-              @for (g of groups(); track g.target.id) {
-                <mat-option [value]="g">{{ g.name }}</mat-option>
-              }
-            </mat-optgroup>
-          }
-          @if (r.recipes.length) {
-            <mat-optgroup label="Recettes">
-              @for (rec of r.recipes; track rec.target.id) {
-                <mat-option [value]="rec">{{ rec.name }}</mat-option>
-              }
-            </mat-optgroup>
-          }
+        @if (foodResults.value()?.length) {
+          <mat-optgroup label="Aliments">
+            @for (f of foodResults.value(); track f.target.id) {
+              <mat-option [value]="f">{{ f.name }}</mat-option>
+            }
+          </mat-optgroup>
         }
-        @if (q().length >= 2) {
+        @if (groups().length) {
+          <mat-optgroup label="Familles (au choix)">
+            @for (g of groups(); track g.target.id) {
+              <mat-option [value]="g">{{ g.name }}</mat-option>
+            }
+          </mat-optgroup>
+        }
+        @if (recipeResults.value()?.length) {
+          <mat-optgroup label="Recettes">
+            @for (rec of recipeResults.value(); track rec.target.id) {
+              <mat-option [value]="rec">{{ rec.name }}</mat-option>
+            }
+          </mat-optgroup>
+        }
+        @if (searching()) {
+          <mat-option disabled>Recherche…</mat-option>
+        } @else if (canCreate()) {
           <mat-option [value]="create">Créer l'aliment « {{ q() }} »</mat-option>
         }
       </mat-autocomplete>
@@ -118,25 +115,55 @@ export class TargetPicker {
     effect(() => this.text.set(this.name() ?? ''));
   }
 
-  protected readonly results = rxResource({
+  // Deux recherches séparées : les aliments s'affichent sans attendre les recettes.
+  protected readonly foodResults = rxResource({
     params: () => this.q(),
     stream: ({ params: q }) =>
       q.length < 2
-        ? of({ foods: [] as PickedTarget[], recipes: [] as PickedTarget[] })
-        : forkJoin({
-            foods: this.foods.searchFoods({ q }),
-            recipes: this.recipes.searchRecipes({ q }),
-          }).pipe(
-            map(({ foods, recipes }) => ({
-              foods: foods
-                .slice(0, 12)
-                .map((f) => ({ target: { kind: 'FOOD' as const, id: f.id }, name: f.name })),
-              recipes: recipes
+        ? of([] as PickedTarget[])
+        : this.foods
+            .searchFoods({ q })
+            .pipe(
+              map((foods) =>
+                foods
+                  .slice(0, 12)
+                  .map((f) => ({ target: { kind: 'FOOD' as const, id: f.id }, name: f.name })),
+              ),
+            ),
+  });
+
+  protected readonly recipeResults = rxResource({
+    params: () => this.q(),
+    stream: ({ params: q }) =>
+      q.length < 2
+        ? of([] as PickedTarget[])
+        : this.recipes.searchRecipes({ q }).pipe(
+            map((recipes) =>
+              recipes
                 .filter((r) => r.id !== this.exclude())
                 .slice(0, 6)
                 .map((r) => ({ target: { kind: 'RECIPE' as const, id: r.id }, name: r.name })),
-            })),
+            ),
           ),
+  });
+
+  /** Saisie en attente de la recherche (anti-rebond) ou recherche d'aliments en cours. */
+  protected readonly searching = computed(() => {
+    const text = this.text();
+    const typed = typeof text === 'string' ? text.trim() : '';
+    return typed.length >= 2 && (typed !== this.q() || this.foodResults.isLoading());
+  });
+
+  /**
+   * « Créer l'aliment » : une fois les aliments trouvés, et seulement si aucun ne porte déjà ce nom — un aliment
+   * masqué de la table Ciqual (« Rhum ») est trouvé et proposé, pas recréé.
+   */
+  protected readonly canCreate = computed(() => {
+    const q = fold(this.q());
+    if (q.length < 2 || !this.foodResults.hasValue()) {
+      return false;
+    }
+    return !this.foodResults.value().some((f) => fold(f.name) === q);
   });
 
   protected readonly groups = computed<PickedTarget[]>(() => {

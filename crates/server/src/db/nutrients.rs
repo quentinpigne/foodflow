@@ -111,9 +111,14 @@ pub async fn delete_food_value(db: impl SqliteExecutor<'_>, food: FoodId, code: 
 }
 
 /// Toutes les valeurs connues des aliments, pour les calculs de recettes.
-pub async fn all_food_values(db: impl SqliteExecutor<'_>) -> anyhow::Result<Vec<(FoodId, String, NutrientValue)>> {
+/// Valeurs des seuls aliments dont les recettes ont besoin : ceux de leurs ingrédients, et les aliments de
+/// référence des familles (ingrédient « au choix »). La table Ciqual compte quelque 25 000 valeurs : les
+/// charger toutes à chaque recherche de recette la ralentit.
+pub async fn recipe_food_values(db: impl SqliteExecutor<'_>) -> anyhow::Result<Vec<(FoodId, String, NutrientValue)>> {
     let rows = sqlx::query!(
-        r#"SELECT food_id, nutrient_code, value, estimated AS "estimated: bool", source FROM food_nutrient"#
+        r#"SELECT food_id, nutrient_code, value, estimated AS "estimated: bool", source FROM food_nutrient
+           WHERE food_id IN (SELECT food_id FROM recipe_ingredient WHERE food_id IS NOT NULL)
+              OR food_id IN (SELECT reference_food_id FROM food_group WHERE reference_food_id IS NOT NULL)"#
     )
     .fetch_all(db)
     .await?;
