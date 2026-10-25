@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "DELETE FROM goal_criterion WHERE goal_id IS ? AND template_id IS ?",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 2
+    },
+    "nullable": []
+  },
+  "hash": "4c656d794c99195824f594952f674c21b93c8f54d34b7bb8de5406f77d47e0a0"
+}

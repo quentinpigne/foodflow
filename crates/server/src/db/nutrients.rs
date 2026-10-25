@@ -109,3 +109,18 @@ pub async fn delete_food_value(db: impl SqliteExecutor<'_>, food: FoodId, code: 
     sqlx::query!("DELETE FROM food_nutrient WHERE food_id = ? AND nutrient_code = ?", id, code).execute(db).await?;
     Ok(())
 }
+
+/// Toutes les valeurs connues des aliments, pour les calculs de recettes.
+pub async fn all_food_values(db: impl SqliteExecutor<'_>) -> anyhow::Result<Vec<(FoodId, String, NutrientValue)>> {
+    let rows = sqlx::query!(
+        r#"SELECT food_id, nutrient_code, value, estimated AS "estimated: bool", source FROM food_nutrient"#
+    )
+    .fetch_all(db)
+    .await?;
+    rows.into_iter()
+        .map(|r| {
+            let value = NutrientValue { value: r.value, estimated: r.estimated, source: enum_from_db(&r.source)? };
+            Ok((super::codec::id_from_db(&r.food_id)?, r.nutrient_code, value))
+        })
+        .collect()
+}

@@ -2,16 +2,20 @@
 //! aucune donnée personnelle.
 //!
 //! - Nutriments et unités générales : données de référence, complétées à chaque démarrage.
-//! - Emplacements : proposés **au premier lancement** seulement, pour ne jamais recréer ce que l'utilisateur
-//!   a supprimé ou renommé.
+//! - Modèles d'objectif fournis (« Repères PNNS 2019 ») : rechargés à chaque démarrage, non modifiables.
+//! - Emplacements et créneaux de repas : proposés **au premier lancement** seulement, pour ne jamais
+//!   recréer ce que l'utilisateur a supprimé ou renommé.
 
+use foodflow_domain::Ratio;
 use foodflow_domain::foods::nutrients::NutrientUnit;
-use foodflow_domain::shared::ids::{LocationId, UnitId};
+use foodflow_domain::nutrition::Criterion;
+use foodflow_domain::shared::ids::{GoalTemplateId, LocationId, MealSlotId, UnitId};
 use foodflow_domain::stock::LocationKind;
 use foodflow_domain::text::normalize;
 use foodflow_domain::{Amount, Measure};
 use serde::Deserialize;
 
+use crate::db::goals::{Owner, SlotRow, TemplateRow};
 use crate::db::locations::LocationFields;
 use crate::db::nutrients::NutrientRow;
 use crate::db::units::UnitFields;
@@ -20,6 +24,30 @@ use crate::db::{self, Db};
 const NUTRIENTS: &str = include_str!("../../seed/nutrients.json");
 const UNITS: &str = include_str!("../../seed/units.json");
 const LOCATIONS: &str = include_str!("../../seed/locations.json");
+const TEMPLATES: &str = include_str!("../../seed/goal_templates.json");
+const SLOTS: &str = include_str!("../../seed/meal_slots.json");
+
+#[derive(Deserialize)]
+struct TemplateFile {
+    templates: Vec<TemplateSeed>,
+}
+
+#[derive(Deserialize)]
+struct TemplateSeed {
+    name: String,
+    criteria: Vec<Criterion>,
+}
+
+#[derive(Deserialize)]
+struct SlotFile {
+    slots: Vec<SlotSeed>,
+}
+
+#[derive(Deserialize)]
+struct SlotSeed {
+    name: String,
+    energy_share: i64,
+}
 
 #[derive(Debug, Deserialize)]
 pub struct NutrientSeed {
@@ -115,6 +143,40 @@ pub async fn run(db: &Db) -> anyhow::Result<()> {
         db::settings::set(&mut *tx, "seed.locations", &true).await?;
     }
 
+    let templates: TemplateFile = serde_json::from_str(TEMPLATES)?;
+    let existing = db::goals::templates(&mut *tx).await?;
+    for template in templates.templates {
+        for criterion in &template.criteria {
+            criterion.check().map_err(|e| anyhow::anyhow!("modèle {} : {e}", template.name))?;
+        }
+        let id = match existing.iter().find(|t| t.name == template.name) {
+            Some(t) => t.id,
+            None => {
+                let row = TemplateRow { id: GoalTemplateId::new(), name: template.name.clone(), builtin: true };
+                db::goals::insert_template(&mut *tx, &row).await?;
+                row.id
+            }
+        };
+        db::goals::replace_criteria(&mut tx, Owner::Template(id), &template.criteria).await?;
+    }
+
+    if db::settings::get::<bool>(&mut *tx, "seed.meal_slots").await?.is_none() {
+        if db::goals::slots(&mut *tx).await?.is_empty() {
+            let seed: SlotFile = serde_json::from_str(SLOTS)?;
+            for (position, slot) in seed.slots.into_iter().enumerate() {
+                let row = SlotRow {
+                    id: MealSlotId::new(),
+                    name: slot.name,
+                    position: i64::try_from(position)?,
+                    energy_share: Ratio::from_thousandths(slot.energy_share),
+                    active: true,
+                };
+                db::goals::upsert_slot(&mut *tx, &row).await?;
+            }
+        }
+        db::settings::set(&mut *tx, "seed.meal_slots", &true).await?;
+    }
+
     tx.commit().await?;
     Ok(())
 }
@@ -138,5 +200,11 @@ mod tests {
         run(&db).await.unwrap();
         assert_eq!(db::locations::list(&db.read).await.unwrap().len(), 2);
         assert_eq!(db::units::list(&db.read, None).await.unwrap().len(), units.len());
+        // Le modèle PNNS est rechargé sans doublon ; les créneaux totalisent 100 % (R-NUT-30).
+        assert_eq!(db::goals::templates(&db.read).await.unwrap().len(), 1);
+        let criteria = db::goals::criteria(&db.read).await.unwrap();
+        assert_eq!(criteria.len(), 18);
+        let shares: Vec<_> = db::goals::slots(&db.read).await.unwrap().iter().map(|s| s.energy_share).collect();
+        assert!(foodflow_domain::nutrition::check_energy_shares(&shares).is_ok());
     }
 }

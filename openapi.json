@@ -772,6 +772,224 @@
         }
       }
     },
+    "/api/v1/goal-templates": {
+      "get": {
+        "tags": [
+          "goals"
+        ],
+        "summary": "Modèles d'objectif, dont « Repères PNNS 2019 — adulte » (NUT-03).",
+        "operationId": "listGoalTemplates",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/GoalTemplate"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "goals"
+        ],
+        "operationId": "createGoalTemplate",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TemplateInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreatedTemplate"
+                }
+              }
+            }
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/goal-templates/{id}": {
+      "delete": {
+        "tags": [
+          "goals"
+        ],
+        "operationId": "deleteGoalTemplate",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/GoalTemplateId"
+            }
+          }
+        ],
+        "responses": {
+          "204": {},
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/goals": {
+      "get": {
+        "tags": [
+          "goals"
+        ],
+        "summary": "Versions de l'objectif du foyer, avec leurs critères (NUT-01).",
+        "operationId": "listGoalVersions",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/GoalVersion"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "goals"
+        ],
+        "summary": "Nouvelle version, depuis un modèle, une version ou celle en vigueur (R-NUT-3, R-NUT-4).",
+        "operationId": "createGoalVersion",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NewVersionInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreatedGoal"
+                }
+              }
+            }
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/goals/{id}": {
+      "put": {
+        "tags": [
+          "goals"
+        ],
+        "summary": "Modifie une version à venir (R-NUT-3).",
+        "operationId": "updateGoalVersion",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/NutritionGoalId"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VersionInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {},
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "goals"
+        ],
+        "operationId": "deleteGoalVersion",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/NutritionGoalId"
+            }
+          }
+        ],
+        "responses": {
+          "204": {},
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/health": {
       "get": {
         "tags": [
@@ -1391,6 +1609,60 @@
         }
       }
     },
+    "/api/v1/meal-slots": {
+      "get": {
+        "tags": [
+          "goals"
+        ],
+        "summary": "Créneaux de repas et part de l'énergie de chacun (R-NUT-30).",
+        "operationId": "listMealSlots",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/MealSlot"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "goals"
+        ],
+        "operationId": "saveMealSlots",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/MealSlot"
+                }
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {},
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/movements/{id}/reverse": {
       "post": {
         "tags": [
@@ -1618,6 +1890,695 @@
         }
       }
     },
+    "/api/v1/recipe-drafts": {
+      "get": {
+        "tags": [
+          "recipes"
+        ],
+        "summary": "Brouillons en attente de revue.",
+        "operationId": "listRecipeDrafts",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/RecipeDraft"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "recipes"
+        ],
+        "summary": "Importe une page de recette ou un fichier JSON-LD : crée un brouillon à revoir (REC-07, R-REC-60, R-REC-61).",
+        "operationId": "startRecipeImport",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StartImport"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RecipeDraft"
+                }
+              }
+            }
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/recipe-drafts/{id}": {
+      "get": {
+        "tags": [
+          "recipes"
+        ],
+        "operationId": "getRecipeDraft",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/RecipeDraftId"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RecipeDraft"
+                }
+              }
+            }
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "recipes"
+        ],
+        "summary": "Enregistre la revue en cours.",
+        "operationId": "saveRecipeDraft",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/RecipeDraftId"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DraftPayload"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {},
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "recipes"
+        ],
+        "summary": "Abandonne le brouillon.",
+        "operationId": "discardRecipeDraft",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/RecipeDraftId"
+            }
+          }
+        ],
+        "responses": {
+          "204": {}
+        }
+      }
+    },
+    "/api/v1/recipe-drafts/{id}/commit": {
+      "post": {
+        "tags": [
+          "recipes"
+        ],
+        "summary": "Valide le brouillon : crée la recette et mémorise les rattachements (R-REC-65, R-REC-66).",
+        "operationId": "commitRecipeDraft",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/RecipeDraftId"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RecipeInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreatedRecipe"
+                }
+              }
+            }
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/recipes": {
+      "get": {
+        "tags": [
+          "recipes"
+        ],
+        "summary": "Recherche et filtres (REC-09).",
+        "operationId": "searchRecipes",
+        "parameters": [
+          {
+            "name": "q",
+            "in": "query",
+            "description": "Mots du nom, des étiquettes ou des ingrédients.",
+            "required": false,
+            "schema": {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          },
+          {
+            "name": "kind",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/RecipeKind"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          {
+            "name": "tag",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          },
+          {
+            "name": "max_active",
+            "in": "query",
+            "description": "Temps actif total maximal, en minutes.",
+            "required": false,
+            "schema": {
+              "type": [
+                "integer",
+                "null"
+              ],
+              "format": "int32",
+              "minimum": 0
+            }
+          },
+          {
+            "name": "make_ahead",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "food_id",
+            "in": "query",
+            "description": "Recettes qui utilisent cet aliment (directement ou dans une sous-recette).",
+            "required": false,
+            "schema": {
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/FoodId"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          {
+            "name": "in_stock",
+            "in": "query",
+            "description": "Trie par couverture par le stock actuel (« que cuisiner avec ce que j'ai ? »).",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "include_archived",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/RecipeSummary"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "recipes"
+        ],
+        "operationId": "createRecipe",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RecipeInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreatedRecipe"
+                }
+              }
+            }
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/recipes/tags": {
+      "get": {
+        "tags": [
+          "recipes"
+        ],
+        "summary": "Étiquettes utilisées.",
+        "operationId": "listRecipeTags",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/recipes/{id}": {
+      "get": {
+        "tags": [
+          "recipes"
+        ],
+        "summary": "Fiche : ingrédients mis à l'échelle, valeurs par portion, temps, portions des groupes (REC-02, REC-03).",
+        "operationId": "getRecipe",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/RecipeId"
+            }
+          },
+          {
+            "name": "servings",
+            "in": "query",
+            "description": "Équivalents adulte servis, en millièmes : met la fiche à l'échelle (R-REC-12).",
+            "required": false,
+            "schema": {
+              "type": [
+                "integer",
+                "null"
+              ],
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RecipeDetail"
+                }
+              }
+            }
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "recipes"
+        ],
+        "operationId": "updateRecipe",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/RecipeId"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RecipeInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {},
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "recipes"
+        ],
+        "operationId": "deleteRecipe",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/RecipeId"
+            }
+          }
+        ],
+        "responses": {
+          "204": {},
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/recipes/{id}/archived": {
+      "put": {
+        "tags": [
+          "recipes"
+        ],
+        "summary": "Archive ou désarchive (R-REC-2).",
+        "operationId": "archiveRecipe",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/RecipeId"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ArchiveInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {},
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/recipes/{id}/duplicate": {
+      "post": {
+        "tags": [
+          "recipes"
+        ],
+        "summary": "Duplique pour faire une variante (REC-12).",
+        "operationId": "duplicateRecipe",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/RecipeId"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreatedRecipe"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/recipes/{id}/image": {
+      "get": {
+        "tags": [
+          "recipes"
+        ],
+        "summary": "Image de la recette (REC-10).",
+        "operationId": "getRecipeImage",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/RecipeId"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Image",
+            "content": {
+              "image/*": {}
+            }
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "recipes"
+        ],
+        "summary": "Remplace l'image (formulaire `multipart`, champ `image`).",
+        "operationId": "uploadRecipeImage",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/RecipeId"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "Champ `image` : JPEG, PNG ou WebP",
+          "content": {
+            "multipart/form-data": {}
+          }
+        },
+        "responses": {
+          "204": {},
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "recipes"
+        ],
+        "operationId": "deleteRecipeImage",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/RecipeId"
+            }
+          }
+        ],
+        "responses": {
+          "204": {}
+        }
+      }
+    },
+    "/api/v1/recipes/{id}/json-ld": {
+      "get": {
+        "tags": [
+          "recipes"
+        ],
+        "summary": "Export au format schema.org/Recipe JSON-LD (REC-11, R-REC-70).",
+        "operationId": "exportRecipe",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/RecipeId"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "JSON-LD schema.org/Recipe",
+            "content": {
+              "application/ld+json": {}
+            }
+          }
+        }
+      }
+    },
     "/api/v1/settings": {
       "get": {
         "tags": [
@@ -1771,6 +2732,17 @@
           }
         }
       },
+      "ArchiveInput": {
+        "type": "object",
+        "required": [
+          "archived"
+        ],
+        "properties": {
+          "archived": {
+            "type": "boolean"
+          }
+        }
+      },
       "AuthStatus": {
         "type": "object",
         "required": [
@@ -1812,6 +2784,16 @@
           }
         }
       },
+      "Confidence": {
+        "type": "string",
+        "description": "Qualité d'une proposition de rattachement.",
+        "enum": [
+          "NONE",
+          "LOW",
+          "MEDIUM",
+          "HIGH"
+        ]
+      },
       "ConsumeInput": {
         "type": "object",
         "properties": {
@@ -1852,6 +2834,25 @@
           }
         }
       },
+      "Coverage": {
+        "type": "object",
+        "required": [
+          "covered",
+          "total"
+        ],
+        "properties": {
+          "covered": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 0
+          },
+          "total": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 0
+          }
+        }
+      },
       "CreatedFood": {
         "type": "object",
         "required": [
@@ -1860,6 +2861,17 @@
         "properties": {
           "id": {
             "$ref": "#/components/schemas/FoodId"
+          }
+        }
+      },
+      "CreatedGoal": {
+        "type": "object",
+        "required": [
+          "id"
+        ],
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/NutritionGoalId"
           }
         }
       },
@@ -1910,6 +2922,28 @@
           }
         }
       },
+      "CreatedRecipe": {
+        "type": "object",
+        "required": [
+          "id"
+        ],
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/RecipeId"
+          }
+        }
+      },
+      "CreatedTemplate": {
+        "type": "object",
+        "required": [
+          "id"
+        ],
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/GoalTemplateId"
+          }
+        }
+      },
       "CreatedUnit": {
         "type": "object",
         "required": [
@@ -1920,6 +2954,101 @@
             "$ref": "#/components/schemas/UnitId"
           }
         }
+      },
+      "Criterion": {
+        "type": "object",
+        "description": "Un critère d'objectif (R-NUT-10).",
+        "required": [
+          "kind",
+          "expression",
+          "period",
+          "importance"
+        ],
+        "properties": {
+          "expression": {
+            "$ref": "#/components/schemas/Expression"
+          },
+          "food_group_id": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/FoodGroupId"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "importance": {
+            "$ref": "#/components/schemas/Importance"
+          },
+          "kind": {
+            "$ref": "#/components/schemas/CriterionKind"
+          },
+          "max_value": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int64"
+          },
+          "min_value": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int64",
+            "description": "Unité selon le critère : cal ou mg (nutriment), millièmes de portion (portions), mg (quantité),\noccurrences (fréquence, même famille), jours (même recette), millièmes (part de l'énergie)."
+          },
+          "nutrient_code": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "nutrition_groups": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/NutritionGroup"
+            }
+          },
+          "occurrence_threshold": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/Amount",
+                "description": "Fréquence : portions minimales, par équivalent adulte, pour qu'un repas compte (R-NUT-14)."
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "period": {
+            "$ref": "#/components/schemas/Period"
+          },
+          "tolerance": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/Ratio",
+                "description": "Énergie : tolérance, en millièmes (± 10 % → 100)."
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        }
+      },
+      "CriterionKind": {
+        "type": "string",
+        "enum": [
+          "ENERGY",
+          "NUTRIENT",
+          "GROUP_PORTIONS",
+          "GROUP_AMOUNT",
+          "GROUP_FREQUENCY",
+          "RECIPE_REPEAT",
+          "FAMILY_REPEAT"
+        ]
       },
       "Dashboard": {
         "type": "object",
@@ -1960,6 +3089,162 @@
               "null"
             ],
             "format": "date"
+          }
+        }
+      },
+      "DraftLine": {
+        "type": "object",
+        "description": "Une ligne d'ingrédient analysée, avec sa proposition de rattachement.",
+        "required": [
+          "source_line",
+          "name",
+          "to_taste",
+          "confidence"
+        ],
+        "properties": {
+          "confidence": {
+            "$ref": "#/components/schemas/Confidence"
+          },
+          "name": {
+            "type": "string",
+            "description": "Nom analysé : sert à mémoriser le rattachement validé (R-REC-66)."
+          },
+          "note": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "quantity": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "quantity_max": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Borne haute d'un intervalle « 2 à 3 », signalée."
+          },
+          "section": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "source_line": {
+            "type": "string"
+          },
+          "target": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/Target"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "target_name": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "to_taste": {
+            "type": "boolean"
+          },
+          "unit_id": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/UnitId"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "unit_label": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        }
+      },
+      "DraftPayload": {
+        "type": "object",
+        "required": [
+          "name",
+          "kind",
+          "active_minutes",
+          "passive_minutes",
+          "tags",
+          "steps",
+          "lines"
+        ],
+        "properties": {
+          "active_minutes": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 0
+          },
+          "description": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "image_url": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "kind": {
+            "$ref": "#/components/schemas/RecipeKind"
+          },
+          "lines": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DraftLine"
+            },
+            "description": "Lignes, celles de faible confiance d'abord (R-REC-64)."
+          },
+          "name": {
+            "type": "string"
+          },
+          "passive_minutes": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 0
+          },
+          "portions": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Portions adulte proposées (« 4 personnes » → 4), ajustables (R-REC-10)."
+          },
+          "source_url": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "steps": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Step"
+            }
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
           }
         }
       },
@@ -2075,6 +3360,13 @@
           "SOON",
           "EXPIRED",
           "PAST_BEST_BEFORE"
+        ]
+      },
+      "Expression": {
+        "type": "string",
+        "enum": [
+          "ABSOLUTE",
+          "PERCENT_ENERGY"
         ]
       },
       "FoodDetail": {
@@ -2410,6 +3702,92 @@
           }
         }
       },
+      "GoalTemplate": {
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "builtin",
+          "criteria"
+        ],
+        "properties": {
+          "builtin": {
+            "type": "boolean"
+          },
+          "criteria": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Criterion"
+            }
+          },
+          "id": {
+            "$ref": "#/components/schemas/GoalTemplateId"
+          },
+          "name": {
+            "type": "string"
+          }
+        }
+      },
+      "GoalTemplateId": {
+        "type": "string",
+        "format": "uuid"
+      },
+      "GoalVersion": {
+        "type": "object",
+        "required": [
+          "id",
+          "valid_from",
+          "current",
+          "locked",
+          "criteria"
+        ],
+        "properties": {
+          "criteria": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Criterion"
+            }
+          },
+          "current": {
+            "type": "boolean",
+            "description": "En vigueur aujourd'hui (R-NUT-2)."
+          },
+          "id": {
+            "$ref": "#/components/schemas/NutritionGoalId"
+          },
+          "locked": {
+            "type": "boolean",
+            "description": "Entrée en vigueur : ne se modifie plus (R-NUT-3)."
+          },
+          "note": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "valid_from": {
+            "type": "string",
+            "format": "date"
+          }
+        }
+      },
+      "GroupPortion": {
+        "type": "object",
+        "required": [
+          "group",
+          "portions"
+        ],
+        "properties": {
+          "group": {
+            "$ref": "#/components/schemas/NutritionGroup"
+          },
+          "portions": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Portions, en millièmes, pour la base des valeurs (R-NUT-22)."
+          }
+        }
+      },
       "Health": {
         "type": "object",
         "required": [
@@ -2418,6 +3796,202 @@
         "properties": {
           "status": {
             "type": "string"
+          }
+        }
+      },
+      "Importance": {
+        "type": "string",
+        "enum": [
+          "REQUIRED",
+          "PREFERRED",
+          "INFO"
+        ]
+      },
+      "IngredientId": {
+        "type": "string",
+        "format": "uuid"
+      },
+      "IngredientInput": {
+        "type": "object",
+        "required": [
+          "target"
+        ],
+        "properties": {
+          "fixed": {
+            "type": "boolean"
+          },
+          "import_name": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Import : nom analysé de la ligne, pour mémoriser le rattachement validé (R-REC-66). Non enregistré."
+          },
+          "note": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "optional": {
+            "type": "boolean"
+          },
+          "quantity": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Quantité saisie, décimale (« 1,5 », « 0.5 ») ; vide pour un ingrédient à volonté."
+          },
+          "section": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "source_line": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "target": {
+            "$ref": "#/components/schemas/Target"
+          },
+          "to_taste": {
+            "type": "boolean"
+          },
+          "unit_id": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/UnitId",
+                "description": "Unité générale ou propre à l'aliment ; sans unité, la quantité compte des pièces, ou des portions\npour une sous-recette en portions."
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "unit_label": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Unité non reconnue (import), gardée pour l'affichage ; la quantité est alors non convertible."
+          }
+        }
+      },
+      "IngredientView": {
+        "type": "object",
+        "required": [
+          "id",
+          "target",
+          "target_name",
+          "to_taste",
+          "optional",
+          "fixed",
+          "unconvertible",
+          "text"
+        ],
+        "properties": {
+          "amount": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/Amount",
+                "description": "Quantité convertie, mise à l'échelle, dans `measure` (portions pour une sous-recette en portions)."
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "display_amount": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/Amount",
+                "description": "Pour un aliment compté en pièces : arrondi à la demi-pièce (R-REC-14)."
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "fixed": {
+            "type": "boolean"
+          },
+          "id": {
+            "$ref": "#/components/schemas/IngredientId"
+          },
+          "measure": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/Measure"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "note": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "optional": {
+            "type": "boolean"
+          },
+          "quantity": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Saisie d'origine, mise à l'échelle demandée (R-REC-12, R-REC-13)."
+          },
+          "section": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "source_line": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "target": {
+            "$ref": "#/components/schemas/Target"
+          },
+          "target_name": {
+            "type": "string"
+          },
+          "text": {
+            "type": "string",
+            "description": "Texte prêt à afficher : « 2 c. à s. Huile d'olive »."
+          },
+          "to_taste": {
+            "type": "boolean"
+          },
+          "unconvertible": {
+            "type": "boolean",
+            "description": "Quantité saisie non convertible : elle rend les totaux incomplets (R-REC-21)."
+          },
+          "unit_id": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/UnitId"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "unit_label": {
+            "type": [
+              "string",
+              "null"
+            ]
           }
         }
       },
@@ -2953,6 +4527,41 @@
           }
         }
       },
+      "MealSlot": {
+        "type": "object",
+        "required": [
+          "name",
+          "energy_share",
+          "active"
+        ],
+        "properties": {
+          "active": {
+            "type": "boolean"
+          },
+          "energy_share": {
+            "$ref": "#/components/schemas/Ratio",
+            "description": "Part de l'énergie de la journée, en millièmes (R-NUT-30)."
+          },
+          "id": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/MealSlotId",
+                "description": "Absent pour un nouveau créneau."
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "name": {
+            "type": "string"
+          }
+        }
+      },
+      "MealSlotId": {
+        "type": "string",
+        "format": "uuid"
+      },
       "Measure": {
         "type": "string",
         "description": "Grandeur d'une quantité (glossaire : mesure).",
@@ -3043,6 +4652,45 @@
           "CHECKED"
         ]
       },
+      "NewVersionInput": {
+        "type": "object",
+        "required": [
+          "valid_from"
+        ],
+        "properties": {
+          "copy_from": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/NutritionGoalId"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "note": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "template_id": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/GoalTemplateId",
+                "description": "Critères de départ : un modèle, ou une version existante ; sinon, ceux de la version en vigueur."
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "valid_from": {
+            "type": "string",
+            "format": "date"
+          }
+        }
+      },
       "NutrientBasis": {
         "type": "string",
         "description": "Base des valeurs nutritionnelles (glossaire).",
@@ -3073,6 +4721,35 @@
           }
         }
       },
+      "NutrientView": {
+        "type": "object",
+        "required": [
+          "code",
+          "value",
+          "estimated",
+          "missing"
+        ],
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "estimated": {
+            "type": "boolean"
+          },
+          "missing": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Ingrédients en cause si le total est incomplet (R-REC-52)."
+          },
+          "value": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Dans l'unité de stockage (cal, mg), arrondie."
+          }
+        }
+      },
       "NutrientsInput": {
         "type": "object",
         "required": [
@@ -3086,6 +4763,10 @@
             }
           }
         }
+      },
+      "NutritionGoalId": {
+        "type": "string",
+        "format": "uuid"
       },
       "NutritionGroup": {
         "type": "string",
@@ -3109,6 +4790,13 @@
           "SALTY_SNACKS",
           "SUGARY_DRINKS",
           "OTHER"
+        ]
+      },
+      "Period": {
+        "type": "string",
+        "enum": [
+          "DAY",
+          "WEEK"
         ]
       },
       "PresenceState": {
@@ -3335,6 +5023,414 @@
           }
         }
       },
+      "Ratio": {
+        "type": "integer",
+        "format": "int64",
+        "description": "Coefficient en millièmes : 1,000 → 1000 (ADR-0001)"
+      },
+      "RecipeDetail": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/RecipeSummary"
+          },
+          {
+            "type": "object",
+            "required": [
+              "ingredients",
+              "steps",
+              "values_basis",
+              "nutrients",
+              "group_portions",
+              "used_by"
+            ],
+            "properties": {
+              "description": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "finishing_minutes": {
+                "type": [
+                  "integer",
+                  "null"
+                ],
+                "format": "int32",
+                "minimum": 0
+              },
+              "fridge_days": {
+                "type": [
+                  "integer",
+                  "null"
+                ],
+                "format": "int32",
+                "minimum": 0
+              },
+              "frozen_days": {
+                "type": [
+                  "integer",
+                  "null"
+                ],
+                "format": "int32",
+                "minimum": 0
+              },
+              "group_portions": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/GroupPortion"
+                }
+              },
+              "ingredients": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/IngredientView"
+                }
+              },
+              "leftover_food_id": {
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/FoodId"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "leftover_food_name": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "notes": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "nutrients": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/NutrientView"
+                }
+              },
+              "servings": {
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/Amount",
+                    "description": "Équivalents adulte servis, en millièmes, si la fiche est mise à l'échelle."
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "source_url": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "steps": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/Step"
+                }
+              },
+              "used_by": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/RecipeRef"
+                },
+                "description": "Recettes qui l'utilisent comme sous-recette."
+              },
+              "values_basis": {
+                "$ref": "#/components/schemas/ValuesBasis"
+              }
+            }
+          }
+        ]
+      },
+      "RecipeDraft": {
+        "type": "object",
+        "required": [
+          "id",
+          "fetched_at",
+          "has_image",
+          "payload",
+          "existing"
+        ],
+        "properties": {
+          "existing": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RecipeRef"
+            },
+            "description": "Recettes déjà importées depuis la même adresse (R-REC-67)."
+          },
+          "fetched_at": {
+            "type": "string"
+          },
+          "has_image": {
+            "type": "boolean"
+          },
+          "id": {
+            "$ref": "#/components/schemas/RecipeDraftId"
+          },
+          "payload": {
+            "$ref": "#/components/schemas/DraftPayload"
+          },
+          "source_url": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        }
+      },
+      "RecipeDraftId": {
+        "type": "string",
+        "format": "uuid"
+      },
+      "RecipeId": {
+        "type": "string",
+        "format": "uuid"
+      },
+      "RecipeInput": {
+        "type": "object",
+        "required": [
+          "name",
+          "kind",
+          "yield",
+          "ingredients"
+        ],
+        "properties": {
+          "active_minutes": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 0
+          },
+          "description": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "finishing_minutes": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int32",
+            "minimum": 0
+          },
+          "freezable": {
+            "type": "boolean"
+          },
+          "fridge_days": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int32",
+            "minimum": 0
+          },
+          "frozen_days": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int32",
+            "minimum": 0
+          },
+          "ingredients": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/IngredientInput"
+            }
+          },
+          "kind": {
+            "$ref": "#/components/schemas/RecipeKind"
+          },
+          "leftover_food_id": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/FoodId"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "name": {
+            "type": "string"
+          },
+          "notes": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "passive_minutes": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 0
+          },
+          "source_url": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "steps": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Step"
+            }
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "yield": {
+            "$ref": "#/components/schemas/Yield"
+          }
+        }
+      },
+      "RecipeKind": {
+        "type": "string",
+        "description": "Catégorie d'une recette.",
+        "enum": [
+          "MAIN",
+          "SIDE",
+          "STARTER",
+          "DESSERT",
+          "BREAKFAST",
+          "SNACK",
+          "BASE"
+        ]
+      },
+      "RecipeRef": {
+        "type": "object",
+        "required": [
+          "id",
+          "name"
+        ],
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/RecipeId"
+          },
+          "name": {
+            "type": "string"
+          }
+        }
+      },
+      "RecipeSummary": {
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "kind",
+          "tags",
+          "yield",
+          "times",
+          "make_ahead",
+          "freezable",
+          "archived",
+          "has_image"
+        ],
+        "properties": {
+          "archived": {
+            "type": "boolean"
+          },
+          "coverage": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/Coverage",
+                "description": "Ingrédients couverts par le stock actuel et ingrédients comptés (REC-09)."
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "energy": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int64",
+            "description": "Énergie par portion ou pour 100, en cal ; `null` si elle est incomplète (R-REC-52)."
+          },
+          "freezable": {
+            "type": "boolean"
+          },
+          "has_image": {
+            "type": "boolean"
+          },
+          "id": {
+            "$ref": "#/components/schemas/RecipeId"
+          },
+          "kind": {
+            "$ref": "#/components/schemas/RecipeKind"
+          },
+          "make_ahead": {
+            "type": "boolean",
+            "description": "Se prépare à l'avance (R-REC-42)."
+          },
+          "name": {
+            "type": "string"
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "times": {
+            "$ref": "#/components/schemas/RecipeTimes"
+          },
+          "yield": {
+            "$ref": "#/components/schemas/Yield"
+          }
+        }
+      },
+      "RecipeTimes": {
+        "type": "object",
+        "required": [
+          "active_minutes",
+          "passive_minutes",
+          "total_active_minutes",
+          "total_minutes"
+        ],
+        "properties": {
+          "active_minutes": {
+            "type": "integer",
+            "format": "int32",
+            "description": "Temps actif de la recette seule.",
+            "minimum": 0
+          },
+          "passive_minutes": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 0
+          },
+          "total_active_minutes": {
+            "type": "integer",
+            "format": "int32",
+            "description": "Temps actif avec les sous-recettes.",
+            "minimum": 0
+          },
+          "total_minutes": {
+            "type": "integer",
+            "format": "int32",
+            "description": "Durée du planning avec les sous-recettes, pour un cuisinier (R-REC-41).",
+            "minimum": 0
+          }
+        }
+      },
       "Settings": {
         "type": "object",
         "description": "Réglages hérités d'une famille ou d'un aliment (R-ALI-2) : `None` signifie « hérité ».",
@@ -3421,6 +5517,50 @@
                 "type": "null"
               }
             ]
+          }
+        }
+      },
+      "StartImport": {
+        "type": "object",
+        "properties": {
+          "json_ld": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Ou le contenu d'un fichier schema.org/Recipe JSON-LD (export d'une recette, R-REC-70)."
+          },
+          "url": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Adresse d'une page de recette."
+          }
+        }
+      },
+      "Step": {
+        "type": "object",
+        "required": [
+          "text"
+        ],
+        "properties": {
+          "section": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "text": {
+            "type": "string"
+          },
+          "timer_minutes": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int32",
+            "minimum": 0
           }
         }
       },
@@ -3572,6 +5712,83 @@
           }
         }
       },
+      "Target": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "id",
+              "kind"
+            ],
+            "properties": {
+              "id": {
+                "$ref": "#/components/schemas/FoodId"
+              },
+              "kind": {
+                "type": "string",
+                "enum": [
+                  "FOOD"
+                ]
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "id",
+              "kind"
+            ],
+            "properties": {
+              "id": {
+                "$ref": "#/components/schemas/FoodGroupId"
+              },
+              "kind": {
+                "type": "string",
+                "enum": [
+                  "GROUP"
+                ]
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "id",
+              "kind"
+            ],
+            "properties": {
+              "id": {
+                "$ref": "#/components/schemas/RecipeId"
+              },
+              "kind": {
+                "type": "string",
+                "enum": [
+                  "RECIPE"
+                ]
+              }
+            }
+          }
+        ],
+        "description": "Ce que vise un ingrédient (R-REC-20)."
+      },
+      "TemplateInput": {
+        "type": "object",
+        "required": [
+          "name",
+          "criteria"
+        ],
+        "properties": {
+          "criteria": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Criterion"
+            }
+          },
+          "name": {
+            "type": "string"
+          }
+        }
+      },
       "TrackingMode": {
         "type": "string",
         "description": "Mode de suivi du stock d'un aliment (spec 02, ADR-0003).",
@@ -3704,6 +5921,41 @@
           "COMPUTED"
         ]
       },
+      "ValuesBasis": {
+        "type": "string",
+        "description": "Base des valeurs affichées (R-REC-51).",
+        "enum": [
+          "PORTION",
+          "PER100_G",
+          "PER100_ML",
+          "PIECE"
+        ]
+      },
+      "VersionInput": {
+        "type": "object",
+        "required": [
+          "valid_from",
+          "criteria"
+        ],
+        "properties": {
+          "criteria": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Criterion"
+            }
+          },
+          "note": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "valid_from": {
+            "type": "string",
+            "format": "date"
+          }
+        }
+      },
       "WasteInput": {
         "type": "object",
         "required": [
@@ -3747,6 +5999,53 @@
           "SPOILED",
           "OTHER"
         ]
+      },
+      "Yield": {
+        "oneOf": [
+          {
+            "type": "object",
+            "description": "Portions adulte, en millièmes.",
+            "required": [
+              "portions",
+              "kind"
+            ],
+            "properties": {
+              "kind": {
+                "type": "string",
+                "enum": [
+                  "PORTIONS"
+                ]
+              },
+              "portions": {
+                "$ref": "#/components/schemas/Amount"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "description": "Quantité dans une mesure (900 g de sauce).",
+            "required": [
+              "measure",
+              "amount",
+              "kind"
+            ],
+            "properties": {
+              "amount": {
+                "$ref": "#/components/schemas/Amount"
+              },
+              "kind": {
+                "type": "string",
+                "enum": [
+                  "AMOUNT"
+                ]
+              },
+              "measure": {
+                "$ref": "#/components/schemas/Measure"
+              }
+            }
+          }
+        ],
+        "description": "Ce que produit une recette (R-REC-10, R-REC-11)."
       }
     }
   },
@@ -3762,6 +6061,14 @@
     {
       "name": "stock",
       "description": "Emplacements, lots, mouvements, inventaire (spec 02)"
+    },
+    {
+      "name": "recipes",
+      "description": "Recettes, import, export (spec 03)"
+    },
+    {
+      "name": "goals",
+      "description": "Objectifs nutritionnels, modèles, créneaux (spec 04)"
     },
     {
       "name": "dashboard",

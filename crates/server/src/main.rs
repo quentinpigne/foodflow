@@ -14,6 +14,7 @@ use tower_http::compression::CompressionLayer;
 use tower_http::trace::TraceLayer;
 use tracing_subscriber::EnvFilter;
 
+mod clients;
 mod clock;
 mod config;
 mod db;
@@ -110,7 +111,8 @@ async fn main() -> anyhow::Result<()> {
             let db = open(&data).await?;
             services::seed::run(&db).await?;
             let clock = today.map_or(Clock::System, Clock::Fixed);
-            serve(AppState { db, clock, data, limiter: Arc::default(), secure_cookies }, addr, web_dir).await
+            let fetcher = Arc::new(clients::web::HttpFetcher::new()?);
+            serve(AppState { db, clock, data, limiter: Arc::default(), secure_cookies, fetcher }, addr, web_dir).await
         }
         Command::Migrate => {
             open(&data).await?;

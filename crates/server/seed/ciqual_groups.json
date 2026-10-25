@@ -1,19 +1,202 @@
 {
-  "_doc": "Réglages par défaut des familles créées par l'import Ciqual (R-ALI-2, R-ALI-51), appliqués tant que la famille n'est pas modifiée à la main.",
+  "_doc": "Réglages par défaut des familles créées par l'import Ciqual (R-ALI-2, R-ALI-51) : mesure, suivi, conservation, groupe nutritionnel et taille de portion (spec 04, NUT-02). Appliqués aux champs vides des familles non modifiées à la main.",
   "groups": {
-    "0504": { "stock_measure": "VOLUME" },
-    "06": { "stock_measure": "VOLUME" },
-    "0902": { "stock_measure": "VOLUME", "tracking_mode": "PRESENCE" },
-    "1002": { "tracking_mode": "PRESENCE" },
-    "1003": { "tracking_mode": "PRESENCE" },
-    "1004": { "tracking_mode": "PRESENCE" },
-    "1005": { "tracking_mode": "PRESENCE" },
-    "1006": { "tracking_mode": "PRESENCE" },
-    "0402": { "shelf_life_days": 3, "frozen_shelf_life_days": 180, "thawed_shelf_life_days": 1 },
-    "0406": { "shelf_life_days": 2, "frozen_shelf_life_days": 120, "thawed_shelf_life_days": 1 },
-    "0201": { "shelf_life_days": 7, "frozen_shelf_life_days": 240 },
-    "0204": { "shelf_life_days": 7 },
-    "0502": { "opened_shelf_life_days": 3 },
-    "0501": { "stock_measure": "VOLUME", "opened_shelf_life_days": 3 }
-  }
+    "01": {
+      "nutrition_group": "OTHER"
+    },
+    "0201": {
+      "shelf_life_days": 7,
+      "frozen_shelf_life_days": 240,
+      "nutrition_group": "VEGETABLES",
+      "portion_measure": "MASS",
+      "portion_amount": 80000
+    },
+    "0202": {
+      "nutrition_group": "REFINED_STARCHES",
+      "portion_measure": "MASS",
+      "portion_amount": 200000
+    },
+    "0203": {
+      "nutrition_group": "LEGUMES",
+      "portion_measure": "MASS",
+      "portion_amount": 60000
+    },
+    "0204": {
+      "shelf_life_days": 7,
+      "nutrition_group": "FRUITS",
+      "portion_measure": "MASS",
+      "portion_amount": 80000
+    },
+    "0205": {
+      "nutrition_group": "NUTS",
+      "portion_measure": "MASS",
+      "portion_amount": 30000
+    },
+    "03": {
+      "nutrition_group": "REFINED_STARCHES",
+      "portion_measure": "MASS",
+      "portion_amount": 60000
+    },
+    "0302": {
+      "portion_measure": "MASS",
+      "portion_amount": 50000
+    },
+    "0303": {
+      "nutrition_group": "SALTY_SNACKS"
+    },
+    "0401": {
+      "nutrition_group": "RED_MEAT",
+      "portion_measure": "MASS",
+      "portion_amount": 100000
+    },
+    "040103": {
+      "nutrition_group": "POULTRY"
+    },
+    "040104": {
+      "nutrition_group": "POULTRY"
+    },
+    "0402": {
+      "shelf_life_days": 3,
+      "frozen_shelf_life_days": 180,
+      "thawed_shelf_life_days": 1,
+      "nutrition_group": "RED_MEAT",
+      "portion_measure": "MASS",
+      "portion_amount": 100000
+    },
+    "040203": {
+      "nutrition_group": "POULTRY"
+    },
+    "040204": {
+      "nutrition_group": "POULTRY"
+    },
+    "0403": {
+      "nutrition_group": "PROCESSED_MEAT",
+      "portion_measure": "MASS",
+      "portion_amount": 50000
+    },
+    "0404": {
+      "nutrition_group": "PROCESSED_MEAT",
+      "portion_measure": "MASS",
+      "portion_amount": 50000
+    },
+    "0405": {
+      "nutrition_group": "FISH",
+      "portion_measure": "MASS",
+      "portion_amount": 100000
+    },
+    "0406": {
+      "shelf_life_days": 2,
+      "frozen_shelf_life_days": 120,
+      "thawed_shelf_life_days": 1,
+      "nutrition_group": "FISH",
+      "portion_measure": "MASS",
+      "portion_amount": 100000
+    },
+    "0407": {
+      "nutrition_group": "FISH",
+      "portion_measure": "MASS",
+      "portion_amount": 100000
+    },
+    "0408": {
+      "nutrition_group": "FISH",
+      "portion_measure": "MASS",
+      "portion_amount": 100000
+    },
+    "0409": {
+      "nutrition_group": "FISH",
+      "portion_measure": "MASS",
+      "portion_amount": 100000
+    },
+    "0410": {
+      "nutrition_group": "EGGS",
+      "portion_measure": "MASS",
+      "portion_amount": 100000
+    },
+    "0411": {
+      "nutrition_group": "OTHER"
+    },
+    "0501": {
+      "stock_measure": "VOLUME",
+      "opened_shelf_life_days": 3,
+      "nutrition_group": "DAIRY",
+      "portion_measure": "VOLUME",
+      "portion_amount": 150000
+    },
+    "0502": {
+      "opened_shelf_life_days": 3,
+      "nutrition_group": "DAIRY",
+      "portion_measure": "MASS",
+      "portion_amount": 125000
+    },
+    "0503": {
+      "nutrition_group": "DAIRY",
+      "portion_measure": "MASS",
+      "portion_amount": 30000
+    },
+    "0504": {
+      "stock_measure": "VOLUME",
+      "nutrition_group": "ADDED_FATS",
+      "portion_measure": "MASS",
+      "portion_amount": 10000
+    },
+    "06": {
+      "stock_measure": "VOLUME",
+      "nutrition_group": "OTHER"
+    },
+    "0602": {
+      "nutrition_group": "SUGARY_DRINKS"
+    },
+    "060205": {
+      "nutrition_group": "OTHER"
+    },
+    "060206": {
+      "nutrition_group": "OTHER"
+    },
+    "07": {
+      "nutrition_group": "SWEET_PRODUCTS"
+    },
+    "08": {
+      "nutrition_group": "SWEET_PRODUCTS"
+    },
+    "09": {
+      "nutrition_group": "ADDED_FATS",
+      "portion_measure": "MASS",
+      "portion_amount": 10000
+    },
+    "0902": {
+      "stock_measure": "VOLUME",
+      "tracking_mode": "PRESENCE"
+    },
+    "10": {
+      "nutrition_group": "OTHER"
+    },
+    "1002": {
+      "tracking_mode": "PRESENCE"
+    },
+    "1003": {
+      "tracking_mode": "PRESENCE"
+    },
+    "1004": {
+      "tracking_mode": "PRESENCE"
+    },
+    "1005": {
+      "tracking_mode": "PRESENCE"
+    },
+    "1006": {
+      "tracking_mode": "PRESENCE"
+    },
+    "11": {
+      "nutrition_group": "OTHER"
+    }
+  },
+  "fatty_fish": [
+    "saumon",
+    "maquereau",
+    "sardine",
+    "hareng",
+    "anchois",
+    "truite",
+    "flétan",
+    "thon rouge"
+  ]
 }

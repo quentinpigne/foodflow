@@ -1,0 +1,62 @@
+{
+  "db_name": "SQLite",
+  "query": "SELECT normalized_name, food_id, group_id, recipe_id FROM ingredient_mapping",
+  "describe": {
+    "columns": [
+      {
+        "name": "normalized_name",
+        "ordinal": 0,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "ingredient_mapping",
+            "name": "normalized_name"
+          }
+        }
+      },
+      {
+        "name": "food_id",
+        "ordinal": 1,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "ingredient_mapping",
+            "name": "food_id"
+          }
+        }
+      },
+      {
+        "name": "group_id",
+        "ordinal": 2,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "ingredient_mapping",
+            "name": "group_id"
+          }
+        }
+      },
+      {
+        "name": "recipe_id",
+        "ordinal": 3,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "ingredient_mapping",
+            "name": "recipe_id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Right": 0
+    },
+    "nullable": [
+      false,
+      true,
+      true,
+      true
+    ]
+  },
+  "hash": "5375b80221955c01dde3ddf6d4a9f154371e9c9ad5ef2585c19c71814bcc38f5"
+}

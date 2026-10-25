@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "INSERT INTO nutrition_goal (id, valid_from, note, created_at, updated_at) VALUES (?, ?, ?, ?, ?)",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 5
+    },
+    "nullable": []
+  },
+  "hash": "3d83fb6e0d15997dade201fb2af6378e056dc311bb5fadf5e2ecb9c752e4d508"
+}

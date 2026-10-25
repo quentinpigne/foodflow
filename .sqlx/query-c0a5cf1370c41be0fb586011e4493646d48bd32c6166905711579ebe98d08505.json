@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "UPDATE recipe SET name = ?, kind = ?, description = ?, notes = ?, yield_kind = ?, yield_portions = ?,\n                 yield_measure = ?, yield_amount = ?, active_minutes = ?, passive_minutes = ?, fridge_days = ?,\n                 freezable = ?, frozen_days = ?, finishing_minutes = ?, leftover_food_id = ?, source_url = ?,\n                 image_path = ?, archived = ?, updated_at = ?\n             WHERE id = ?",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 20
+    },
+    "nullable": []
+  },
+  "hash": "c0a5cf1370c41be0fb586011e4493646d48bd32c6166905711579ebe98d08505"
+}

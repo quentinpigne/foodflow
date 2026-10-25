@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "INSERT INTO ingredient_mapping (normalized_name, food_id, group_id, recipe_id, updated_at) VALUES (?, ?, ?, ?, ?)\n         ON CONFLICT (normalized_name) DO UPDATE SET food_id = excluded.food_id, group_id = excluded.group_id,\n             recipe_id = excluded.recipe_id, updated_at = excluded.updated_at",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 5
+    },
+    "nullable": []
+  },
+  "hash": "f9d9b60bc4b3c5ec9f74621fedc944fb6d3efb7b5e951c1377fcb10085e53ff2"
+}

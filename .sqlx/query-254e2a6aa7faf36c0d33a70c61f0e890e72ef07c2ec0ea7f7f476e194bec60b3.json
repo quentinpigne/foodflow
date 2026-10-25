@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "INSERT INTO recipe_draft (id, source_url, fetched_at, payload, raw_json_ld, image_path, created_at, updated_at)\n         VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 8
+    },
+    "nullable": []
+  },
+  "hash": "254e2a6aa7faf36c0d33a70c61f0e890e72ef07c2ec0ea7f7f476e194bec60b3"
+}

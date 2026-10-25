@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "INSERT INTO meal_slot (id, name, position, energy_share, active, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?)\n         ON CONFLICT (id) DO UPDATE SET name = excluded.name, position = excluded.position,\n             energy_share = excluded.energy_share, active = excluded.active, updated_at = excluded.updated_at",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 7
+    },
+    "nullable": []
+  },
+  "hash": "2798586aedfeca00086116fadf9efbbece2edc4c15d5cbb77d81fafc3a49033e"
+}

@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "INSERT INTO goal_criterion (id, goal_id, template_id, kind, nutrient_code, nutrition_groups, food_group_id,\n                 expression, period, min_value, max_value, tolerance, occurrence_threshold, importance, position)\n             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 15
+    },
+    "nullable": []
+  },
+  "hash": "772f98b1bbf8a08986a9eed384335a533301cfa6ab8d5fc16e299dd274508c6b"
+}

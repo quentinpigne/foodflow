@@ -30,6 +30,24 @@ struct Selection {
 #[derive(Deserialize)]
 struct GroupDefaults {
     groups: HashMap<String, Settings>,
+    /// Débuts de noms d'aliments rangés en poisson gras (spec 04) : le groupe Ciqual ne les distingue pas.
+    #[serde(default)]
+    fatty_fish: Vec<String>,
+}
+
+/// Complète les réglages vides d'une famille par ceux par défaut (R-ALI-2) ; ce qui est renseigné reste.
+fn fill(current: Settings, defaults: Settings) -> Settings {
+    Settings {
+        nutrition_group: current.nutrition_group.or(defaults.nutrition_group),
+        stock_measure: current.stock_measure.or(defaults.stock_measure),
+        tracking_mode: current.tracking_mode.or(defaults.tracking_mode),
+        shelf_life_days: current.shelf_life_days.or(defaults.shelf_life_days),
+        opened_shelf_life_days: current.opened_shelf_life_days.or(defaults.opened_shelf_life_days),
+        frozen_shelf_life_days: current.frozen_shelf_life_days.or(defaults.frozen_shelf_life_days),
+        thawed_shelf_life_days: current.thawed_shelf_life_days.or(defaults.thawed_shelf_life_days),
+        portion_measure: current.portion_measure.or(defaults.portion_measure),
+        portion_amount: current.portion_amount.or(defaults.portion_amount),
+    }
 }
 
 #[derive(Debug, Default, PartialEq, Eq)]
@@ -59,7 +77,8 @@ pub async fn import(db: &Db, dir: &Path) -> anyhow::Result<ImportReport> {
         });
     }
     let selection: HashSet<String> = serde_json::from_str::<Selection>(SELECTION)?.codes.into_iter().collect();
-    let defaults = serde_json::from_str::<GroupDefaults>(GROUP_DEFAULTS)?.groups;
+    let config = serde_json::from_str::<GroupDefaults>(GROUP_DEFAULTS)?;
+    let (defaults, fatty_fish) = (config.groups, config.fatty_fish);
     let mut report = ImportReport::default();
     let mut tx = db.write.begin().await?;
 
@@ -74,13 +93,18 @@ pub async fn import(db: &Db, dir: &Path) -> anyhow::Result<ImportReport> {
             Some(id) => {
                 group_ids.insert(group.code.clone(), id);
                 let Some(row) = existing.get(&id) else { continue };
-                if !row.user_modified && (row.name != group.name || row.parent_id != parent) {
+                let settings = match defaults.get(&group.code) {
+                    Some(d) if !row.user_modified => fill(row.settings, *d),
+                    _ => row.settings,
+                };
+                if !row.user_modified && (row.name != group.name || row.parent_id != parent || row.settings != settings)
+                {
                     let fields = GroupFields {
                         parent_id: parent,
                         name: &group.name,
                         name_key: &key,
                         ciqual_code: Some(&group.code),
-                        settings: row.settings,
+                        settings,
                         reference_food_id: row.reference_food_id,
                         user_modified: false,
                     };
@@ -128,6 +152,12 @@ pub async fn import(db: &Db, dir: &Path) -> anyhow::Result<ImportReport> {
             None => {
                 let id = FoodId::new();
                 let key = unique_key(&mut tx, &food.name, &food.code, None).await?;
+                let lower = normalize(&food.name);
+                let fatty = fatty_fish.iter().any(|f| lower.starts_with(&normalize(f)));
+                let settings = Settings {
+                    nutrition_group: fatty.then_some(foodflow_domain::foods::NutritionGroup::FattyFish),
+                    ..Settings::default()
+                };
                 let fields = FoodFields {
                     group_id: group,
                     name: &food.name,
@@ -137,7 +167,7 @@ pub async fn import(db: &Db, dir: &Path) -> anyhow::Result<ImportReport> {
                     nutrient_basis: NutrientBasis::Per100G,
                     density_mg_per_ml: None,
                     piece_weight_mg: None,
-                    settings: Settings::default(),
+                    settings,
                     minimum_stock: None,
                     preferred_product_id: None,
                     user_modified: false,

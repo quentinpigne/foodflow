@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "UPDATE nutrition_goal SET valid_from = ?, note = ?, updated_at = ? WHERE id = ?",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 4
+    },
+    "nullable": []
+  },
+  "hash": "7414e56db87a8cccc27cdc0c08ed4427f79d8ca13f64491141093fb5aa43d7dd"
+}

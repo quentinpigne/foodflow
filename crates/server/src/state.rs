@@ -2,6 +2,7 @@
 
 use std::sync::Arc;
 
+use crate::clients::web::Fetcher;
 use crate::clock::Clock;
 use crate::config::DataDir;
 use crate::db::Db;
@@ -15,4 +16,6 @@ pub struct AppState {
     pub limiter: Arc<LoginLimiter>,
     /// Drapeau `Secure` du cookie de session : actif dès que le serveur est servi en HTTPS (ADR-0009).
     pub secure_cookies: bool,
+    /// Téléchargement des pages de recettes (ADR-0007).
+    pub fetcher: Arc<dyn Fetcher>,
 }

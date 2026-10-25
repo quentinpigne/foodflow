@@ -1,0 +1,86 @@
+{
+  "db_name": "SQLite",
+  "query": "SELECT id, source_url, fetched_at, payload, raw_json_ld, image_path FROM recipe_draft ORDER BY created_at DESC",
+  "describe": {
+    "columns": [
+      {
+        "name": "id",
+        "ordinal": 0,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "recipe_draft",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "name": "source_url",
+        "ordinal": 1,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "recipe_draft",
+            "name": "source_url"
+          }
+        }
+      },
+      {
+        "name": "fetched_at",
+        "ordinal": 2,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "recipe_draft",
+            "name": "fetched_at"
+          }
+        }
+      },
+      {
+        "name": "payload",
+        "ordinal": 3,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "recipe_draft",
+            "name": "payload"
+          }
+        }
+      },
+      {
+        "name": "raw_json_ld",
+        "ordinal": 4,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "recipe_draft",
+            "name": "raw_json_ld"
+          }
+        }
+      },
+      {
+        "name": "image_path",
+        "ordinal": 5,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "recipe_draft",
+            "name": "image_path"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Right": 0
+    },
+    "nullable": [
+      false,
+      true,
+      false,
+      false,
+      false,
+      true
+    ]
+  },
+  "hash": "9f870c7c98522116e493f0c3ae5a60e42790a52cf3b84fe7eb8ead5ce1b24e99"
+}

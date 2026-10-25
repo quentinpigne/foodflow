@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "INSERT INTO recipe (id, name, kind, description, notes, yield_kind, yield_portions, yield_measure,\n                 yield_amount, active_minutes, passive_minutes, fridge_days, freezable, frozen_days, finishing_minutes,\n                 leftover_food_id, source_url, image_path, archived, created_at, updated_at)\n             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 21
+    },
+    "nullable": []
+  },
+  "hash": "c217df98346202929acf046a30b17fb21cf8a17d079a2ac2dfe38418b0c19f72"
+}

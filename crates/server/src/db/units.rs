@@ -111,3 +111,25 @@ pub async fn delete(db: impl SqliteExecutor<'_>, id: UnitId) -> anyhow::Result<(
     sqlx::query!("DELETE FROM unit WHERE id = ?", id).execute(db).await?;
     Ok(())
 }
+
+/// Toutes les unités : générales et propres aux aliments.
+pub async fn all(db: impl SqliteExecutor<'_>) -> anyhow::Result<Vec<UnitRow>> {
+    let rows = sqlx::query!(
+        "SELECT id, food_id, name, plural, abbreviation, measure, amount FROM unit ORDER BY food_id IS NOT NULL, position, name"
+    )
+    .fetch_all(db)
+    .await?;
+    rows.into_iter()
+        .map(|r| {
+            Ok(UnitRow {
+                id: id_from_db(&r.id)?,
+                food_id: opt_id_from_db(r.food_id.as_deref())?,
+                name: r.name,
+                plural: r.plural,
+                abbreviation: r.abbreviation,
+                measure: enum_from_db(&r.measure)?,
+                amount: Amount::from_raw(r.amount),
+            })
+        })
+        .collect()
+}

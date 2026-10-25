@@ -4,9 +4,12 @@
 pub mod auth;
 pub mod dashboard;
 pub mod foods;
+pub mod goals;
 pub mod groups;
 pub mod locations;
 pub mod products;
+pub mod recipe_drafts;
+pub mod recipes;
 pub mod settings;
 pub mod stock;
 pub mod system;

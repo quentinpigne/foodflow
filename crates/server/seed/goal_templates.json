@@ -1,0 +1,28 @@
+{
+  "_doc": "Modèles d'objectif fournis (R-NUT-4). Valeurs dans les unités de stockage : cal et mg ; parts de l'énergie et portions en millièmes ; quantités en mg ; fréquences en occurrences ; même recette en jours. Sources : Santé publique France, recommandations relatives à l'alimentation (2019) ; ANSES, références nutritionnelles pour la population.",
+  "templates": [
+    {
+      "name": "Repères PNNS 2019 — adulte",
+      "criteria": [
+        { "kind": "ENERGY", "nutrient_code": "ENERGY", "expression": "ABSOLUTE", "period": "DAY", "min_value": 2000000, "max_value": 2000000, "tolerance": 100, "importance": "PREFERRED" },
+        { "kind": "NUTRIENT", "nutrient_code": "PROTEIN", "expression": "PERCENT_ENERGY", "period": "DAY", "min_value": 100, "max_value": 200, "importance": "PREFERRED" },
+        { "kind": "NUTRIENT", "nutrient_code": "FAT", "expression": "PERCENT_ENERGY", "period": "DAY", "min_value": 350, "max_value": 400, "importance": "PREFERRED" },
+        { "kind": "NUTRIENT", "nutrient_code": "CARBOHYDRATE", "expression": "PERCENT_ENERGY", "period": "DAY", "min_value": 400, "max_value": 550, "importance": "PREFERRED" },
+        { "kind": "NUTRIENT", "nutrient_code": "SATURATED_FAT", "expression": "PERCENT_ENERGY", "period": "DAY", "max_value": 120, "importance": "PREFERRED" },
+        { "kind": "NUTRIENT", "nutrient_code": "SUGARS", "expression": "ABSOLUTE", "period": "DAY", "max_value": 100000, "importance": "PREFERRED" },
+        { "kind": "NUTRIENT", "nutrient_code": "FIBER", "expression": "ABSOLUTE", "period": "DAY", "min_value": 30000, "importance": "PREFERRED" },
+        { "kind": "NUTRIENT", "nutrient_code": "SALT", "expression": "ABSOLUTE", "period": "DAY", "max_value": 6000, "importance": "INFO" },
+        { "kind": "GROUP_PORTIONS", "nutrition_groups": ["VEGETABLES", "FRUITS"], "expression": "ABSOLUTE", "period": "DAY", "min_value": 5000, "importance": "PREFERRED" },
+        { "kind": "GROUP_PORTIONS", "nutrition_groups": ["NUTS"], "expression": "ABSOLUTE", "period": "DAY", "min_value": 1000, "importance": "INFO" },
+        { "kind": "GROUP_PORTIONS", "nutrition_groups": ["WHOLE_GRAINS"], "expression": "ABSOLUTE", "period": "DAY", "min_value": 1000, "importance": "PREFERRED" },
+        { "kind": "GROUP_PORTIONS", "nutrition_groups": ["DAIRY"], "expression": "ABSOLUTE", "period": "DAY", "min_value": 2000, "importance": "PREFERRED" },
+        { "kind": "GROUP_FREQUENCY", "nutrition_groups": ["LEGUMES"], "expression": "ABSOLUTE", "period": "WEEK", "min_value": 2, "occurrence_threshold": 1000, "importance": "PREFERRED" },
+        { "kind": "GROUP_FREQUENCY", "nutrition_groups": ["FISH", "FATTY_FISH"], "expression": "ABSOLUTE", "period": "WEEK", "min_value": 2, "occurrence_threshold": 1000, "importance": "PREFERRED" },
+        { "kind": "GROUP_FREQUENCY", "nutrition_groups": ["FATTY_FISH"], "expression": "ABSOLUTE", "period": "WEEK", "min_value": 1, "occurrence_threshold": 1000, "importance": "PREFERRED" },
+        { "kind": "GROUP_AMOUNT", "nutrition_groups": ["RED_MEAT"], "expression": "ABSOLUTE", "period": "WEEK", "max_value": 500000, "importance": "PREFERRED" },
+        { "kind": "GROUP_AMOUNT", "nutrition_groups": ["PROCESSED_MEAT"], "expression": "ABSOLUTE", "period": "WEEK", "max_value": 150000, "importance": "PREFERRED" },
+        { "kind": "RECIPE_REPEAT", "expression": "ABSOLUTE", "period": "WEEK", "min_value": 7, "importance": "PREFERRED" }
+      ]
+    }
+  ]
+}

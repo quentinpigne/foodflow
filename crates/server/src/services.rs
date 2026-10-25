@@ -9,9 +9,13 @@ pub mod dashboard;
 pub mod demo;
 pub mod export;
 pub mod foods;
+pub mod goals;
 pub mod groups;
+pub mod images;
 pub mod locations;
 pub mod products;
+pub mod recipe_import;
+pub mod recipes;
 pub mod seed;
 pub mod settings;
 pub mod stock;
@@ -36,5 +40,7 @@ pub fn required(value: &str, field: &'static str, max: usize) -> AppResult<Strin
     Ok(value.to_owned())
 }
 
+#[cfg(test)]
+mod recipe_tests;
 #[cfg(test)]
 mod tests;

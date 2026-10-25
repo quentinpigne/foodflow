@@ -69,8 +69,8 @@ pub struct Criterion {
     pub food_group_id: Option<FoodGroupId>,
     pub expression: Expression,
     pub period: Period,
-    /// Unité selon le critère : cal ou mg (nutriment), millièmes de portion (portions, fréquence),
-    /// mg (quantité), jours (même recette), occurrences (même famille), millièmes (part de l'énergie).
+    /// Unité selon le critère : cal ou mg (nutriment), millièmes de portion (portions), mg (quantité),
+    /// occurrences (fréquence, même famille), jours (même recette), millièmes (part de l'énergie).
     pub min_value: Option<i64>,
     pub max_value: Option<i64>,
     /// Énergie : tolérance, en millièmes (± 10 % → 100).

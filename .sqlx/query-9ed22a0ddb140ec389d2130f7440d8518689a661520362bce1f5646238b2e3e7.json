@@ -1,0 +1,182 @@
+{
+  "db_name": "SQLite",
+  "query": "SELECT id, goal_id, template_id, kind, nutrient_code, nutrition_groups, food_group_id, expression, period,\n                min_value, max_value, tolerance, occurrence_threshold, importance\n         FROM goal_criterion ORDER BY position",
+  "describe": {
+    "columns": [
+      {
+        "name": "id",
+        "ordinal": 0,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "goal_criterion",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "name": "goal_id",
+        "ordinal": 1,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "goal_criterion",
+            "name": "goal_id"
+          }
+        }
+      },
+      {
+        "name": "template_id",
+        "ordinal": 2,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "goal_criterion",
+            "name": "template_id"
+          }
+        }
+      },
+      {
+        "name": "kind",
+        "ordinal": 3,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "goal_criterion",
+            "name": "kind"
+          }
+        }
+      },
+      {
+        "name": "nutrient_code",
+        "ordinal": 4,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "goal_criterion",
+            "name": "nutrient_code"
+          }
+        }
+      },
+      {
+        "name": "nutrition_groups",
+        "ordinal": 5,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "goal_criterion",
+            "name": "nutrition_groups"
+          }
+        }
+      },
+      {
+        "name": "food_group_id",
+        "ordinal": 6,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "goal_criterion",
+            "name": "food_group_id"
+          }
+        }
+      },
+      {
+        "name": "expression",
+        "ordinal": 7,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "goal_criterion",
+            "name": "expression"
+          }
+        }
+      },
+      {
+        "name": "period",
+        "ordinal": 8,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "goal_criterion",
+            "name": "period"
+          }
+        }
+      },
+      {
+        "name": "min_value",
+        "ordinal": 9,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "goal_criterion",
+            "name": "min_value"
+          }
+        }
+      },
+      {
+        "name": "max_value",
+        "ordinal": 10,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "goal_criterion",
+            "name": "max_value"
+          }
+        }
+      },
+      {
+        "name": "tolerance",
+        "ordinal": 11,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "goal_criterion",
+            "name": "tolerance"
+          }
+        }
+      },
+      {
+        "name": "occurrence_threshold",
+        "ordinal": 12,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "goal_criterion",
+            "name": "occurrence_threshold"
+          }
+        }
+      },
+      {
+        "name": "importance",
+        "ordinal": 13,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "goal_criterion",
+            "name": "importance"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Right": 0
+    },
+    "nullable": [
+      false,
+      true,
+      true,
+      false,
+      true,
+      false,
+      true,
+      false,
+      false,
+      true,
+      true,
+      true,
+      true,
+      false
+    ]
+  },
+  "hash": "9ed22a0ddb140ec389d2130f7440d8518689a661520362bce1f5646238b2e3e7"
+}

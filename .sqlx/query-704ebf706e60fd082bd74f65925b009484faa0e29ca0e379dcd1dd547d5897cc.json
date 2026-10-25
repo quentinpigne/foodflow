@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "DELETE FROM goal_template WHERE id = ? AND builtin = 0",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 1
+    },
+    "nullable": []
+  },
+  "hash": "704ebf706e60fd082bd74f65925b009484faa0e29ca0e379dcd1dd547d5897cc"
+}

@@ -27,6 +27,16 @@ pub const TABLES: &[&str] = &[
     "location",
     "stock_lot",
     "stock_movement",
+    "recipe",
+    "recipe_tag",
+    "recipe_ingredient",
+    "recipe_step",
+    "recipe_draft",
+    "ingredient_mapping",
+    "meal_slot",
+    "nutrition_goal",
+    "goal_template",
+    "goal_criterion",
 ];
 
 async fn columns(conn: &mut SqliteConnection, table: &str) -> anyhow::Result<Vec<String>> {

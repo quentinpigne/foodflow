@@ -1,0 +1,254 @@
+{
+  "db_name": "SQLite",
+  "query": "SELECT id, name, kind, description, notes, yield_kind, yield_portions, yield_measure, yield_amount,\n                  active_minutes, passive_minutes, fridge_days, freezable AS \"freezable: bool\", frozen_days,\n                  finishing_minutes, leftover_food_id, source_url, image_path, archived AS \"archived: bool\", created_at\n           FROM recipe ORDER BY name COLLATE NOCASE",
+  "describe": {
+    "columns": [
+      {
+        "name": "id",
+        "ordinal": 0,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "recipe",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "name": "name",
+        "ordinal": 1,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "recipe",
+            "name": "name"
+          }
+        }
+      },
+      {
+        "name": "kind",
+        "ordinal": 2,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "recipe",
+            "name": "kind"
+          }
+        }
+      },
+      {
+        "name": "description",
+        "ordinal": 3,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "recipe",
+            "name": "description"
+          }
+        }
+      },
+      {
+        "name": "notes",
+        "ordinal": 4,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "recipe",
+            "name": "notes"
+          }
+        }
+      },
+      {
+        "name": "yield_kind",
+        "ordinal": 5,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "recipe",
+            "name": "yield_kind"
+          }
+        }
+      },
+      {
+        "name": "yield_portions",
+        "ordinal": 6,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "recipe",
+            "name": "yield_portions"
+          }
+        }
+      },
+      {
+        "name": "yield_measure",
+        "ordinal": 7,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "recipe",
+            "name": "yield_measure"
+          }
+        }
+      },
+      {
+        "name": "yield_amount",
+        "ordinal": 8,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "recipe",
+            "name": "yield_amount"
+          }
+        }
+      },
+      {
+        "name": "active_minutes",
+        "ordinal": 9,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "recipe",
+            "name": "active_minutes"
+          }
+        }
+      },
+      {
+        "name": "passive_minutes",
+        "ordinal": 10,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "recipe",
+            "name": "passive_minutes"
+          }
+        }
+      },
+      {
+        "name": "fridge_days",
+        "ordinal": 11,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "recipe",
+            "name": "fridge_days"
+          }
+        }
+      },
+      {
+        "name": "freezable: bool",
+        "ordinal": 12,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "recipe",
+            "name": "freezable"
+          }
+        }
+      },
+      {
+        "name": "frozen_days",
+        "ordinal": 13,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "recipe",
+            "name": "frozen_days"
+          }
+        }
+      },
+      {
+        "name": "finishing_minutes",
+        "ordinal": 14,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "recipe",
+            "name": "finishing_minutes"
+          }
+        }
+      },
+      {
+        "name": "leftover_food_id",
+        "ordinal": 15,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "recipe",
+            "name": "leftover_food_id"
+          }
+        }
+      },
+      {
+        "name": "source_url",
+        "ordinal": 16,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "recipe",
+            "name": "source_url"
+          }
+        }
+      },
+      {
+        "name": "image_path",
+        "ordinal": 17,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "recipe",
+            "name": "image_path"
+          }
+        }
+      },
+      {
+        "name": "archived: bool",
+        "ordinal": 18,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "recipe",
+            "name": "archived"
+          }
+        }
+      },
+      {
+        "name": "created_at",
+        "ordinal": 19,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "recipe",
+            "name": "created_at"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Right": 0
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      true,
+      true,
+      false,
+      true,
+      true,
+      true,
+      false,
+      false,
+      true,
+      false,
+      true,
+      true,
+      true,
+      true,
+      true,
+      false,
+      false
+    ]
+  },
+  "hash": "5f08110977c0220562447f131b99f979b485f468e01a0a09be7eb3bb9c55d708"
+}

@@ -1,0 +1,9 @@
+{
+  "_doc": "Créneaux de repas proposés au premier lancement, avec leur part de l'énergie de la journée (Q13, R-NUT-30), en millièmes.",
+  "slots": [
+    { "name": "Petit-déjeuner", "energy_share": 250 },
+    { "name": "Déjeuner", "energy_share": 350 },
+    { "name": "Goûter", "energy_share": 100 },
+    { "name": "Dîner", "energy_share": 300 }
+  ]
+}

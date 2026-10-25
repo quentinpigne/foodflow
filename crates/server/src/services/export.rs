@@ -62,6 +62,8 @@ mod tests {
         let second = export(&target).await.unwrap();
         assert_eq!(first["tables"], second["tables"]);
         assert!(first["tables"]["stock_movement"].as_array().unwrap().len() >= 10);
+        assert_eq!(first["tables"]["recipe"].as_array().unwrap().len(), 4);
+        assert_eq!(first["tables"]["goal_criterion"].as_array().unwrap().len(), 36, "modèle PNNS et version du foyer");
     }
 
     #[tokio::test]

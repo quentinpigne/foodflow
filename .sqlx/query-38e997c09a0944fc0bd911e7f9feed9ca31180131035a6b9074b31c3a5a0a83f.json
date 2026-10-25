@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "DELETE FROM nutrition_goal WHERE id = ?",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 1
+    },
+    "nullable": []
+  },
+  "hash": "38e997c09a0944fc0bd911e7f9feed9ca31180131035a6b9074b31c3a5a0a83f"
+}

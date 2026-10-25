@@ -1,0 +1,38 @@
+{
+  "db_name": "SQLite",
+  "query": "SELECT recipe_id, tag FROM recipe_tag ORDER BY tag",
+  "describe": {
+    "columns": [
+      {
+        "name": "recipe_id",
+        "ordinal": 0,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "recipe_tag",
+            "name": "recipe_id"
+          }
+        }
+      },
+      {
+        "name": "tag",
+        "ordinal": 1,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "recipe_tag",
+            "name": "tag"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Right": 0
+    },
+    "nullable": [
+      false,
+      false
+    ]
+  },
+  "hash": "0f025c3c07062b91c15046f701e5e0b67804bcc939b4bd90ec5e2b3c25ece6ab"
+}
