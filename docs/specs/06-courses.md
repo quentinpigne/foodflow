@@ -12,7 +12,7 @@ Courses du samedi 07/11 — Carrefour Market            couvre les besoins du 07
 ───────────────────────────────────────────────────────────────────────────────────────────
 Fruits et légumes
   ☐ Courgettes            1,2 kg      besoin 1,2 kg (gratin lun.)                 ≈ 3,10 €
-  ☐ Pommes                6 pièces    besoin 4,8 → 6 (fruits du déjeuner)          ≈ 2,40 €
+  ☐ Pommes                1 × sachet de 6   besoin 4,8 pièces (fruits du déj.)     ≈ 2,40 €
 Crèmerie
   ☐ Lait demi-écrémé      2 × Lactel 1 L   besoin 1,4 L · stock 0,3 L             ≈ 2,30 €
   ☐ Crème fraîche         1 × 20 cL   stock minimum                                ≈ 1,20 €
