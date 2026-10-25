@@ -126,6 +126,25 @@ Langage commun du projet. Chaque terme métier a **un seul** nom français (docu
 | Graine | `seed` | Nombre qui fixe les départages d'une génération déterministe ; même graine, même proposition. |
 | Réglages de génération | `generation settings` | Poids du score, nombre d'itérations, plafond de coût. |
 
+## Courses (spec 06)
+
+| Terme | Identifiant | Définition |
+|---|---|---|
+| Besoin | `need` | Quantité (ou présence) d'un aliment demandée à une date par un repas, une préparation, un repas habituel ou le stock minimum. |
+| Couverture | `coverage` | Part d'un besoin assurée par le stock utilisable à sa date. |
+| Session de courses | `ShoppingTrip` | Passage en magasin à une date ; couvre les besoins jusqu'à la session suivante. |
+| Liste de courses | `shopping list` | Ce qu'il faut acheter pour une session : calculée tant qu'elle est prévue, figée au départ en magasin. |
+| Article | `ShoppingItem` | Ligne de la liste : aliment et produit proposé, ou article libre. |
+| Article libre | `free item` | Article en texte, hors stock (papier cuisson). |
+| Ajustement | `ShoppingAdjustment` | Ajout, quantité imposée ou retrait, conservé au recalcul de la liste. |
+| Rayon | `Aisle` | Classement d'un article dans le parcours du magasin. |
+| Magasin | `Store` | Lieu d'achat, avec son ordre des rayons. |
+| Relevé de prix | `PriceObservation` | Prix payé pour une quantité d'un produit, à une date, dans un magasin. |
+| Prix unitaire | `unit price` | Prix au kg, au L ou à la pièce. |
+| Prix de référence | `reference price` | Prix unitaire retenu pour estimer coûts et totaux (dernier relevé du produit habituel, sinon d'un produit de l'aliment). |
+| Total estimé | `estimated total` | Somme des articles au prix de référence. |
+| Total payé | `total paid` | Montant réellement payé pour une session ; sert au rapprochement avec Cashflow. |
+
 ## Transverse
 
 | Terme | Identifiant | Définition |

@@ -7,7 +7,7 @@ conventions de Cashflow. Ce document est la source de vérité du schéma. Les r
 sont dans les specs ; ici ne figurent que les contraintes structurelles.
 
 Domaines couverts à ce stade : aliments (spec 01), stock (spec 02), recettes (spec 03) et objectifs
-nutritionnels (spec 04), planification (spec 05). Les autres viendront avec leur spec.
+nutritionnels (spec 04), planification (spec 05), courses (spec 06). Les autres viendront avec leur spec.
 
 ## Types logiques
 
@@ -40,6 +40,7 @@ Les réglages hérités (R-ALI-2) sont des colonnes **nullables** sur `food_grou
 | `ciqual_code` | texte ? | unique ; famille créée par l'import Ciqual |
 | `reference_food_id` | `Id` ? | FK `Food` de la famille ou d'une sous-famille (R-ALI-4) |
 | `nutrition_group` | `NutritionGroup` ? | hérité si `NULL` (spec 04) |
+| `aisle_id` | `Id` ? | FK `Aisle` ; rayon par défaut, hérité si `NULL` (R-COU-30) |
 | `portion_measure`, `portion_amount` | `Measure` ?, `Amount` ? | taille de portion du groupe nutritionnel ; héritée si `NULL` (R-NUT-22) |
 | `stock_measure` | `Measure` ? | hérité si `NULL` |
 | `tracking_mode` | `TrackingMode` ? | hérité si `NULL` |
@@ -465,3 +466,75 @@ Consommation réelle, enregistrée à la validation (R-PLA-31), base du bilan r�
 | `proposal` | `Json` | repas proposés, raisons, bilan, contraintes non satisfaites |
 | `status` | `PENDING` \| `ACCEPTED` \| `PARTIALLY_ACCEPTED` \| `DISCARDED` | |
 | `created_at` | `Timestamp` | |
+
+## Courses — spec 06
+
+### `Aisle`, `Store`, `StoreAisle`
+
+| Champ | Type | Contraintes |
+|---|---|---|
+| `Aisle.id`, `name`, `position` | `Id`, texte, entier | nom unique ; `position` : ordre général |
+| `Store.id`, `name` | `Id`, texte | nom unique |
+| `StoreAisle.store_id`, `aisle_id`, `position` | `Id`, `Id`, entier | PK (`store_id`, `aisle_id`) ; ordre propre au magasin (R-COU-31) |
+
+`Food` et `Product` ont aussi un `aisle_id` facultatif (R-COU-30).
+
+### `ShoppingTrip`
+
+| Champ | Type | Contraintes |
+|---|---|---|
+| `id` | `Id` | PK |
+| `date` | `Date` | |
+| `store_id` | `Id` ? | FK `Store` |
+| `status` | `PLANNED` \| `IN_PROGRESS` \| `DONE` \| `CANCELLED` | au plus une session `IN_PROGRESS` |
+| `covers_until` | `Date` | calculée au départ en magasin (R-COU-20) |
+| `total_paid` | `Money` ? | R-COU-53 |
+| `validation_batch_id` | `Id` ? | mouvements `PURCHASE` (R-COU-50) |
+| `cashflow_transaction_id` | texte ? | rapprochement (spec `CSH`, ADR-0010) |
+
+### `ShoppingAdjustment`
+
+Ajustements d'une session `PLANNED`, conservés au recalcul (R-COU-23).
+
+| Champ | Type | Contraintes |
+|---|---|---|
+| `id` | `Id` | PK |
+| `trip_id` | `Id` | FK `ShoppingTrip` |
+| `kind` | `ADD` \| `SET_AMOUNT` \| `REMOVE` | |
+| `food_id` / `product_id` | `Id` ? | au plus un ; aucun pour un article libre (`ADD`) |
+| `label` | texte ? | requis pour un article libre |
+| `amount` | `Amount` ? | requis pour `SET_AMOUNT` |
+| `aisle_id` | `Id` ? | |
+
+### `ShoppingItem`
+
+Articles figés au départ en magasin (R-COU-40).
+
+| Champ | Type | Contraintes |
+|---|---|---|
+| `id` | `Id` | PK, généré par l'appareil pour un ajout hors connexion |
+| `trip_id` | `Id` | FK `ShoppingTrip` |
+| `origin` | `NEED` \| `MINIMUM_STOCK` \| `PRESENCE` \| `MANUAL` | |
+| `food_id` / `group_id` | `Id` ? | au plus un ; aucun pour un article libre |
+| `label` | texte ? | article libre |
+| `needed_amount` | `Amount` ? | besoin non couvert, mesure de stock |
+| `product_id` | `Id` ? | produit proposé, puis acheté |
+| `packages` | entier ? | nombre de conditionnements (R-COU-21) |
+| `bought_amount` | `Amount` ? | quantité achetée |
+| `aisle_id` | `Id` ? | |
+| `checked` | booléen | |
+| `price_paid` | `Money` ? | |
+| `updated_on_device_at` | `Timestamp` | horodatage du dernier geste (R-COU-42) |
+
+### `PriceObservation`
+
+| Champ | Type | Contraintes |
+|---|---|---|
+| `id` | `Id` | PK |
+| `product_id` / `food_id` | `Id` ? | exactement un des deux |
+| `store_id` | `Id` ? | FK `Store` |
+| `date` | `Date` | |
+| `amount` | `Amount` | > 0, mesure de stock |
+| `price_paid` | `Money` | ≥ 0 |
+| `unit_price` | `Money` | centimes par kg, L ou pièce (R-COU-60) |
+| `shopping_item_id` | `Id` ? | FK `ShoppingItem` |
