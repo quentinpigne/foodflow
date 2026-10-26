@@ -226,15 +226,12 @@ let keys = 0;
 
             @if (status() === 'PLANNED') {
               <section class="card">
-                <h2 class="widget-title">
-                  Au menu
-                  @if (m.active_minutes) {
-                    <span class="muted"
-                      >· {{ minutes(m.active_minutes) }} actif, {{ minutes(m.total_minutes) }} au
-                      total</span
-                    >
-                  }
-                </h2>
+                <h2 class="widget-title">Au menu</h2>
+                @if (m.active_minutes) {
+                  <p class="muted times">
+                    {{ minutes(m.active_minutes) }} actif, {{ minutes(m.total_minutes) }} au total
+                  </p>
+                }
                 <div class="items">
                   @for (r of rows(); track r.key; let i = $index) {
                     <div class="item">
@@ -451,6 +448,9 @@ let keys = 0;
     .grow {
       flex: 1;
       min-width: 16rem;
+    }
+    .times {
+      margin: -0.5rem 0 1rem;
     }
     .items {
       display: flex;
