@@ -381,3 +381,27 @@ async fn r_pla_13_deleting_the_cooked_meal_drops_its_planned_leftover() {
     meals::delete(&db, saturday.id).await.unwrap();
     assert!(meals::get(&db, sunday.id, d(TODAY)).await.unwrap().items.is_empty());
 }
+
+/// Un lot inventorié après le repas n'est pas proposé : l'inventaire a déjà constaté la consommation ; elle
+/// compte comme utilisée, sans sortie (R-STK-14, R-PLA-32).
+#[tokio::test]
+async fn r_pla_30_lot_counted_after_the_meal_is_not_withdrawn() {
+    let (db, _dir) = setup().await;
+    let gratin = recipe(&db, "Gratin de courgettes").await;
+    let meal = create(&db, "2026-10-24", "Dîner").await;
+    meals::update(&db, meal.id, &input(&meal, vec![cook(gratin, 2_600)])).await.unwrap();
+    let before = meal_validation::proposal(&db, meal.id, d(TODAY)).await.unwrap();
+    let zucchini = before.items[0].lines.iter().find(|l| l.name == "Courgette").unwrap();
+    let lot = zucchini.takes[0].lot_id;
+    let input_inventory = stock::InventoryInput {
+        date: Some(d(TODAY)),
+        entries: vec![stock::InventoryEntry { lot_id: lot, amount: Some(Amount::from_raw(300_000)), presence: None }],
+    };
+    stock::inventory(&db, &input_inventory, d(TODAY)).await.unwrap();
+    let after = meal_validation::proposal(&db, meal.id, d(TODAY)).await.unwrap();
+    let zucchini = after.items[0].lines.iter().find(|l| l.name == "Courgette").unwrap();
+    assert!(zucchini.takes.iter().all(|t| t.lot_id != lot));
+    meal_validation::validate(&db, meal.id, &ValidationInput::default(), d(TODAY)).await.unwrap();
+    let counted = stock::get(&db, lot, d(TODAY)).await.unwrap().lot;
+    assert_eq!(counted.quantity, Some(Amount::from_raw(300_000)), "le lot inventorié n'a pas bougé");
+}

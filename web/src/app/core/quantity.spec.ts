@@ -1,4 +1,12 @@
-import { formatHalves, formatQuantity, parseQuantity, quantityInput, UNITS } from './quantity';
+import {
+  formatHalves,
+  formatPortions,
+  formatQuantity,
+  parsePortions,
+  parseQuantity,
+  quantityInput,
+  UNITS,
+} from './quantity';
 
 describe('quantity', () => {
   it('analyse les saisies en unités de stockage (ADR-0001)', () => {
@@ -40,5 +48,13 @@ describe('quantity', () => {
     expect(formatHalves(1_500)).toBe('1 ½');
     expect(formatHalves(500)).toBe('½');
     expect(formatHalves(2_000)).toBe('2');
+  });
+});
+
+describe('portions', () => {
+  it('se lisent et s’écrivent en millièmes', () => {
+    expect(formatPortions(2_600)).toBe('2,6');
+    expect(parsePortions('3,4')).toBe(3_400);
+    expect(parsePortions('abc')).toBeNull();
   });
 });

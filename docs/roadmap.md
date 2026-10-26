@@ -70,6 +70,10 @@ Objectif : planifier la semaine du foyer et tenir le stock par la validation des
 **Critère de sortie** : deux semaines réelles planifiées à la main et validées repas par repas ; le stock
 affiché correspond au stock réel pour les aliments suivis en quantité.
 
+**État (2026-10-26)** : implémentée, sauf les sessions de préparation (PLA-10, préparations `PREPARED`) qui
+restent en V1 avec l'ordonnancement (PLA-14, PLA-15). La semaine commence le lundi : le réglage du premier
+jour (R-PLA-4) n'est pas encore proposé. Reste à faire l'essai réel du critère de sortie.
+
 ## Phase 4 — Courses (MVP puis V1)
 
 Objectif : n'acheter que ce qui manque, liste en main en magasin.

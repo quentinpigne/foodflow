@@ -34,33 +34,11 @@ import {
   NUTRITION_GROUP_LABELS,
   PERIOD_LABELS,
 } from '../../core/labels';
+import { scale } from '../../core/criteria';
 import { NUTRIENTS } from '../../core/nutrients';
 import { confirm } from '../../shared/confirm-dialog';
 import { FrDatePipe } from '../../shared/date.pipe';
 import { GroupsStore } from '../../shared/stores';
-
-/** Facteur d'affichage et unité des bornes d'un critère (valeurs entières côté serveur, ADR-0001). */
-function scale(c: Criterion): { factor: number; unit: string } {
-  switch (c.kind) {
-    case 'ENERGY':
-      return { factor: 1000, unit: 'kcal' };
-    case 'NUTRIENT':
-      // « % » suffit : le champ « Exprimé en » dit déjà « part de l'énergie ».
-      return c.expression === 'PERCENT_ENERGY'
-        ? { factor: 10, unit: '%' }
-        : { factor: 1000, unit: 'g' };
-    case 'GROUP_PORTIONS':
-      return { factor: 1000, unit: 'portions' };
-    case 'GROUP_AMOUNT':
-      return { factor: 1000, unit: 'g' };
-    case 'GROUP_FREQUENCY':
-      return { factor: 1, unit: 'repas' };
-    case 'RECIPE_REPEAT':
-      return { factor: 1, unit: 'jours d’écart' };
-    case 'FAMILY_REPEAT':
-      return { factor: 1, unit: 'fois' };
-  }
-}
 
 const KINDS = Object.keys(CRITERION_KIND_LABELS) as CriterionKind[];
 

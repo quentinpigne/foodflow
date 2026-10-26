@@ -80,6 +80,31 @@ export const routes: Routes = [
         loadComponent: () => import('./features/recipes/recipe-editor').then((m) => m.RecipeEditor),
       },
       {
+        path: 'repas',
+        title: 'Repas — Foodflow',
+        loadComponent: () => import('./features/meals/plan').then((m) => m.PlanPage),
+      },
+      {
+        path: 'repas/:id',
+        title: 'Repas — Foodflow',
+        loadComponent: () => import('./features/meals/meal-editor').then((m) => m.MealEditor),
+      },
+      {
+        path: 'repas/:id/validation',
+        title: 'Valider le repas — Foodflow',
+        loadComponent: () => import('./features/meals/validation').then((m) => m.MealValidation),
+      },
+      {
+        path: 'foyer',
+        title: 'Foyer — Foodflow',
+        loadComponent: () => import('./features/household/household').then((m) => m.HouseholdPage),
+      },
+      {
+        path: 'bilan',
+        title: 'Bilan — Foodflow',
+        loadComponent: () => import('./features/goals/assessment').then((m) => m.AssessmentPage),
+      },
+      {
         path: 'objectifs',
         title: 'Objectifs — Foodflow',
         loadComponent: () => import('./features/goals/goals').then((m) => m.GoalsPage),

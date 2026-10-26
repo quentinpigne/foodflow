@@ -46,14 +46,18 @@ export class Shell {
 
   protected readonly items: NavItem[] = [
     { path: '/', label: 'Accueil', icon: 'home', exact: true },
+    { path: '/repas', label: 'Repas', icon: 'calendar_month', exact: false },
     { path: '/stock', label: 'Stock', icon: 'kitchen', exact: false },
     { path: '/recettes', label: 'Recettes', icon: 'menu_book', exact: false },
-    { path: '/aliments', label: 'Aliments', icon: 'nutrition', exact: false },
+    { path: '/aliments', label: 'Aliments', icon: 'nutrition', exact: false, secondary: true },
+    { path: '/bilan', label: 'Bilan', icon: 'monitoring', exact: false, secondary: true },
     { path: '/objectifs', label: 'Objectifs', icon: 'target', exact: false, secondary: true },
+    { path: '/foyer', label: 'Foyer', icon: 'group', exact: false, secondary: true },
     { path: '/reglages', label: 'Réglages', icon: 'settings', exact: false },
   ];
 
   protected readonly primaryItems = this.items.filter((item) => !item.secondary);
+  protected readonly secondaryItems = this.items.filter((item) => item.secondary);
 
   protected newLot(): void {
     this.addLot.open();

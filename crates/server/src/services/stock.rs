@@ -63,6 +63,8 @@ pub struct Lot {
     pub needs_review: bool,
     pub depleted: bool,
     pub note: Option<String>,
+    /// Date du dernier inventaire : aucun mouvement ne la précède (R-STK-14).
+    pub last_inventory: Option<Date>,
 }
 
 #[derive(Debug, Serialize, ToSchema)]
@@ -188,6 +190,7 @@ impl Context {
             needs_review: lot.needs_review,
             depleted: lot.depleted,
             note: lot.note.clone(),
+            last_inventory: state.last_inventory,
         }
     }
 }

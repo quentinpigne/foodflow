@@ -756,8 +756,13 @@ pub async fn load(db: &Db, today: Date) -> anyhow::Result<()> {
         meals::get(db, id, today).await.map_err(fail)
     };
     let yesterday = plan(d(1)?, dinner, vec![cooked(gratin, 6_000)]).await?;
+    let lunch_plat = template
+        .iter()
+        .find(|s| s.slot_id == lunch)
+        .and_then(|s| s.roles.iter().find(|r| r.required))
+        .and_then(|r| r.id);
     let leftovers = meals::MealItem {
-        role_id: None,
+        role_id: lunch_plat,
         source: ItemSource::Lot,
         recipe_id: None,
         cooked_portions: None,

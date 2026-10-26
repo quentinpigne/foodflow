@@ -98,7 +98,9 @@ Bilan prévu : énergie 1 980 kcal/j ✔ · fruits et légumes 4,2 portions/j �
 - **R-PLA-30** — Valider un repas propose, préremplies et ajustables :
   - les **sorties de stock** de chaque élément : ingrédients mis à l'échelle des portions cuisinées,
     pris dans les lots selon R-STK-36, avec la question de R-STK-37 pour un lot dont la date est dépassée ;
-    pour une part de lot, la sortie de ce lot ;
+    pour une part de lot, la sortie de ce lot. Un lot inventorié après la date du repas n'est pas proposé :
+    l'inventaire a déjà constaté ce qu'il en restait (R-STK-14), et la quantité compte comme utilisée sans
+    sortie (R-PLA-32) ;
   - les **restes** de chaque recette cuisinée (ADR-0012) : « rien » par défaut, ou les portions du reste
     prévu ;
   - les **convives** réels.

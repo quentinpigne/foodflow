@@ -126,3 +126,38 @@ export function formatHalves(raw: number): string {
   }
   return raw < unit.amount ? '½' : `${formatIn(raw - unit.amount / 2, unit)} ½`;
 }
+
+/** Portions, en millièmes : « 2,6 ». */
+export function formatPortions(raw: number | null | undefined): string {
+  return raw === null || raw === undefined ? '—' : formatIn(raw, UNITS.COUNT[0]);
+}
+
+/** « 2,6 » → 2 600 millièmes de portion ; `null` si la saisie n'est pas valide. */
+export function parsePortions(text: string): number | null {
+  return parseQuantity(text, 'COUNT');
+}
+
+/** Somme de quantités, de portions ou de coefficients (entiers en millièmes). */
+export function total(values: readonly number[]): number {
+  return values.reduce((sum, value) => sum + value, 0);
+}
+
+/** La plus petite de deux quantités. */
+export function smallest(a: number, b: number): number {
+  return Math.min(a, b);
+}
+
+/** Différence de deux quantités (ce qui reste à couvrir), jamais négative. */
+export function remainder(wanted: number, covered: number): number {
+  return Math.max(0, wanted - covered);
+}
+
+/** Part en millièmes → pourcentage entier (« 667 » → 67). */
+export function percent(ratio: number): number {
+  return Math.round(ratio / 10);
+}
+
+/** Arrondit une quantité au multiple de `step` le plus proche (affichage : 163 863 cal → 164 000). */
+export function roundTo(raw: number, step: number): number {
+  return Math.round(raw / step) * step;
+}

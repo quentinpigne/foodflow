@@ -65,3 +65,28 @@ export function shiftMonth(value: string, delta: number): string {
 export function formatMonthKey(value: string): string {
   return formatMonth(`${value}-01`);
 }
+
+/** Date `AAAA-MM-JJ` décalée de `delta` jours. */
+export function addDays(iso: string, delta: number): string {
+  const date = fromIsoDate(iso);
+  date.setDate(date.getDate() + delta);
+  return toIsoDate(date);
+}
+
+/** Lundi de la semaine d'une date (R-PLA-4 : la semaine commence le lundi). */
+export function weekStart(iso: string): string {
+  const day = fromIsoDate(iso).getDay();
+  return addDays(iso, -((day + 6) % 7));
+}
+
+/** Jour de la semaine, 1 (lundi) à 7 (dimanche). */
+export function weekdayOf(iso: string): number {
+  return ((fromIsoDate(iso).getDay() + 6) % 7) + 1;
+}
+
+const weekdayShort = new Intl.DateTimeFormat('fr-FR', { weekday: 'short', day: 'numeric' });
+
+/** « lun. 26 ». */
+export function formatShortDay(iso: string): string {
+  return weekdayShort.format(fromIsoDate(iso));
+}

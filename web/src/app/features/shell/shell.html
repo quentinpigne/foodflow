@@ -10,7 +10,11 @@
         <a mat-menu-item routerLink="/stock/inventaire"
           ><mat-icon>checklist</mat-icon> Inventaire</a
         >
-        <a mat-menu-item routerLink="/objectifs"><mat-icon>target</mat-icon> Objectifs</a>
+        @for (item of secondaryItems; track item.path) {
+          <a mat-menu-item [routerLink]="item.path"
+            ><mat-icon>{{ item.icon }}</mat-icon> {{ item.label }}</a
+          >
+        }
         <button mat-menu-item (click)="logout()"><mat-icon>logout</mat-icon> Déconnexion</button>
       </mat-menu>
     </mat-toolbar>

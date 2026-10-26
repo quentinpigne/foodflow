@@ -3930,7 +3930,8 @@
           "priority",
           "expired_count",
           "soon_count",
-          "lot_count"
+          "lot_count",
+          "meals_to_validate"
         ],
         "properties": {
           "expired_count": {
@@ -3940,6 +3941,19 @@
           "lot_count": {
             "type": "integer",
             "minimum": 0
+          },
+          "meals_to_validate": {
+            "type": "integer",
+            "description": "Repas des 30 derniers jours, passés, ni validés, ni sautés, ni hors foyer (R-PLA-35).",
+            "minimum": 0
+          },
+          "oldest_to_validate": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date",
+            "description": "Date du plus ancien d'entre eux."
           },
           "priority": {
             "type": "array",
@@ -5490,6 +5504,14 @@
           },
           "id": {
             "$ref": "#/components/schemas/LotId"
+          },
+          "last_inventory": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date",
+            "description": "Date du dernier inventaire : aucun mouvement ne la précède (R-STK-14)."
           },
           "location_id": {
             "$ref": "#/components/schemas/LocationId"

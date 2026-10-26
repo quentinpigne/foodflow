@@ -232,7 +232,8 @@ async fn build(
                         list.push(Need { target: LineTarget::Lot(lot), name: String::new(), measure: None, amount });
                     }
                     // Le repas d'origine n'est pas encore validé : son reste n'existe pas en stock.
-                    _ => unquantified.push("Reste d'un repas pas encore validé".to_owned()),
+                    _ => unquantified
+                        .push("restes d'un repas pas encore validé : validez d'abord le repas d'origine".to_owned()),
                 }
             }
             ItemSource::Food => {
@@ -261,6 +262,9 @@ async fn build(
         }
     }
 
+    // Un lot inventorié après le repas ne sert pas : l'inventaire a déjà constaté ce qu'il en restait
+    // (R-STK-14) ; ce qui en a été pris compte comme utilisé, sans sortie.
+    lots.retain(|l| l.last_inventory.is_none_or(|d| d <= meal.date));
     let mut remaining: HashMap<LotId, Amount> = HashMap::new();
     let mut proposed = Vec::new();
     for (item_id, list, unquantified) in needs {
@@ -397,6 +401,9 @@ async fn validate_in(conn: &mut SqliteConnection, id: MealId, input: &Validation
         let mut taken_total = Amount::ZERO;
         for take in line.takes.iter().filter(|t| t.amount.is_positive()) {
             let lot = db::stock::find(&mut *conn, take.lot_id).await?.ok_or(AppError::NotFound("lot"))?;
+            if stock::get_in(&mut *conn, lot.id, today).await?.last_inventory.is_some_and(|d| d > meal.date) {
+                continue;
+            }
             let (movement, taken) = stock::withdraw(&mut *conn, lot.id, take.amount, meal.date, today, batch).await?;
             taken_total += taken;
             let row = UseRow {

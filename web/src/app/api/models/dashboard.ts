@@ -7,6 +7,16 @@ export interface Dashboard {
   lot_count: number;
 
   /**
+   * Repas des 30 derniers jours, passés, ni validés, ni sautés, ni hors foyer (R-PLA-35).
+   */
+  meals_to_validate: number;
+
+  /**
+   * Date du plus ancien d'entre eux.
+   */
+  oldest_to_validate?: (string | null);
+
+  /**
    * À consommer en priorité (R-GAS-1) : lots `SOON`, à date dépassée ou à date à compléter, triés par
    * date limite effective ; et lots à vérifier (R-STK-3), même épuisés, jusqu'à ce qu'un inventaire
    * confirme l'écart.

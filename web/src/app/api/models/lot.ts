@@ -35,6 +35,11 @@ export interface Lot {
   food_name?: (string | null);
   frozen_on?: (string | null);
   id: LotId;
+
+  /**
+   * Date du dernier inventaire : aucun mouvement ne la précède (R-STK-14).
+   */
+  last_inventory?: (string | null);
   location_id: LocationId;
   location_kind: LocationKind;
   location_name: string;
