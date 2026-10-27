@@ -227,6 +227,34 @@ fn unit_at(original: &str) -> Option<(&'static str, usize)> {
     None
 }
 
+/// Réécrit une ligne d'un site qui omet le « de » après un contenant et écrit « unité » pour une pièce
+/// (« 1 sachet levure chimique », « 3 unité pomme golden ») dans la forme courante (« 1 sachet de levure
+/// chimique », « 3 pomme golden »), avant son analyse.
+pub fn with_container_de(line: &str) -> String {
+    let Some((_, rest)) = number(line) else { return line.to_owned() };
+    let head = line[..line.len() - rest.len()].trim_end();
+    let rest = rest.trim_start();
+    let lower = normalize(rest);
+    // Longueur, dans la ligne d'origine, d'un début reconnu sur la forme normalisée (sans œ ni æ) : les
+    // accents retirés changent le nombre d'octets, pas celui des caractères.
+    let bytes = |chars: usize| -> usize { rest.chars().take(chars).map(char::len_utf8).sum() };
+    if let Some(word) = ["unites ", "unite "].iter().find(|u| lower.starts_with(*u)) {
+        return format!("{head} {}", &rest[bytes(word.chars().count())..]);
+    }
+    for forms in UNITS.iter().filter(|(c, _)| CONTAINERS.contains(c)).map(|(_, forms)| forms) {
+        for form in *forms {
+            let Some(after) = lower.strip_prefix(form).and_then(|a| a.strip_prefix(' ')) else { continue };
+            let linked = ["de ", "d'", "d’", "du ", "des "].iter().any(|p| after.starts_with(p));
+            if linked || after.is_empty() {
+                return line.to_owned();
+            }
+            let unit_end = bytes(form.chars().count() + 1);
+            return format!("{head} {}de {}", &rest[..unit_end], &rest[unit_end..]);
+        }
+    }
+    line.to_owned()
+}
+
 /// Retire « de », « d' », « des », « du » en tête du nom.
 fn strip_article(text: &str) -> &str {
     let t = text.trim_start();
@@ -376,6 +404,24 @@ pub fn parse_line(line: &str) -> ParsedLine {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    /// Les sites qui omettent le « de » après un contenant, et écrivent « unité » pour une pièce (R-REC-63).
+    #[test]
+    fn r_rec_63_lines_without_de() {
+        assert_eq!(with_container_de("1 sachet levure chimique"), "1 sachet de levure chimique");
+        assert_eq!(with_container_de("2 cubes bouillon de volaille"), "2 cubes de bouillon de volaille");
+        assert_eq!(with_container_de("1 sachet sucre vanillé"), "1 sachet de sucre vanillé", "accent après l'unité");
+        assert_eq!(with_container_de("1 boîte maïs"), "1 boîte de maïs", "accent dans l'unité");
+        assert_eq!(with_container_de("3 unité pomme golden"), "3 pomme golden");
+        assert_eq!(with_container_de("2 unités jaune d'œuf"), "2 jaune d'œuf");
+        assert_eq!(with_container_de("1 pincée de sel"), "1 pincée de sel", "déjà lié");
+        assert_eq!(with_container_de("50 g sucre"), "50 g sucre", "une mesure se lit sans « de »");
+        assert_eq!(with_container_de("sel et poivre"), "sel et poivre");
+        let parsed = parse_line(&with_container_de("1 pincée sel"));
+        assert_eq!((parsed.unit.as_deref(), parsed.name.as_str()), (Some("pincée"), "sel"));
+        let piece = parse_line(&with_container_de("3 unité poire passe-crassane ou comice"));
+        assert_eq!((piece.unit, piece.name.as_str()), (None, "poire passe-crassane"));
+    }
 
     fn d(s: &str) -> Decimal {
         s.parse().unwrap()

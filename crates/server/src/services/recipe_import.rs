@@ -6,7 +6,7 @@
 use std::collections::HashMap;
 
 use foodflow_domain::recipes::matching::{self, Candidate, Confidence};
-use foodflow_domain::recipes::parsing::parse_lines;
+use foodflow_domain::recipes::parsing::{parse_lines, with_container_de};
 use foodflow_domain::recipes::{RecipeKind, Target};
 use foodflow_domain::shared::ids::{FoodId, RecipeDraftId, RecipeId, UnitId};
 use foodflow_domain::text::normalize;
@@ -81,13 +81,32 @@ pub struct RecipeDraft {
     pub existing: Vec<RecipeRef>,
 }
 
+/// Mots d'une catégorie qui désignent un dessert (« Autre gâteau aux pommes », « Gaufre liégeoise »).
+const DESSERT_WORDS: &[&str] = &[
+    "dessert",
+    "patisserie",
+    "gateau",
+    "gaufre",
+    "crepe",
+    "biscuit",
+    "cookie",
+    "clafoutis",
+    "muffin",
+    "brownie",
+    "cheesecake",
+    "compote",
+    "crumble",
+    "mousse au chocolat",
+    "glace",
+];
+
 fn kind_of(categories: &[String]) -> RecipeKind {
     let text = normalize(&categories.join(" "));
-    if text.contains("dessert") || text.contains("patisserie") {
+    if DESSERT_WORDS.iter().any(|w| text.contains(w)) {
         RecipeKind::Dessert
     } else if text.contains("entree") || text.contains("apero") {
         RecipeKind::Starter
-    } else if text.contains("accompagnement") {
+    } else if text.contains("accompagnement") || text.contains("puree") {
         RecipeKind::Side
     } else if text.contains("petit-dejeuner") || text.contains("petit dejeuner") || text.contains("brunch") {
         RecipeKind::Breakfast
@@ -167,16 +186,41 @@ async fn candidates(conn: &mut sqlx::SqliteConnection, kitchen: &Kitchen) -> any
     Ok(out)
 }
 
-/// Analyse et rattache les lignes d'ingrédients (R-REC-63, R-REC-64).
+/// Sites qui omettent le « de » après un contenant (« 1 sachet levure ») et écrivent « unité » pour une pièce.
+const SITES_WITHOUT_DE: &[&str] = &["journaldesfemmes.fr"];
+
+fn omits_de(url: Option<&str>) -> bool {
+    let host = url.and_then(|u| u.split("://").nth(1)).and_then(|u| u.split(['/', '?', '#']).next()).unwrap_or("");
+    SITES_WITHOUT_DE.iter().any(|site| host == *site || host.ends_with(&format!(".{site}")))
+}
+
+/// Nom de la recette sans l'accroche ajoutée par certains sites (« Gaufres liégeoises : la meilleure recette »).
+fn recipe_name(name: &str) -> String {
+    match name.split_once(" : ") {
+        Some((head, tail)) if !head.trim().is_empty() && normalize(tail).contains("recette") => head.trim().to_owned(),
+        _ => name.trim().to_owned(),
+    }
+}
+
+/// Étiquette tirée d'un mot-clé, sans le préfixe « recette » (« Recette automne » → « automne »).
+fn tag(keyword: &str) -> String {
+    let tag = keyword.trim().to_lowercase();
+    tag.strip_prefix("recette ").map(str::trim).unwrap_or(&tag).to_owned()
+}
+
+/// Analyse et rattache les lignes d'ingrédients (R-REC-63, R-REC-64) ; la ligne d'origine est gardée telle
+/// quelle, même réécrite pour un site qui omet le « de ».
 fn lines(
     kitchen: &Kitchen,
     raw: &[String],
     memory: &HashMap<String, Target>,
     candidates: &[Candidate],
+    without_de: bool,
 ) -> Vec<DraftLine> {
     let mut out: Vec<DraftLine> = Vec::new();
     for source in raw {
-        for parsed in parse_lines(source) {
+        let text = if without_de { with_container_de(source) } else { source.clone() };
+        for parsed in parse_lines(&text) {
             let proposal = matching::propose(&parsed.name, memory, candidates);
             // Unité : générale si elle existe sous ce nom, sinon propre à l'aliment proposé, sinon gardée en texte.
             let unit = parsed.unit.as_deref().and_then(|name| {
@@ -188,7 +232,7 @@ fn lines(
                 })
             });
             out.push(DraftLine {
-                source_line: parsed.source.clone(),
+                source_line: if without_de { source.clone() } else { parsed.source.clone() },
                 section: None,
                 name: parsed.name.clone(),
                 quantity: parsed.quantity.map(decimal_text),
@@ -275,13 +319,13 @@ pub async fn start(
     };
     let source_url = url.map(str::to_owned).or_else(|| recipe.get("url").and_then(|u| u.as_str()).map(str::to_owned));
     let payload = DraftPayload {
-        name: imported.name.clone().unwrap_or_else(|| "Recette importée".to_owned()),
+        name: imported.name.as_deref().map(recipe_name).unwrap_or_else(|| "Recette importée".to_owned()),
         description: imported.description.clone(),
         kind: kind_of(&imported.categories),
         portions: imported.portions.map(decimal_text),
         active_minutes: active,
         passive_minutes: passive,
-        tags: imported.keywords.iter().map(|k| k.trim().to_lowercase()).filter(|k| !k.is_empty()).collect(),
+        tags: imported.keywords.iter().map(|k| tag(k)).filter(|k| !k.is_empty()).collect(),
         source_url: source_url.clone(),
         image_url: imported.image.clone(),
         steps: imported
@@ -289,7 +333,7 @@ pub async fn start(
             .iter()
             .map(|s| Step { section: s.section.clone(), text: s.text.clone(), timer_minutes: None })
             .collect(),
-        lines: lines(&kitchen, &imported.ingredients, &memory, &candidates),
+        lines: lines(&kitchen, &imported.ingredients, &memory, &candidates, omits_de(source_url.as_deref())),
     };
     let id = RecipeDraftId::new();
     // L'image est copiée dans le volume dès l'import : la recette ne dépendra plus du site (R-REC-68).
@@ -405,6 +449,8 @@ mod tests {
             pages: HashMap::from([
                 ("https://exemple.test/gratin".to_owned(), page("gratin-graph.html")),
                 ("https://exemple.test/crepes".to_owned(), page("crepes-simple.html")),
+                ("https://cuisine.journaldesfemmes.fr/recette/1-gateau".to_owned(), page("gateau-sans-de.html")),
+                ("https://exemple.test/gateau".to_owned(), page("gateau-sans-de.html")),
                 (
                     "https://exemple.test/rien".to_owned(),
                     Fetched { body: b"<html><body>Rien</body></html>".to_vec(), content_type: None },
@@ -451,6 +497,37 @@ mod tests {
                 .collect(),
             steps: p.steps.clone(),
         }
+    }
+
+    /// Un site qui omet le « de » après un contenant et écrit « unité » pour une pièce : ses lignes sont lues
+    /// dans la forme courante, la ligne d'origine gardée ; l'accroche du nom et le préfixe « recette » des
+    /// mots-clés sont retirés ; la catégorie « gâteau » donne un dessert (R-REC-63, R-REC-65).
+    #[tokio::test]
+    async fn r_rec_63_site_without_de() {
+        let (db, dir) = db::test_db().await;
+        let data = DataDir::new(dir.path());
+        seed::run(&db).await.unwrap();
+        let url = "https://cuisine.journaldesfemmes.fr/recette/1-gateau";
+        let input = StartImport { url: Some(url.into()), json_ld: None };
+        let draft = start(&db, &data, &fetcher(), &StaticPhotoSearch::default(), &input).await.unwrap();
+        let p = &draft.payload;
+        assert_eq!(p.name, "Gâteau du verger");
+        assert_eq!(p.kind, RecipeKind::Dessert);
+        assert_eq!(p.tags, ["facile", "pomme", "goûter"]);
+        assert_eq!((p.active_minutes, p.passive_minutes), (15, 40));
+        assert_eq!(p.steps[0].text, "Mélanger la farine, la levure, le sucre et le sel.");
+        let line = |source: &str| p.lines.iter().find(|l| l.source_line == source).unwrap();
+        let yeast = line("1 sachet levure chimique");
+        assert_eq!((yeast.name.as_str(), yeast.quantity.as_deref()), ("levure chimique", Some("1")));
+        assert!(yeast.unit_id.is_some() || yeast.unit_label.as_deref() == Some("sachet"));
+        assert_eq!(line("1 sachet sucre vanillé").name, "sucre vanillé");
+        assert_eq!(line("3 unité pomme").name, "pomme");
+        assert_eq!(line("1 pincée sel").name, "sel");
+
+        // Ailleurs, la ligne est lue telle quelle.
+        let other = StartImport { url: Some("https://exemple.test/gateau".into()), json_ld: None };
+        let draft = start(&db, &data, &fetcher(), &StaticPhotoSearch::default(), &other).await.unwrap();
+        assert!(draft.payload.lines.iter().any(|l| l.name == "unité pomme"));
     }
 
     /// Import d'une page : brouillon, rien de créé avant la validation ; puis validation et mémoire (R-REC-61, R-REC-66).

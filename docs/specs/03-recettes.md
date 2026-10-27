@@ -143,7 +143,10 @@ Par portion (adulte) : 640 kcal · P 32 g · G 52 g · L 33 g · coût ≈ 2,10 
   l'unité est ignoré : « 1 petite boîte de maïs »), nom de l'ingrédient et précision (« émincé », « bien
   mûres »). Une alternative (« 4 citrons jaunes ou 8 verts ») ou un usage (« chocolat pour la pâte »)
   passe en précision. « Sel, poivre » donne deux ingrédients à volonté ; « 1 œuf + 1 blanc d'œuf », deux
-  ingrédients.
+  ingrédients. Pour un site qui omet le « de » après un contenant et écrit « unité » pour une pièce
+  (journaldesfemmes.fr : « 1 sachet levure », « 3 unité pomme »), la ligne est d'abord réécrite dans la forme
+  courante ; la ligne d'origine est gardée telle quelle (R-REC-65). Le nom de la recette perd l'accroche
+  ajoutée par certains sites (« … : la meilleure recette »), et les mots-clés leur préfixe « recette ».
 - **R-REC-64** — Le nom analysé est **rattaché** à une cible (aliment, famille, sous-recette), dans cet
   ordre : rattachement mémorisé (R-REC-66), **dictionnaire de départ** (`seed/ingredient_dictionary.json` :
   quelque 700 noms courants des recettes → aliment Ciqual, « farine » → farine de blé T55), nom ou alias
