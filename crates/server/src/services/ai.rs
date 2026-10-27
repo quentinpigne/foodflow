@@ -303,7 +303,7 @@ pub fn recipe_schema() -> Value {
             "active_minutes": { "type": "integer" },
             "passive_minutes": { "type": "integer" },
             "ingredients": { "type": "array", "items": { "type": "string" }, "description": "une ligne par ingrédient, quantité et unité d'abord : « 200 g de farine »" },
-            "steps": { "type": "array", "items": { "type": "string" } },
+            "steps": { "type": "array", "items": { "type": "string" }, "description": "une étape par élément, sans numéro" },
             "tags": { "type": "array", "items": { "type": "string" } }
         }
     })

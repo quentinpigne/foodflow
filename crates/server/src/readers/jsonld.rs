@@ -121,12 +121,38 @@ pub struct ImportedStep {
     pub text: String,
 }
 
+/// Retire la numérotation d'une étape (« 1. », « 2) », « Étape 3 : ») : l'application numérote elle-même.
+/// Un nombre sans ponctuation (« 2 heures avant… ») reste.
+pub fn without_number(text: &str) -> String {
+    let mut rest = text.trim();
+    loop {
+        let lower = rest.to_lowercase();
+        let after_word = ["étape", "etape", "step"]
+            .iter()
+            .find(|w| lower.starts_with(*w))
+            .map_or(rest, |w| rest[w.len()..].trim_start());
+        let digits = after_word.bytes().take_while(u8::is_ascii_digit).count();
+        if digits == 0 {
+            return rest.to_owned();
+        }
+        let tail = after_word[digits..].trim_start();
+        let Some(mark) = tail.chars().next().filter(|c| matches!(c, '.' | ')' | ':' | '-' | '–' | '/')) else {
+            return rest.to_owned();
+        };
+        let next = tail[mark.len_utf8()..].trim_start();
+        if next.is_empty() {
+            return rest.to_owned();
+        }
+        rest = next;
+    }
+}
+
 fn steps(value: Option<&Value>, section: Option<String>, out: &mut Vec<ImportedStep>) {
     match value {
         Some(Value::String(s)) => {
             // Une seule chaîne : une étape par ligne non vide.
             for line in s.split(['\n', '\r']).map(decode_entities).filter(|l| !l.is_empty()) {
-                out.push(ImportedStep { section: section.clone(), text: line });
+                out.push(ImportedStep { section: section.clone(), text: without_number(&line) });
             }
         }
         Some(Value::Array(items)) => {
@@ -140,7 +166,7 @@ fn steps(value: Option<&Value>, section: Option<String>, out: &mut Vec<ImportedS
                 let name = text(map.get("name"));
                 steps(map.get("itemListElement"), name, out);
             } else if let Some(t) = text(map.get("text")).or_else(|| text(map.get("name"))) {
-                out.push(ImportedStep { section: section.clone(), text: t });
+                out.push(ImportedStep { section: section.clone(), text: without_number(&t) });
             }
         }
         _ => {}
@@ -211,6 +237,16 @@ pub fn read(recipe: &Value) -> ImportedRecipe {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn step_numbers_are_removed() {
+        let step = "Dans une cocotte, faire chauffer l'huile.";
+        assert_eq!(without_number(&format!("1. 1. {step}")), step);
+        assert_eq!(without_number(&format!("2) {step}")), step);
+        assert_eq!(without_number(&format!("Étape 3 : {step}")), step);
+        assert_eq!(without_number("2 heures avant, sortir le beurre."), "2 heures avant, sortir le beurre.");
+        assert_eq!(without_number("1."), "1.");
+    }
 
     fn fixture(name: &str) -> String {
         std::fs::read_to_string(
