@@ -2,6 +2,7 @@
 
 use std::sync::Arc;
 
+use crate::clients::ai::AiClient;
 use crate::clients::web::Fetcher;
 use crate::clock::Clock;
 use crate::config::DataDir;
@@ -18,4 +19,6 @@ pub struct AppState {
     pub secure_cookies: bool,
     /// Téléchargement des pages de recettes (ADR-0007).
     pub fetcher: Arc<dyn Fetcher>,
+    /// IA (ADR-0014), appelée seulement si elle est activée dans les réglages.
+    pub ai: Arc<dyn AiClient>,
 }

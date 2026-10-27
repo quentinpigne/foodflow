@@ -223,7 +223,12 @@ fn state_of(lot: &LotRow, movements: &[MovementRow]) -> LotState {
 /// Lots avec leur quantité calculée et leur état de péremption (STK-04).
 pub async fn list(db: &Db, query: &LotQuery, today: Date) -> AppResult<Vec<Lot>> {
     let mut conn = db.read.acquire().await?;
-    let context = Context::load(&mut conn, today).await?;
+    list_in(&mut conn, query, today).await
+}
+
+/// Comme `list`, dans une connexion ouverte.
+pub(crate) async fn list_in(conn: &mut SqliteConnection, query: &LotQuery, today: Date) -> AppResult<Vec<Lot>> {
+    let context = Context::load(&mut *conn, today).await?;
     let lots = db::stock::list(&mut *conn, query.location_id, query.food_id, query.include_depleted).await?;
     let mut movements: HashMap<LotId, Vec<MovementRow>> = HashMap::new();
     for m in db::stock::movements_of_active_lots(&mut *conn, query.include_depleted).await? {

@@ -296,7 +296,7 @@ impl Kitchen {
         Some(totals.scaled(values::per_serving_factor(&recipe.yield_).ok()?))
     }
 
-    fn summary(&self, recipe: &RecipeRow, coverage: Option<Coverage>) -> RecipeSummary {
+    pub fn summary(&self, recipe: &RecipeRow, coverage: Option<Coverage>) -> RecipeSummary {
         let energy = self
             .per_serving(recipe)
             .and_then(|t| t.nutrients.get("ENERGY").cloned())

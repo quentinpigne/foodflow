@@ -3,6 +3,7 @@
 //! Pur et sans I/O : aucune dépendance à la base, au système de fichiers, au réseau ou à l'horloge.
 //! La date du jour est toujours un paramètre. Les flottants y sont interdits (ADR-0001).
 
+pub mod ai;
 pub mod foods;
 pub mod nutrition;
 pub mod planning;

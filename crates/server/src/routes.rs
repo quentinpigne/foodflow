@@ -1,6 +1,7 @@
 //! Routes : assemblage de l'API REST sous `/api/v1`, décrite par utoipa (ADR-0009), et des fichiers de
 //! l'interface. Chaque sous-module branche les handlers d'un domaine.
 
+mod ai;
 mod auth;
 mod foods;
 mod planning;
@@ -29,6 +30,7 @@ use crate::state::AppState;
         (name = "recipes", description = "Recettes, import, export (spec 03)"),
         (name = "goals", description = "Objectifs nutritionnels, modèles, créneaux, bilan (spec 04)"),
         (name = "planning", description = "Foyer, semaine type, repas, validation (spec 05)"),
+        (name = "ai", description = "IA : réglages, recettes, plannings (ADR-0014)"),
         (name = "dashboard", description = "Tableau de bord (spec 09)"),
         (name = "system", description = "Réglages, export, version"),
     )
@@ -41,6 +43,7 @@ fn protected_routes() -> OpenApiRouter<AppState> {
         .merge(stock::router())
         .merge(recipes::router())
         .merge(planning::router())
+        .merge(ai::router())
         .merge(system::protected())
 }
 

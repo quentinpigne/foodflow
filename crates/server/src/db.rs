@@ -4,6 +4,7 @@ pub mod auth;
 pub mod codec;
 pub mod export;
 pub mod foods;
+pub mod generation;
 pub mod goals;
 pub mod groups;
 pub mod locations;

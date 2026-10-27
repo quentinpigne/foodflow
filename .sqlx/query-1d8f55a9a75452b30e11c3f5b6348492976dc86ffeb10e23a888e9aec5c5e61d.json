@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "INSERT INTO generation_run (id, kind, period_start, period_end, prompt, request_payload, response_payload,\n             proposal, status, created_at, updated_at)\n         VALUES (?, 'AI', ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 10
+    },
+    "nullable": []
+  },
+  "hash": "1d8f55a9a75452b30e11c3f5b6348492976dc86ffeb10e23a888e9aec5c5e61d"
+}

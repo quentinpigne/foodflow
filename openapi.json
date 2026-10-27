@@ -10,6 +10,337 @@
     "version": "0.1.0"
   },
   "paths": {
+    "/api/v1/ai/plans": {
+      "get": {
+        "tags": [
+          "ai"
+        ],
+        "summary": "Propositions encore ouvertes.",
+        "operationId": "listAiPlans",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Proposal"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "ai"
+        ],
+        "summary": "Demande un planning à l'IA (PLA-12) : une proposition, rien n'est écrit dans les repas.",
+        "operationId": "createAiPlan",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PlanIdeaInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Proposal"
+                }
+              }
+            }
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/ai/plans/preview": {
+      "post": {
+        "tags": [
+          "ai"
+        ],
+        "summary": "Ce qui sera envoyé pour un planning (R-PLA-66).",
+        "operationId": "previewAiPlan",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PlanIdeaInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiPreview"
+                }
+              }
+            }
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/ai/plans/{id}": {
+      "get": {
+        "tags": [
+          "ai"
+        ],
+        "operationId": "getAiPlan",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/RowId"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Proposal"
+                }
+              }
+            }
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "ai"
+        ],
+        "operationId": "discardAiPlan",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/RowId"
+            }
+          }
+        ],
+        "responses": {
+          "204": {}
+        }
+      }
+    },
+    "/api/v1/ai/plans/{id}/accept": {
+      "post": {
+        "tags": [
+          "ai"
+        ],
+        "summary": "Accepte une proposition, en tout ou repas par repas (R-PLA-64).",
+        "operationId": "acceptAiPlan",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/RowId"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AcceptInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AcceptResult"
+                }
+              }
+            }
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/ai/recipes": {
+      "post": {
+        "tags": [
+          "ai"
+        ],
+        "summary": "Demande une recette à l'IA : elle arrive en brouillon (REC-19).",
+        "operationId": "createAiRecipe",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RecipeIdeaInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RecipeDraft"
+                }
+              }
+            }
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/ai/recipes/preview": {
+      "post": {
+        "tags": [
+          "ai"
+        ],
+        "summary": "Ce qui sera envoyé pour créer une recette (R-REC-81).",
+        "operationId": "previewAiRecipe",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RecipeIdeaInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiPreview"
+                }
+              }
+            }
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/ai/settings": {
+      "get": {
+        "tags": [
+          "ai"
+        ],
+        "summary": "Réglages de l'IA ; la clé n'est jamais renvoyée (ADR-0014).",
+        "operationId": "getAiSettings",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiSettings"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "ai"
+        ],
+        "operationId": "updateAiSettings",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AiSettingsInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {},
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/assessment": {
       "get": {
         "tags": [
@@ -3384,6 +3715,39 @@
   },
   "components": {
     "schemas": {
+      "AcceptInput": {
+        "type": "object",
+        "properties": {
+          "meals": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MealKey"
+            },
+            "description": "Repas à accepter ; tous ceux qui sont prêts si vide."
+          }
+        }
+      },
+      "AcceptResult": {
+        "type": "object",
+        "required": [
+          "accepted",
+          "skipped"
+        ],
+        "properties": {
+          "accepted": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 0
+          },
+          "skipped": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Repas non acceptés, avec la raison."
+          }
+        }
+      },
       "AdjustInput": {
         "type": "object",
         "properties": {
@@ -3421,6 +3785,130 @@
                 "type": "null"
               }
             ]
+          }
+        }
+      },
+      "AiPreview": {
+        "type": "object",
+        "description": "Ce que l'IA recevra, montré avant l'envoi (R-REC-81, R-PLA-66).",
+        "required": [
+          "system",
+          "user"
+        ],
+        "properties": {
+          "system": {
+            "type": "string",
+            "description": "Consignes générales."
+          },
+          "user": {
+            "type": "string",
+            "description": "Données et demande, en texte lisible."
+          }
+        }
+      },
+      "AiProvider": {
+        "type": "string",
+        "description": "Fournisseur d'IA : tous deux exposent une API de chat compatible OpenAI.",
+        "enum": [
+          "MISTRAL",
+          "OPENAI"
+        ]
+      },
+      "AiSettings": {
+        "type": "object",
+        "description": "Réglages de l'IA, tels que l'interface les voit : la clé n'est jamais renvoyée (ADR-0014).",
+        "required": [
+          "enabled",
+          "provider",
+          "base_url",
+          "model",
+          "has_key",
+          "monthly_limit",
+          "new_recipes_per_plan",
+          "used_this_month",
+          "ready"
+        ],
+        "properties": {
+          "base_url": {
+            "type": "string"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "has_key": {
+            "type": "boolean",
+            "description": "Une clé est enregistrée."
+          },
+          "model": {
+            "type": "string"
+          },
+          "monthly_limit": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 0
+          },
+          "new_recipes_per_plan": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 0
+          },
+          "provider": {
+            "$ref": "#/components/schemas/AiProvider"
+          },
+          "ready": {
+            "type": "boolean",
+            "description": "Activée, avec un modèle et une clé : utilisable."
+          },
+          "used_this_month": {
+            "type": "integer",
+            "format": "int32",
+            "description": "Appels déjà faits ce mois-ci.",
+            "minimum": 0
+          }
+        }
+      },
+      "AiSettingsInput": {
+        "type": "object",
+        "required": [
+          "enabled",
+          "provider",
+          "model",
+          "monthly_limit",
+          "new_recipes_per_plan"
+        ],
+        "properties": {
+          "api_key": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Absente : la clé enregistrée est gardée ; vide : elle est effacée."
+          },
+          "base_url": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Vide : l'adresse par défaut du fournisseur."
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "model": {
+            "type": "string"
+          },
+          "monthly_limit": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 0
+          },
+          "new_recipes_per_plan": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 0
+          },
+          "provider": {
+            "$ref": "#/components/schemas/AiProvider"
           }
         }
       },
@@ -6127,6 +6615,22 @@
         "type": "string",
         "format": "uuid"
       },
+      "MealKey": {
+        "type": "object",
+        "required": [
+          "date",
+          "slot_id"
+        ],
+        "properties": {
+          "date": {
+            "type": "string",
+            "format": "date"
+          },
+          "slot_id": {
+            "$ref": "#/components/schemas/MealSlotId"
+          }
+        }
+      },
       "MealSlot": {
         "type": "object",
         "required": [
@@ -6348,6 +6852,43 @@
           },
           "slot_id": {
             "$ref": "#/components/schemas/MealSlotId"
+          }
+        }
+      },
+      "NewRecipe": {
+        "type": "object",
+        "description": "Une recette nouvelle de la proposition : son brouillon, puis la recette créée à sa validation.",
+        "required": [
+          "index",
+          "name"
+        ],
+        "properties": {
+          "draft_id": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/RecipeDraftId"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "index": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "name": {
+            "type": "string"
+          },
+          "recipe_id": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/RecipeId"
+              },
+              {
+                "type": "null"
+              }
+            ]
           }
         }
       },
@@ -6589,6 +7130,42 @@
             "items": {
               "$ref": "#/components/schemas/Meal"
             }
+          }
+        }
+      },
+      "PlanIdeaInput": {
+        "type": "object",
+        "required": [
+          "start"
+        ],
+        "properties": {
+          "days": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int32",
+            "description": "Nombre de jours (7 par défaut, 14 au plus).",
+            "minimum": 0
+          },
+          "prompt": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Consigne libre (« semaine italienne », « plus léger »)."
+          },
+          "slot_ids": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MealSlotId"
+            },
+            "description": "Créneaux à remplir ; tous les créneaux actifs si vide."
+          },
+          "start": {
+            "type": "string",
+            "format": "date",
+            "description": "Premier jour."
           }
         }
       },
@@ -6845,6 +7422,63 @@
           }
         }
       },
+      "Proposal": {
+        "type": "object",
+        "required": [
+          "id",
+          "start",
+          "end",
+          "status",
+          "meals",
+          "new_recipes",
+          "rejected",
+          "created_at"
+        ],
+        "properties": {
+          "created_at": {
+            "type": "string"
+          },
+          "end": {
+            "type": "string",
+            "format": "date"
+          },
+          "id": {
+            "$ref": "#/components/schemas/RowId"
+          },
+          "meals": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ProposedMeal"
+            }
+          },
+          "new_recipes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/NewRecipe"
+            }
+          },
+          "prompt": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "rejected": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RejectedItem"
+            }
+          },
+          "start": {
+            "type": "string",
+            "format": "date"
+          },
+          "status": {
+            "type": "string",
+            "description": "`PENDING`, `PARTIALLY_ACCEPTED`, `ACCEPTED`, `DISCARDED`."
+          }
+        }
+      },
       "ProposedItem": {
         "type": "object",
         "required": [
@@ -6979,6 +7613,46 @@
               "$ref": "#/components/schemas/LotTake"
             },
             "description": "Lots à date dépassée, à confirmer « encore bon » avant d'y puiser (R-STK-37)."
+          }
+        }
+      },
+      "ProposedMeal": {
+        "type": "object",
+        "required": [
+          "date",
+          "slot_id",
+          "slot_name",
+          "reason",
+          "items",
+          "accepted",
+          "ready"
+        ],
+        "properties": {
+          "accepted": {
+            "type": "boolean"
+          },
+          "date": {
+            "type": "string",
+            "format": "date"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ProposedItem"
+            }
+          },
+          "ready": {
+            "type": "boolean",
+            "description": "Toutes ses recettes existent : il peut être accepté."
+          },
+          "reason": {
+            "type": "string"
+          },
+          "slot_id": {
+            "$ref": "#/components/schemas/MealSlotId"
+          },
+          "slot_name": {
+            "type": "string"
           }
         }
       },
@@ -7154,6 +7828,45 @@
       "RecipeId": {
         "type": "string",
         "format": "uuid"
+      },
+      "RecipeIdeaInput": {
+        "type": "object",
+        "required": [
+          "mode"
+        ],
+        "properties": {
+          "mode": {
+            "$ref": "#/components/schemas/RecipeIdeaMode"
+          },
+          "prompt": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Consigne ; requise pour `PROMPT` et `VARIANT`, facultative sinon."
+          },
+          "recipe_id": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/RecipeId",
+                "description": "Recette de départ (`VARIANT`)."
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        }
+      },
+      "RecipeIdeaMode": {
+        "type": "string",
+        "description": "Point de départ d'une recette demandée à l'IA (R-REC-80).",
+        "enum": [
+          "PROMPT",
+          "STOCK",
+          "VARIANT",
+          "SURPRISE"
+        ]
       },
       "RecipeInput": {
         "type": "object",
@@ -7389,6 +8102,35 @@
             "minimum": 0
           }
         }
+      },
+      "RejectedItem": {
+        "type": "object",
+        "required": [
+          "reason"
+        ],
+        "properties": {
+          "date": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "slot_name": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        }
+      },
+      "RowId": {
+        "type": "string",
+        "format": "uuid",
+        "description": "Ligne de liaison sans nom métier (préférence, convive, élément de repas habituel, consommation)."
       },
       "Settings": {
         "type": "object",
@@ -8408,6 +9150,10 @@
     {
       "name": "planning",
       "description": "Foyer, semaine type, repas, validation (spec 05)"
+    },
+    {
+      "name": "ai",
+      "description": "IA : réglages, recettes, plannings (ADR-0014)"
     },
     {
       "name": "dashboard",

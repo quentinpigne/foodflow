@@ -112,7 +112,9 @@ async fn main() -> anyhow::Result<()> {
             services::seed::run(&db).await?;
             let clock = today.map_or(Clock::System, Clock::Fixed);
             let fetcher = Arc::new(clients::web::HttpFetcher::new()?);
-            serve(AppState { db, clock, data, limiter: Arc::default(), secure_cookies, fetcher }, addr, web_dir).await
+            let ai = Arc::new(clients::ai::HttpAiClient::new()?);
+            serve(AppState { db, clock, data, limiter: Arc::default(), secure_cookies, fetcher, ai }, addr, web_dir)
+                .await
         }
         Command::Migrate => {
             open(&data).await?;

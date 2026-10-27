@@ -1,0 +1,122 @@
+{
+  "db_name": "SQLite",
+  "query": "SELECT id, period_start, period_end, prompt, request_payload, response_payload, proposal, status, created_at\n         FROM generation_run WHERE status IN ('PENDING', 'PARTIALLY_ACCEPTED') ORDER BY created_at DESC",
+  "describe": {
+    "columns": [
+      {
+        "name": "id",
+        "ordinal": 0,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "generation_run",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "name": "period_start",
+        "ordinal": 1,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "generation_run",
+            "name": "period_start"
+          }
+        }
+      },
+      {
+        "name": "period_end",
+        "ordinal": 2,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "generation_run",
+            "name": "period_end"
+          }
+        }
+      },
+      {
+        "name": "prompt",
+        "ordinal": 3,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "generation_run",
+            "name": "prompt"
+          }
+        }
+      },
+      {
+        "name": "request_payload",
+        "ordinal": 4,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "generation_run",
+            "name": "request_payload"
+          }
+        }
+      },
+      {
+        "name": "response_payload",
+        "ordinal": 5,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "generation_run",
+            "name": "response_payload"
+          }
+        }
+      },
+      {
+        "name": "proposal",
+        "ordinal": 6,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "generation_run",
+            "name": "proposal"
+          }
+        }
+      },
+      {
+        "name": "status",
+        "ordinal": 7,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "generation_run",
+            "name": "status"
+          }
+        }
+      },
+      {
+        "name": "created_at",
+        "ordinal": 8,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "generation_run",
+            "name": "created_at"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Right": 0
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      true,
+      true,
+      true,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "1a14a7e33b439663718f66112663677eacf6059016cf4e369a3fdb945f66f646"
+}

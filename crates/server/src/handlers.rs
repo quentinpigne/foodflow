@@ -1,6 +1,7 @@
 //! Handlers HTTP : extraient la requête, appellent un service et mettent en forme la réponse. Aucun
 //! calcul ni aucune requête SQL ici. Chacun est décrit pour le contrat OpenAPI (utoipa).
 
+pub mod ai;
 pub mod auth;
 pub mod dashboard;
 pub mod foods;

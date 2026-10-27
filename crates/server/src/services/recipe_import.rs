@@ -369,6 +369,8 @@ pub async fn commit(db: &Db, data: &DataDir, id: RecipeDraftId, input: &RecipeIn
         }
     }
     db::recipes::delete_draft(&db.write, id).await?;
+    // Une recette nouvelle d'un planning par l'IA : ses repas peuvent désormais être acceptés (R-PLA-66).
+    super::ai_planning::draft_committed(db, id, recipe).await?;
     Ok(recipe)
 }
 

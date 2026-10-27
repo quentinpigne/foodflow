@@ -111,6 +111,10 @@ pub enum DomainError {
     MealNotPlanned,
     #[error("un repas habituel de ce nom existe déjà")]
     HabitualMealNameTaken,
+
+    // ----- IA (ADR-0014)
+    #[error("réponse de l'IA invalide : {0}")]
+    AiResponse(&'static str),
 }
 
 impl DomainError {
@@ -166,6 +170,7 @@ impl DomainError {
             MealValidated => "MEAL_VALIDATED",
             MealNotPlanned => "MEAL_NOT_PLANNED",
             HabitualMealNameTaken => "HABITUAL_MEAL_NAME_TAKEN",
+            AiResponse(_) => "AI_RESPONSE",
         }
     }
 
@@ -209,6 +214,7 @@ impl DomainError {
             MealItemContent => "R-PLA-12",
             MealValidated => "R-PLA-31",
             MealNotPlanned => "R-PLA-30",
+            AiResponse(_) => "R-REC-82",
         })
     }
 }
