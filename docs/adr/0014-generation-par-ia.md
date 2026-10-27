@@ -35,6 +35,9 @@ Option 2.
 - La réponse est demandée dans un **format JSON imposé** : pour chaque créneau, des éléments qui
   référencent une recette ou un aliment **par identifiant**, ou une **recette nouvelle** (nom, rendement,
   temps, lignes d'ingrédients, étapes), avec une justification courte.
+  Les identifiants envoyés sont des **références courtes** (`C1` créneau, `R3` recette, `L2` lot), que le
+  serveur retraduit : les modèles recopient mal les UUID (constaté : des noms de recettes à leur place).
+  Une référence inconnue rend le repas illisible, écarté et signalé (R-PLA-67).
 - Fournisseur : **toute API compatible OpenAI** (`POST /v1/chat/completions`), probablement un
   proxy LiteLLM devant le modèle choisi (Q12, 2026-10-25). Adresse, clé, nom du modèle et plafond
   d'appels mensuel sont dans la configuration du serveur ; changer de modèle ne demande aucun code.

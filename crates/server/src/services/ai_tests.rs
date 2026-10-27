@@ -216,18 +216,28 @@ async fn r_pla_64_66_67_plan_with_new_recipe() {
     let input =
         PlanIdeaInput { start: d("2026-11-02"), days: Some(2), slot_ids: vec![dinner], prompt: Some("léger".into()) };
     let preview = ai_planning::preview(&db, &input, d(TODAY)).await.unwrap();
-    assert!(preview.user.contains(&format!("[créneau {dinner}]")));
-    assert!(preview.user.contains(&format!("[recette {gratin}]")));
+    // Références courtes à la place des identifiants : le créneau demandé est C1.
+    assert!(preview.user.contains("(lundi dîner) [créneau C1]"), "{}", preview.user);
+    assert!(!preview.user.contains(&gratin.to_string()) && !preview.user.contains(&dinner.to_string()));
+    let gratin_ref = preview
+        .user
+        .lines()
+        .find(|l| l.contains("Gratin de courgettes"))
+        .and_then(|l| l.split("[recette ").nth(1))
+        .and_then(|l| l.split(']').next())
+        .unwrap()
+        .to_owned();
+    assert!(gratin_ref.starts_with('R'), "{gratin_ref}");
     assert!(preview.user.contains("au plus 1 recette(s) nouvelle(s)"));
     assert!(preview.user.contains("Consigne du foyer : léger"));
     assert!(!preview.user.contains(&lunch.to_string()), "seulement les créneaux demandés");
 
     let answer = json!({
         "meals": [
-            { "date": "2026-11-02", "slot_id": dinner, "items": [{ "recipe_id": gratin, "new_recipe": null, "lot_id": null }], "reason": "Des légumes." },
-            { "date": "2026-11-03", "slot_id": dinner, "items": [{ "recipe_id": null, "new_recipe": 0, "lot_id": null }], "reason": "Une soupe." },
-            { "date": "2026-11-03", "slot_id": lunch, "items": [{ "recipe_id": gratin, "new_recipe": null, "lot_id": null }], "reason": "" },
-            { "date": "2026-11-02", "slot_id": dinner, "items": [{ "recipe_id": RecipeId::new(), "new_recipe": null, "lot_id": null }], "reason": "" }
+            { "date": "2026-11-02", "slot_id": "C1", "items": [{ "recipe_id": gratin_ref, "new_recipe": null, "lot_id": null }], "reason": "Des légumes." },
+            { "date": "2026-11-03", "slot_id": "C1", "items": [{ "recipe_id": null, "new_recipe": 0, "lot_id": null }], "reason": "Une soupe." },
+            { "date": "2026-11-03", "slot_id": lunch, "items": [{ "recipe_id": gratin_ref, "new_recipe": null, "lot_id": null }], "reason": "" },
+            { "date": "2026-11-02", "slot_id": "C1", "items": [{ "recipe_id": RecipeId::new(), "new_recipe": null, "lot_id": null }], "reason": "" }
         ],
         "new_recipes": [soup()]
     });
@@ -292,25 +302,36 @@ async fn r_rec_73_free_photo_for_a_recipe_without_image() {
     assert!(!export::export(&db).await.unwrap().to_string().contains("photo-secret"), "la clé n'est pas exportée");
 }
 
-/// Un repas illisible est écarté et signalé sans faire refuser le planning ; une réponse qui n'est pas un
-/// planning est refusée avec sa cause (R-PLA-67, R-REC-82).
+/// Le planning désigne créneaux, recettes et lots par des références courtes, retraduites en identifiants ;
+/// un repas illisible ou à la référence inconnue est écarté et signalé sans faire refuser le planning ; une
+/// réponse qui n'est pas un planning est refusée avec sa cause (R-PLA-67, R-REC-82).
 #[test]
-fn r_pla_67_unreadable_meal_is_rejected_alone() {
+fn r_pla_67_short_references_and_unreadable_meals() {
     let slot = "019a2b3c-0000-7000-8000-000000000001";
+    let recipe = "019a2b3c-0000-7000-8000-000000000002";
+    let refs: std::collections::HashMap<String, String> =
+        [("C1".to_owned(), slot.to_owned()), ("R1".to_owned(), recipe.to_owned())].into();
+    let item = |recipe_id: &str| json!([{ "recipe_id": recipe_id, "new_recipe": null, "lot_id": "null" }]);
     let content = json!({
         "meals": [
-            { "date": "2026-11-02", "slot_id": slot, "items": [{ "recipe_id": null, "new_recipe": null, "lot_id": null }], "reason": "" },
-            { "date": "2026-11-03", "slot_id": slot, "items": [{ "recipe_id": "", "new_recipe": null, "lot_id": null }], "reason": "" }
+            { "date": "2026-11-02", "slot_id": "C1", "items": item("R1"), "reason": "" },
+            { "date": "2026-11-03", "slot_id": "[c1]", "items": item("Ratatouille"), "reason": "" },
+            { "date": "2026-11-04", "slot_id": "C1", "items": "aucun", "reason": "" }
         ],
         "new_recipes": []
     });
-    let (plan, rejected) = ai_planning::read_plan(&content.to_string()).unwrap();
+    let (plan, rejected) = ai_planning::read_plan(&content.to_string(), &refs).unwrap();
     assert_eq!(plan.meals.len(), 1);
-    assert_eq!(rejected.len(), 1);
+    assert_eq!(plan.meals[0].slot_id.to_string(), slot);
+    assert_eq!(plan.meals[0].items[0].recipe_id.map(|r| r.to_string()).as_deref(), Some(recipe));
+    assert_eq!(plan.meals[0].items[0].lot_id, None, "« null » en texte : aucun lot");
+    assert_eq!(rejected.len(), 2);
     assert_eq!(rejected[0].date, Some(d("2026-11-03")));
-    assert!(rejected[0].reason.starts_with("repas illisible"), "{}", rejected[0].reason);
+    assert_eq!(rejected[0].slot_id.map(|s| s.to_string()).as_deref(), Some(slot));
+    assert_eq!(rejected[0].reason, "repas illisible : référence inconnue « Ratatouille » (recipe_id)");
+    assert!(rejected[1].reason.starts_with("repas illisible : invalid type"), "{}", rejected[1].reason);
 
     let truncated = r#"{"meals": [{"date": "2026-11-02""#;
-    let error = ai_planning::read_plan(truncated).unwrap_err().to_string();
+    let error = ai_planning::read_plan(truncated, &refs).unwrap_err().to_string();
     assert!(error.starts_with("réponse de l'IA invalide : le planning ne suit pas le format demandé : EOF"), "{error}");
 }

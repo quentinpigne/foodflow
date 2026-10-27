@@ -1,5 +1,5 @@
 // IA factice des tests de bout en bout : une API de chat compatible OpenAI, en local, aux réponses fixes.
-// Elle lit dans la demande les identifiants des créneaux et des recettes : aucun appel réseau réel.
+// Elle lit dans la demande les références des créneaux et des recettes : aucun appel réseau réel.
 import { createServer } from 'node:http';
 
 const soup = {
@@ -15,10 +15,8 @@ const soup = {
 };
 
 function plan(text) {
-  const slots = [
-    ...text.matchAll(/^- (\d{4}-\d{2}-\d{2}) \([^)]*\) \[créneau ([0-9a-f-]{36})\]/gm),
-  ];
-  const recipe = /\[recette ([0-9a-f-]{36})\] Gratin de courgettes/.exec(text)?.[1];
+  const slots = [...text.matchAll(/^- (\d{4}-\d{2}-\d{2}) \([^)]*\) \[créneau (C\d+)\]/gm)];
+  const recipe = /\[recette (R\d+)\] Gratin de courgettes/.exec(text)?.[1];
   const meals = slots.slice(0, 2).map(([, date, slot], index) => ({
     date,
     slot_id: slot,

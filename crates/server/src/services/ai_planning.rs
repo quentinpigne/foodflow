@@ -54,6 +54,9 @@ struct OpenSlot {
 /// Contexte complet d'une demande : le texte envoyé et de quoi contrôler la réponse.
 struct Prepared {
     request: AiRequest,
+    /// Références courtes du texte envoyé (`R3`, `L1`, `C2`) → identifiants : les modèles recopient mal les
+    /// UUID, bien les codes courts.
+    refs: HashMap<String, String>,
     context: PlanContext,
     end: Date,
 }
@@ -105,7 +108,22 @@ fn criterion_text(c: &Criterion) -> String {
     format!("- {what}{min}{max}, {period}")
 }
 
-fn plan_schema(max_new: u32) -> Value {
+/// Valeurs permises pour une référence : les codes envoyés, ou `null`.
+fn ref_schema(refs: &HashMap<String, String>, prefix: char, nullable: bool) -> Value {
+    let mut codes: Vec<Value> = refs.keys().filter(|k| k.starts_with(prefix)).map(|k| json!(k)).collect();
+    codes.sort_by_key(|c| {
+        let code = c.as_str().unwrap_or_default();
+        code[1..].parse::<usize>().unwrap_or(usize::MAX)
+    });
+    if nullable {
+        codes.push(Value::Null);
+        json!({ "type": ["string", "null"], "enum": codes })
+    } else {
+        json!({ "type": "string", "enum": codes })
+    }
+}
+
+fn plan_schema(max_new: u32, refs: &HashMap<String, String>) -> Value {
     json!({
         "type": "object",
         "additionalProperties": false,
@@ -119,7 +137,7 @@ fn plan_schema(max_new: u32) -> Value {
                     "required": ["date", "slot_id", "items", "reason"],
                     "properties": {
                         "date": { "type": "string", "description": "AAAA-MM-JJ" },
-                        "slot_id": { "type": "string" },
+                        "slot_id": ref_schema(refs, 'C', false),
                         "items": {
                             "type": "array",
                             "items": {
@@ -127,9 +145,9 @@ fn plan_schema(max_new: u32) -> Value {
                                 "additionalProperties": false,
                                 "required": ["recipe_id", "new_recipe", "lot_id"],
                                 "properties": {
-                                    "recipe_id": { "type": ["string", "null"] },
+                                    "recipe_id": ref_schema(refs, 'R', true),
                                     "new_recipe": { "type": ["integer", "null"], "description": "rang dans new_recipes" },
-                                    "lot_id": { "type": ["string", "null"] }
+                                    "lot_id": ref_schema(refs, 'L', true)
                                 }
                             }
                         },
@@ -144,7 +162,7 @@ fn plan_schema(max_new: u32) -> Value {
 
 /// Lit un planning reçu. Un repas illisible est écarté et signalé, comme un repas invalide (R-PLA-67) ; une
 /// réponse qui n'est pas un planning est refusée avec sa cause (R-REC-82).
-pub fn read_plan(content: &str) -> AppResult<(AiPlan, Vec<Rejection>)> {
+pub fn read_plan(content: &str, refs: &HashMap<String, String>) -> AppResult<(AiPlan, Vec<Rejection>)> {
     let invalid =
         |detail: String| DomainError::AiFormat(format!("le planning ne suit pas le format demandé : {detail}"));
     let value: Value = serde_json::from_str(content).map_err(|e| invalid(e.to_string()))?;
@@ -152,7 +170,10 @@ pub fn read_plan(content: &str) -> AppResult<(AiPlan, Vec<Rejection>)> {
     let mut kept = Vec::new();
     let mut rejected = Vec::new();
     for meal in meals {
-        match serde_json::from_value::<AiMeal>(meal.clone()) {
+        let mut meal = meal.clone();
+        let resolved = resolve_meal(&mut meal, refs);
+        let read = resolved.and_then(|()| serde_json::from_value::<AiMeal>(meal.clone()).map_err(|e| e.to_string()));
+        match read {
             Ok(meal) => kept.push(meal),
             Err(e) => rejected.push(Rejection {
                 date: meal.get("date").and_then(Value::as_str).and_then(|d| d.parse().ok()),
@@ -168,6 +189,34 @@ pub fn read_plan(content: &str) -> AppResult<(AiPlan, Vec<Rejection>)> {
         }
     };
     Ok((AiPlan { meals: kept, new_recipes }, rejected))
+}
+
+/// Remplace les références courtes d'un repas par les identifiants. Une valeur vide (`""`, `"null"`) est
+/// une absence ; une référence inconnue (un nom de recette…) rend le repas illisible, avec sa cause.
+fn resolve_meal(meal: &mut Value, refs: &HashMap<String, String>) -> Result<(), String> {
+    let resolve = |value: &mut Value, field: &str| -> Result<(), String> {
+        let Some(text) = value.get(field).and_then(Value::as_str) else { return Ok(()) };
+        let code = text.trim().trim_start_matches('[').trim_end_matches(']').trim();
+        let resolved = if code.is_empty() || code.eq_ignore_ascii_case("null") {
+            Value::Null
+        } else if let Some(id) = refs.get(&code.to_uppercase()) {
+            json!(id)
+        } else if code.parse::<RecipeId>().is_ok() {
+            json!(code)
+        } else {
+            return Err(format!("référence inconnue « {code} » ({field})"));
+        };
+        value[field] = resolved;
+        Ok(())
+    };
+    resolve(meal, "slot_id")?;
+    if let Some(items) = meal.get_mut("items").and_then(Value::as_array_mut) {
+        for item in items {
+            resolve(item, "recipe_id")?;
+            resolve(item, "lot_id")?;
+        }
+    }
+    Ok(())
 }
 
 /// Construit la demande, à l'identique pour l'aperçu et pour l'envoi (R-PLA-66).
@@ -237,6 +286,11 @@ async fn prepare(conn: &mut SqliteConnection, input: &PlanIdeaInput, today: Date
         return Err(AppError::invalid("NOTHING_TO_PLAN", "aucun créneau à remplir sur cette période"));
     }
 
+    // Références courtes : créneaux `C`, recettes `R`, lots `L`, numérotés dans l'ordre des listes envoyées.
+    let mut refs: HashMap<String, String> =
+        slots.iter().enumerate().map(|(i, s)| (format!("C{}", i + 1), s.id.to_string())).collect();
+    let slot_ref =
+        |id: MealSlotId| slots.iter().position(|s| s.id == id).map(|i| format!("C{}", i + 1)).unwrap_or_default();
     let kitchen = &planner.kitchen;
     let (household, letters) = household_text(&mut *conn, kitchen).await?;
     let letter = |m: MemberId| letters.iter().find(|(id, _)| *id == m).map(|(_, l)| l.clone()).unwrap_or_default();
@@ -270,7 +324,7 @@ async fn prepare(conn: &mut SqliteConnection, input: &PlanIdeaInput, today: Date
             o.date,
             WEEKDAYS[o.date.weekday().num_days_from_monday() as usize],
             name,
-            o.slot,
+            slot_ref(o.slot),
             schedule.available_active_minutes,
             schedule.ready_by.format("%H:%M"),
             who.join(", "),
@@ -284,15 +338,21 @@ async fn prepare(conn: &mut SqliteConnection, input: &PlanIdeaInput, today: Date
             .collect();
         refused.insert((o.date, o.slot), set);
     }
+    refs.extend(candidates.iter().enumerate().map(|(i, r)| (format!("R{}", i + 1), r.id.to_string())));
     let recipe_lines: Vec<String> = candidates
         .iter()
-        .map(|r| {
+        .enumerate()
+        .map(|(index, r)| {
             let summary = kitchen.summary(r, None);
             let energy = summary.energy.map(|e| format!(", {} kcal/portion", e / 1_000)).unwrap_or_default();
             let keeps = r.fridge_days.map(|d| format!(", se garde {d} j")).unwrap_or_default();
             format!(
-                "- [recette {}] {} ({:?}, {} min actives, {} min au total{energy}{keeps})",
-                r.id, r.name, r.kind, summary.times.total_active_minutes, summary.times.total_minutes
+                "- [recette R{}] {} ({:?}, {} min actives, {} min au total{energy}{keeps})",
+                index + 1,
+                r.name,
+                r.kind,
+                summary.times.total_active_minutes,
+                summary.times.total_minutes
             )
         })
         .collect();
@@ -301,6 +361,7 @@ async fn prepare(conn: &mut SqliteConnection, input: &PlanIdeaInput, today: Date
             .await?;
     let priority = priority_lots(&lots);
     let leftovers: HashSet<LotId> = priority.iter().filter(|l| l.recipe_id.is_some()).map(|l| l.id).collect();
+    refs.extend(priority.iter().enumerate().map(|(i, l)| (format!("L{}", i + 1), l.id.to_string())));
     let goals = db::goals::goals(&mut *conn).await?;
     let dated: Vec<(Date, _)> = goals.iter().map(|g| (g.valid_from, g.id)).collect();
     let criteria: Vec<String> = match foodflow_domain::nutrition::in_force(&dated, input.start) {
@@ -322,15 +383,15 @@ async fn prepare(conn: &mut SqliteConnection, input: &PlanIdeaInput, today: Date
         } else {
             format!("Recettes connues :\n{}", recipe_lines.join("\n"))
         },
-        lots_text("À utiliser en priorité (les restes se servent par leur identifiant de lot)", &priority, true),
+        lots_text("À utiliser en priorité (les restes se servent par leur référence de lot)", &priority, true),
         if criteria.is_empty() {
             "Objectif nutritionnel : aucun.".to_owned()
         } else {
             format!("Objectif nutritionnel du foyer :\n{}", criteria.join("\n"))
         },
         format!(
-            "Propose un repas pour chaque créneau à remplir : des recettes connues par leur identifiant, des restes \
-             par leur identifiant de lot, ou au plus {max_new} recette(s) nouvelle(s) dans new_recipes, référencées \
+            "Propose un repas pour chaque créneau à remplir, désigné par la date et la référence du créneau (C1…) : \
+             des recettes connues par leur référence (R1…), des restes par leur référence de lot (L1…), ou au plus {max_new} recette(s) nouvelle(s) dans new_recipes, référencées \
              par leur rang (0, 1…). Varie les plats, respecte les temps disponibles et les refus des convives, \
              utilise d'abord les restes et ce qui est à consommer en priorité, vise l'objectif nutritionnel. \
              Pour chaque repas, une justification courte.{}",
@@ -350,8 +411,9 @@ async fn prepare(conn: &mut SqliteConnection, input: &PlanIdeaInput, today: Date
             system: SYSTEM.to_owned(),
             user,
             schema_name: "planning".to_owned(),
-            schema: plan_schema(max_new),
+            schema: plan_schema(max_new, &refs),
         },
+        refs,
         context,
         end,
     })
@@ -541,7 +603,7 @@ pub async fn generate(
         .complete(&config, &prepared.request)
         .await
         .map_err(|e| AppError::invalid("AI_UNAVAILABLE", e.to_string()))?;
-    let (plan, unreadable) = read_plan(&content)?;
+    let (plan, unreadable) = read_plan(&content, &prepared.refs)?;
     let checked = check_plan(plan, &prepared.context);
     let mut rejected = unreadable;
     rejected.extend(checked.rejected);

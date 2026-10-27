@@ -237,16 +237,18 @@ pub fn priority_lots(lots: &[Lot]) -> Vec<&Lot> {
         .collect()
 }
 
-pub fn lots_text(title: &str, lots: &[&Lot], with_ids: bool) -> String {
+/// Lots en texte ; avec `with_refs`, chacun a sa référence courte (`L1`, `L2`…, dans l'ordre de la liste).
+pub fn lots_text(title: &str, lots: &[&Lot], with_refs: bool) -> String {
     if lots.is_empty() {
         return format!("{title} : aucun.");
     }
     let lines: Vec<String> = lots
         .iter()
-        .map(|l| {
+        .enumerate()
+        .map(|(index, l)| {
             let until =
                 l.effective_expiry.map(|e| format!(", avant le {}", e.date.format("%d/%m"))).unwrap_or_default();
-            let id = if with_ids { format!(" [lot {}]", l.id) } else { String::new() };
+            let id = if with_refs { format!(" [lot L{}]", index + 1) } else { String::new() };
             format!("- {} : {}{until}{id}", l.name, quantity(l))
         })
         .collect();
