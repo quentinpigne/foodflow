@@ -409,7 +409,7 @@ pub fn json_ld(recipe: &AiRecipe) -> Value {
 /// Lit et vérifie une recette reçue.
 pub fn parse_recipe(content: &str) -> AppResult<AiRecipe> {
     let recipe: AiRecipe = serde_json::from_str(content)
-        .map_err(|_| AppError::from(DomainError::AiResponse("la recette ne suit pas le format demandé")))?;
+        .map_err(|e| DomainError::AiFormat(format!("la recette ne suit pas le format demandé : {e}")))?;
     recipe.check()?;
     Ok(recipe)
 }

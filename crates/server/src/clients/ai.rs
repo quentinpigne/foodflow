@@ -157,6 +157,7 @@ pub fn reply(response: &str) -> anyhow::Result<String> {
         return content(response);
     }
     let mut text = String::new();
+    let mut finish = None;
     for data in response.lines().filter_map(|l| l.strip_prefix("data:")).map(str::trim) {
         if data == "[DONE]" {
             break;
@@ -170,17 +171,39 @@ pub fn reply(response: &str) -> anyhow::Result<String> {
         if let Some(part) = choice["delta"]["content"].as_str().or(choice["message"]["content"].as_str()) {
             text.push_str(part);
         }
+        if let Some(reason) = choice["finish_reason"].as_str() {
+            finish = Some(reason.to_owned());
+        }
     }
+    finished(&text, finish.as_deref())
+}
+
+/// Texte complet d'une réponse : refusé s'il est vide ou tronqué, débarrassé d'un bloc de code Markdown.
+fn finished(text: &str, finish_reason: Option<&str>) -> anyhow::Result<String> {
+    if finish_reason == Some("length") {
+        bail!(
+            "réponse de l'IA tronquée : le modèle a atteint sa longueur de réponse maximale (moins de jours, \
+             moins de recettes nouvelles, ou un modèle qui répond plus long)"
+        );
+    }
+    let text = text.trim();
+    let text = text
+        .strip_prefix("```json")
+        .or_else(|| text.strip_prefix("```"))
+        .and_then(|t| t.strip_suffix("```"))
+        .unwrap_or(text)
+        .trim();
     if text.is_empty() {
         bail!("réponse de l'IA sans contenu");
     }
-    Ok(text)
+    Ok(text.to_owned())
 }
 
 /// Contenu du premier choix d'une réponse de chat d'un seul bloc.
 pub fn content(response: &str) -> anyhow::Result<String> {
     let value: Value = serde_json::from_str(response).context("réponse de l'IA illisible")?;
-    value["choices"][0]["message"]["content"].as_str().map(str::to_owned).context("réponse de l'IA sans contenu")
+    let choice = &value["choices"][0];
+    finished(choice["message"]["content"].as_str().unwrap_or_default(), choice["finish_reason"].as_str())
 }
 
 impl AiClient for HttpAiClient {
@@ -307,6 +330,10 @@ mod tests {
         let failed = "data: {\"error\":{\"message\":\"surcharge\"}}\n\n";
         assert_eq!(reply(failed).unwrap_err().to_string(), "le fournisseur d'IA s'est interrompu : surcharge");
         assert!(reply("data: [DONE]\n").is_err());
+        let cut = "data: {\"choices\":[{\"delta\":{\"content\":\"{\\\"a\"},\"finish_reason\":\"length\"}]}\n\n";
+        assert!(reply(cut).unwrap_err().to_string().starts_with("réponse de l'IA tronquée"));
+        let fenced = r#"{"choices":[{"message":{"content":"```json\n{}\n```"}}]}"#;
+        assert_eq!(reply(fenced).unwrap(), "{}", "bloc de code retiré");
         let whole = r#"{"choices":[{"message":{"content":"{}"}}]}"#;
         assert_eq!(reply(whole).unwrap(), "{}", "réponse d'un seul bloc acceptée");
     }

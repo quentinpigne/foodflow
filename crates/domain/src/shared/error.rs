@@ -115,6 +115,9 @@ pub enum DomainError {
     // ----- IA (ADR-0014)
     #[error("réponse de l'IA invalide : {0}")]
     AiResponse(&'static str),
+    /// Réponse qui ne suit pas le format demandé, avec la cause précise (R-REC-82).
+    #[error("réponse de l'IA invalide : {0}")]
+    AiFormat(String),
 }
 
 impl DomainError {
@@ -170,7 +173,7 @@ impl DomainError {
             MealValidated => "MEAL_VALIDATED",
             MealNotPlanned => "MEAL_NOT_PLANNED",
             HabitualMealNameTaken => "HABITUAL_MEAL_NAME_TAKEN",
-            AiResponse(_) => "AI_RESPONSE",
+            AiResponse(_) | AiFormat(_) => "AI_RESPONSE",
         }
     }
 
@@ -214,7 +217,7 @@ impl DomainError {
             MealItemContent => "R-PLA-12",
             MealValidated => "R-PLA-31",
             MealNotPlanned => "R-PLA-30",
-            AiResponse(_) => "R-REC-82",
+            AiResponse(_) | AiFormat(_) => "R-REC-82",
         })
     }
 }

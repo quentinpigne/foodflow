@@ -174,8 +174,9 @@ Bilan prévu : énergie 1 980 kcal/j ✔ · fruits et légumes 4,2 portions/j �
   (3 par défaut, jusqu'à une par repas).
 - **R-PLA-67** — Une proposition par IA est contrôlée par le domaine avant d'être montrée : recette ou
   aliment inconnu, créneau hors de la période, repas déjà validé ou verrouillé, élément refusé par un
-  convive présent, recettes nouvelles au-delà du plafond. Un élément invalide est **écarté et signalé**,
-  jamais corrigé en silence (ADR-0014).
+  convive présent, recettes nouvelles au-delà du plafond, repas illisible (hors du format demandé). Un
+  élément invalide est **écarté et signalé**, jamais corrigé en silence (ADR-0014). Une réponse qui n'est
+  pas un planning, ou qui est tronquée, est refusée avec sa cause.
 
 ## Features
 

@@ -4,7 +4,7 @@
 use std::collections::{HashMap, HashSet};
 
 use chrono::{Datelike, Days};
-use foodflow_domain::ai::plan::{AiItem, AiPlan, PlanContext, Rejection, check_plan};
+use foodflow_domain::ai::plan::{AiItem, AiMeal, AiPlan, PlanContext, Rejection, check_plan};
 use foodflow_domain::nutrition::{Criterion, CriterionKind, Expression, Period};
 use foodflow_domain::planning::household::{self, Diner as DomainDiner, Preference};
 use foodflow_domain::planning::{ItemSource, MealStatus};
@@ -140,6 +140,34 @@ fn plan_schema(max_new: u32) -> Value {
             "new_recipes": { "type": "array", "items": recipe_schema(), "maxItems": max_new }
         }
     })
+}
+
+/// Lit un planning reçu. Un repas illisible est écarté et signalé, comme un repas invalide (R-PLA-67) ; une
+/// réponse qui n'est pas un planning est refusée avec sa cause (R-REC-82).
+pub fn read_plan(content: &str) -> AppResult<(AiPlan, Vec<Rejection>)> {
+    let invalid =
+        |detail: String| DomainError::AiFormat(format!("le planning ne suit pas le format demandé : {detail}"));
+    let value: Value = serde_json::from_str(content).map_err(|e| invalid(e.to_string()))?;
+    let meals = value.get("meals").and_then(Value::as_array).ok_or_else(|| invalid("aucune liste de repas".into()))?;
+    let mut kept = Vec::new();
+    let mut rejected = Vec::new();
+    for meal in meals {
+        match serde_json::from_value::<AiMeal>(meal.clone()) {
+            Ok(meal) => kept.push(meal),
+            Err(e) => rejected.push(Rejection {
+                date: meal.get("date").and_then(Value::as_str).and_then(|d| d.parse().ok()),
+                slot_id: meal.get("slot_id").and_then(|s| serde_json::from_value(s.clone()).ok()),
+                reason: format!("repas illisible : {e}"),
+            }),
+        }
+    }
+    let new_recipes = match value.get("new_recipes") {
+        None | Some(Value::Null) => Vec::new(),
+        Some(recipes) => {
+            serde_json::from_value(recipes.clone()).map_err(|e| invalid(format!("recettes nouvelles : {e}")))?
+        }
+    };
+    Ok((AiPlan { meals: kept, new_recipes }, rejected))
 }
 
 /// Construit la demande, à l'identique pour l'aperçu et pour l'envoi (R-PLA-66).
@@ -513,10 +541,10 @@ pub async fn generate(
         .complete(&config, &prepared.request)
         .await
         .map_err(|e| AppError::invalid("AI_UNAVAILABLE", e.to_string()))?;
-    let plan: AiPlan = serde_json::from_str(&content)
-        .map_err(|_| AppError::from(DomainError::AiResponse("le planning ne suit pas le format demandé")))?;
+    let (plan, unreadable) = read_plan(&content)?;
     let checked = check_plan(plan, &prepared.context);
-    let mut rejected = checked.rejected;
+    let mut rejected = unreadable;
+    rejected.extend(checked.rejected);
     let mut new_recipes = Vec::new();
     for (index, recipe) in &checked.new_recipes {
         match ai::draft_from(db, data, fetcher, photos, recipe).await {

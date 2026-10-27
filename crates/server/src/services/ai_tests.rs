@@ -198,7 +198,8 @@ async fn r_rec_82_invalid_answer_is_refused() {
         d(TODAY),
     )
     .await;
-    assert!(matches!(result, Err(AppError::Domain(foodflow_domain::DomainError::AiResponse(_)))), "{result:?}");
+    let error = result.unwrap_err().to_string();
+    assert!(error.starts_with("réponse de l'IA invalide : la recette ne suit pas le format demandé : "), "{error}");
 }
 
 /// Un planning par l'IA : éléments invalides écartés, recette nouvelle en brouillon, repas créés à
@@ -289,4 +290,27 @@ async fn r_rec_73_free_photo_for_a_recipe_without_image() {
     assert!(draft.has_image);
     assert_eq!(*photos.queries.lock().unwrap(), ["Soupe de courgettes"], "seul le nom part");
     assert!(!export::export(&db).await.unwrap().to_string().contains("photo-secret"), "la clé n'est pas exportée");
+}
+
+/// Un repas illisible est écarté et signalé sans faire refuser le planning ; une réponse qui n'est pas un
+/// planning est refusée avec sa cause (R-PLA-67, R-REC-82).
+#[test]
+fn r_pla_67_unreadable_meal_is_rejected_alone() {
+    let slot = "019a2b3c-0000-7000-8000-000000000001";
+    let content = json!({
+        "meals": [
+            { "date": "2026-11-02", "slot_id": slot, "items": [{ "recipe_id": null, "new_recipe": null, "lot_id": null }], "reason": "" },
+            { "date": "2026-11-03", "slot_id": slot, "items": [{ "recipe_id": "", "new_recipe": null, "lot_id": null }], "reason": "" }
+        ],
+        "new_recipes": []
+    });
+    let (plan, rejected) = ai_planning::read_plan(&content.to_string()).unwrap();
+    assert_eq!(plan.meals.len(), 1);
+    assert_eq!(rejected.len(), 1);
+    assert_eq!(rejected[0].date, Some(d("2026-11-03")));
+    assert!(rejected[0].reason.starts_with("repas illisible"), "{}", rejected[0].reason);
+
+    let truncated = r#"{"meals": [{"date": "2026-11-02""#;
+    let error = ai_planning::read_plan(truncated).unwrap_err().to_string();
+    assert!(error.starts_with("réponse de l'IA invalide : le planning ne suit pas le format demandé : EOF"), "{error}");
 }
