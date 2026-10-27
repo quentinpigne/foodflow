@@ -4,10 +4,17 @@
 
 use std::future::Future;
 use std::pin::Pin;
-use std::time::Duration;
+use std::time::{Duration, Instant};
 
 use anyhow::{Context, bail};
 use serde_json::{Value, json};
+
+/// Délai de réponse : la réponse n'arrive qu'une fois générée en entier, et un planning de la semaine, ou un
+/// modèle qui raisonne, prend plusieurs minutes.
+pub const TIMEOUT: Duration = Duration::from_secs(300);
+/// Un échec plus rapide, sans réponse, vient d'une connexion déjà fermée par le fournisseur : la demande n'a
+/// pas été traitée, et se refait une fois.
+const QUICK_FAILURE: Duration = Duration::from_secs(2);
 
 /// Taille maximale d'une réponse.
 const MAX_BYTES: usize = 2 * 1024 * 1024;
@@ -64,34 +71,75 @@ pub struct HttpAiClient {
 impl HttpAiClient {
     pub fn new() -> anyhow::Result<Self> {
         let client = reqwest::Client::builder()
-            // Une génération de menus prend du temps.
-            .timeout(Duration::from_secs(180))
+            .timeout(TIMEOUT)
             .connect_timeout(Duration::from_secs(10))
+            // Les fournisseurs ferment vite les connexions inactives : ne pas en réutiliser une trop ancienne.
+            .pool_idle_timeout(Duration::from_secs(20))
             .user_agent(concat!("Foodflow/", env!("CARGO_PKG_VERSION")))
             .build()?;
         Ok(Self { client })
     }
 
     async fn send(&self, config: &AiConfig, body: &Value) -> anyhow::Result<(reqwest::StatusCode, String)> {
-        let url = format!("{}/chat/completions", config.base_url.trim_end_matches('/'));
-        let mut response = self
-            .client
-            .post(url)
-            .bearer_auth(&config.api_key)
-            .header(reqwest::header::CONTENT_TYPE, "application/json")
-            .body(body.to_string())
-            .send()
-            .await
-            .context("IA injoignable")?;
+        let started = Instant::now();
+        let mut response = match self.post(config, body).await {
+            Err(error) if !error.is_timeout() && started.elapsed() < QUICK_FAILURE => {
+                tracing::warn!(error = describe(&error), "appel à l'IA refait après une connexion fermée");
+                self.post(config, body).await
+            }
+            result => result,
+        }
+        .map_err(|e| failure(&e, started))?;
         let status = response.status();
         let mut bytes = Vec::new();
-        while let Some(chunk) = response.chunk().await? {
+        while let Some(chunk) = response.chunk().await.map_err(|e| failure(&e, started))? {
             bytes.extend_from_slice(&chunk);
             if bytes.len() > MAX_BYTES {
                 bail!("réponse de l'IA trop volumineuse");
             }
         }
         Ok((status, String::from_utf8_lossy(&bytes).into_owned()))
+    }
+}
+
+impl HttpAiClient {
+    async fn post(&self, config: &AiConfig, body: &Value) -> reqwest::Result<reqwest::Response> {
+        let url = format!("{}/chat/completions", config.base_url.trim_end_matches('/'));
+        self.client
+            .post(url)
+            .bearer_auth(&config.api_key)
+            .header(reqwest::header::CONTENT_TYPE, "application/json")
+            .body(body.to_string())
+            .send()
+            .await
+    }
+}
+
+/// Cause d'une erreur de connexion, de la plus générale à la plus précise.
+fn describe(error: &reqwest::Error) -> String {
+    let mut text = error.to_string();
+    let mut source = std::error::Error::source(error);
+    while let Some(cause) = source {
+        text.push_str(" : ");
+        text.push_str(&cause.to_string());
+        source = cause.source();
+    }
+    text
+}
+
+/// Message d'un appel sans réponse, journalisé avec sa cause et sa durée (jamais le contenu ni la clé).
+fn failure(error: &reqwest::Error, started: Instant) -> anyhow::Error {
+    let seconds = started.elapsed().as_secs();
+    tracing::warn!(error = describe(error), seconds, "appel à l'IA sans réponse");
+    if error.is_timeout() {
+        anyhow::anyhow!(
+            "l'IA n'a pas répondu en {} s : réessayer, ou choisir un modèle plus rapide dans les réglages",
+            TIMEOUT.as_secs()
+        )
+    } else if error.is_connect() {
+        anyhow::anyhow!("IA injoignable (connexion impossible) : {}", describe(error))
+    } else {
+        anyhow::anyhow!("connexion à l'IA interrompue après {seconds} s : {}", describe(error))
     }
 }
 
@@ -173,6 +221,44 @@ mod tests {
         assert_eq!(strict["messages"][1]["content"], "u");
         assert_eq!(body(&config, &request, false)["response_format"]["type"], "json_object");
         assert!(!strict.to_string().contains("\"k\""), "la clé ne va que dans l'en-tête");
+    }
+
+    /// Une connexion fermée sans réponse (connexion inactive coupée par le fournisseur) se refait une fois ;
+    /// l'échec suivant donne sa cause, jamais un simple « injoignable ». Faux fournisseur sur la boucle locale.
+    #[tokio::test]
+    async fn closed_connection_is_retried_once() {
+        use tokio::io::{AsyncReadExt, AsyncWriteExt};
+        let listener = tokio::net::TcpListener::bind("127.0.0.1:0").await.unwrap();
+        let config = AiConfig {
+            base_url: format!("http://{}/v1", listener.local_addr().unwrap()),
+            model: "m".into(),
+            api_key: "k".into(),
+        };
+        let server = tokio::spawn(async move {
+            // Première connexion : fermée dès la demande lue ; seconde : une réponse.
+            let (mut first, _) = listener.accept().await.unwrap();
+            let _ = first.read(&mut [0; 4096]).await;
+            drop(first);
+            let (mut second, _) = listener.accept().await.unwrap();
+            let _ = second.read(&mut [0; 65536]).await;
+            let body = r#"{"choices":[{"message":{"content":"{}"}}]}"#;
+            let reply = format!(
+                "HTTP/1.1 200 OK\r\ncontent-type: application/json\r\ncontent-length: {}\r\nconnection: close\r\n\r\n{body}",
+                body.len()
+            );
+            second.write_all(reply.as_bytes()).await.unwrap();
+            // Troisième et quatrième : fermées, l'échec remonte.
+            for _ in 0..2 {
+                let (mut stream, _) = listener.accept().await.unwrap();
+                let _ = stream.read(&mut [0; 4096]).await;
+            }
+        });
+        let request = AiRequest { system: "s".into(), user: "u".into(), schema_name: "r".into(), schema: json!({}) };
+        let client = HttpAiClient::new().unwrap();
+        assert_eq!(client.complete(&config, &request).await.unwrap(), "{}");
+        let error = client.complete(&config, &request).await.unwrap_err().to_string();
+        assert!(error.starts_with("connexion à l'IA interrompue"), "{error}");
+        server.await.unwrap();
     }
 
     #[test]
