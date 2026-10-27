@@ -1,7 +1,9 @@
 //! Référentiel chargé en mémoire : familles, aliments et produits, avec la résolution des réglages hérités
-//! (R-ALI-2). Quelques milliers de lignes au plus : on le charge à chaque cas d'usage qui en a besoin.
+//! (R-ALI-2). Quelques milliers de lignes, que presque chaque cas d'usage consulte : il est gardé en mémoire et
+//! relu seulement quand sa version (`catalog_version`, tenue par des déclencheurs) a changé.
 
 use std::collections::HashMap;
+use std::sync::{Arc, Mutex};
 
 use foodflow_domain::foods::groups::{ancestors, resolve};
 use foodflow_domain::foods::{NutritionGroup, TrackingMode};
@@ -64,8 +66,32 @@ pub struct Catalog {
     pub products: HashMap<ProductId, ProductRow>,
 }
 
+/// Référentiels gardés en mémoire, par fichier de base : version et contenu.
+type Cache = HashMap<String, (i64, Arc<Catalog>)>;
+static CACHE: Mutex<Option<Cache>> = Mutex::new(None);
+
 impl Catalog {
-    pub async fn load(conn: &mut SqliteConnection) -> anyhow::Result<Self> {
+    /// Le référentiel tel que la connexion le voit : celui en mémoire s'il est à jour, sinon relu.
+    pub async fn load(conn: &mut SqliteConnection) -> anyhow::Result<Arc<Self>> {
+        let file = db::catalog::file(&mut *conn).await?;
+        let version = db::catalog::version(&mut *conn).await?;
+        if !file.is_empty()
+            && let Ok(cache) = CACHE.lock()
+            && let Some((cached, catalog)) = cache.as_ref().and_then(|c| c.get(&file))
+            && *cached == version
+        {
+            return Ok(Arc::clone(catalog));
+        }
+        let catalog = Arc::new(Self::read(&mut *conn).await?);
+        if !file.is_empty()
+            && let Ok(mut cache) = CACHE.lock()
+        {
+            cache.get_or_insert_default().insert(file, (version, Arc::clone(&catalog)));
+        }
+        Ok(catalog)
+    }
+
+    async fn read(conn: &mut SqliteConnection) -> anyhow::Result<Self> {
         let groups: HashMap<_, _> = db::groups::list(&mut *conn).await?.into_iter().map(|g| (g.id, g)).collect();
         let parents = groups.values().map(|g| (g.id, g.parent_id)).collect();
         let foods = db::foods::list(&mut *conn).await?.into_iter().map(|f| (f.id, f)).collect();
@@ -115,5 +141,40 @@ impl Catalog {
             .collect();
         names.reverse();
         names.join(" › ")
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    async fn name(conn: &mut SqliteConnection, food: FoodId) -> String {
+        Catalog::load(conn).await.unwrap().foods[&food].name.clone()
+    }
+
+    /// Le référentiel en mémoire suit chaque écriture, y compris dans une transaction, et une transaction
+    /// annulée ne laisse pas sa version en mémoire.
+    #[tokio::test]
+    async fn cache_follows_writes_and_rollbacks() {
+        let (db, _dir) = db::test_db().await;
+        crate::services::demo::load(&db, "2026-10-25".parse().unwrap()).await.unwrap();
+        let mut read = db.read.acquire().await.unwrap();
+        let first = Catalog::load(&mut read).await.unwrap();
+        let again = Catalog::load(&mut read).await.unwrap();
+        assert!(Arc::ptr_eq(&first, &again), "relu de la mémoire");
+        let food = *first.foods.keys().next().unwrap();
+        let rename =
+            |name: &'static str| sqlx::query("UPDATE food SET name = ? WHERE id = ?").bind(name).bind(food.to_string());
+
+        rename("Renommé").execute(&db.write).await.unwrap();
+        assert_eq!(name(&mut read, food).await, "Renommé");
+
+        let mut tx = db.write.begin().await.unwrap();
+        rename("Annulé").execute(&mut *tx).await.unwrap();
+        assert_eq!(name(&mut tx, food).await, "Annulé", "la transaction voit ses écritures");
+        tx.rollback().await.unwrap();
+        assert_eq!(name(&mut read, food).await, "Renommé", "rien de la transaction annulée");
+        let mut write = db.write.acquire().await.unwrap();
+        assert_eq!(name(&mut write, food).await, "Renommé");
     }
 }

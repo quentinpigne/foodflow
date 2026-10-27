@@ -1,0 +1,26 @@
+{
+  "db_name": "SQLite",
+  "query": "SELECT version FROM catalog_version WHERE id = 1",
+  "describe": {
+    "columns": [
+      {
+        "name": "version",
+        "ordinal": 0,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "catalog_version",
+            "name": "version"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Right": 0
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "61880151bb5c0220615141799e4c8f1dc16171b9d636f0e7478773d37a8f0709"
+}

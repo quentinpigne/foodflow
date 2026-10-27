@@ -1,6 +1,7 @@
 //! Accès à la base SQLite : connexion, migrations et requêtes, par module.
 
 pub mod auth;
+pub mod catalog;
 pub mod codec;
 pub mod export;
 pub mod foods;

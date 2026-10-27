@@ -190,6 +190,12 @@ ses couches dans des dossiers visibles (demande du propriétaire, 2026-10-25) :
 handlers ne calculent pas et n'exécutent pas de requête ; les services ne contiennent pas de calcul métier
 (il va dans `domain`). Les modules restent en fichiers homonymes (`routes.rs` + `routes/`), sans `mod.rs`.
 
+Le **référentiel** (familles, aliments, produits : quelques milliers de lignes, consultées par presque chaque
+cas d'usage) est gardé en mémoire par `services/catalog.rs` et relu seulement quand sa version change. La
+table `catalog_version` est tenue par des déclencheurs SQLite sur ces trois tables, avec une valeur
+aléatoire : aucune écriture ne peut l'oublier, et une transaction annulée ne réutilise jamais une version mise
+en mémoire. Le relire à chaque appel coûtait plus d'une seconde quand une page lançait plusieurs appels.
+
 ### Dépendances propres à Foodflow
 
 - `domain` : mêmes dépendances autorisées que Cashflow (`rust_decimal`, `chrono`, `uuid`, `serde`,

@@ -2,6 +2,7 @@
 //! REC-01 à REC-03, REC-05, REC-06, REC-09, REC-12, REC-16).
 
 use std::collections::{BTreeMap, HashMap, HashSet};
+use std::sync::Arc;
 
 use foodflow_domain::foods::NutritionGroup;
 use foodflow_domain::foods::conversion::{FoodConversions, convert_exact};
@@ -31,7 +32,7 @@ use crate::error::{AppError, AppResult};
 
 /// Tout ce qu'il faut pour calculer : référentiel, recettes, unités, et le livre du domaine.
 pub struct Kitchen {
-    pub catalog: Catalog,
+    pub catalog: Arc<Catalog>,
     pub recipes: Vec<RecipeRow>,
     pub ingredients: Vec<IngredientRow>,
     pub tags: Vec<(RecipeId, String)>,

@@ -4,6 +4,7 @@
 //! mouvements, puis remet à jour les copies de lecture du lot (`depleted`, dates d'ouverture…).
 
 use std::collections::HashMap;
+use std::sync::Arc;
 
 use foodflow_domain::foods::TrackingMode;
 use foodflow_domain::shared::ids::{BatchId, FoodId, LocationId, LotId, MovementId, ProductId, RecipeId};
@@ -104,7 +105,7 @@ pub struct LotQuery {
 
 /// Ce qu'il faut pour présenter des lots : référentiel, emplacements, réglages.
 pub struct Context {
-    catalog: Catalog,
+    catalog: Arc<Catalog>,
     recipes: HashMap<RecipeId, String>,
     locations: HashMap<LocationId, LocationRow>,
     soon_days: u32,
