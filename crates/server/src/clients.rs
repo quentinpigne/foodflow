@@ -2,4 +2,5 @@
 //! les tests : aucun test n'appelle le réseau.
 
 pub mod ai;
+pub mod photos;
 pub mod web;

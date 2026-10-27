@@ -113,8 +113,13 @@ async fn main() -> anyhow::Result<()> {
             let clock = today.map_or(Clock::System, Clock::Fixed);
             let fetcher = Arc::new(clients::web::HttpFetcher::new()?);
             let ai = Arc::new(clients::ai::HttpAiClient::new()?);
-            serve(AppState { db, clock, data, limiter: Arc::default(), secure_cookies, fetcher, ai }, addr, web_dir)
-                .await
+            let photos = Arc::new(clients::photos::PixabayClient::new()?);
+            serve(
+                AppState { db, clock, data, limiter: Arc::default(), secure_cookies, fetcher, ai, photos },
+                addr,
+                web_dir,
+            )
+            .await
         }
         Command::Migrate => {
             open(&data).await?;

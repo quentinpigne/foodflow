@@ -16,6 +16,7 @@ use utoipa::ToSchema;
 
 use super::images;
 use super::recipes::{Kitchen, RecipeInput, RecipeRef, Step};
+use crate::clients::photos::PhotoSearch;
 use crate::clients::web::{Fetcher, check_url};
 use crate::clock::timestamp;
 use crate::config::DataDir;
@@ -229,7 +230,13 @@ fn existing(kitchen: &Kitchen, url: Option<&str>) -> Vec<RecipeRef> {
 }
 
 /// Lance un import : télécharge la page (ou lit le JSON-LD fourni), analyse, et crée un brouillon (R-REC-61).
-pub async fn start(db: &Db, data: &DataDir, fetcher: &dyn Fetcher, input: &StartImport) -> AppResult<RecipeDraft> {
+pub async fn start(
+    db: &Db,
+    data: &DataDir,
+    fetcher: &dyn Fetcher,
+    photos: &dyn PhotoSearch,
+    input: &StartImport,
+) -> AppResult<RecipeDraft> {
     let url = input.url.as_deref().map(str::trim).filter(|u| !u.is_empty());
     if let Some(url) = url {
         check_url(url).map_err(|e| AppError::invalid_field("INVALID_URL", "url", e.to_string()))?;
@@ -291,6 +298,10 @@ pub async fn start(db: &Db, data: &DataDir, fetcher: &dyn Fetcher, input: &Start
         && let Ok(fetched) = fetcher.get(image).await
     {
         image_path = images::store(data, &format!("draft-{id}"), fetched.content_type.as_deref(), &fetched.body).ok();
+    }
+    // Sans image, une photo libre est cherchée d'après le nom, si le réglage l'active (R-REC-73).
+    if image_path.is_none() {
+        image_path = super::photos::find(db, data, fetcher, photos, &format!("draft-{id}"), &payload.name).await;
     }
     let row = DraftRow {
         id,
@@ -379,6 +390,7 @@ mod tests {
     use std::collections::HashMap;
 
     use super::*;
+    use crate::clients::photos::StaticPhotoSearch;
     use crate::clients::web::{Fetched, StaticFetcher};
     use crate::services::recipes::{self, IngredientInput};
     use crate::services::{demo, seed};
@@ -449,7 +461,7 @@ mod tests {
         demo::load(&db, "2026-10-25".parse().unwrap()).await.unwrap();
         let start_input = StartImport { url: Some("https://exemple.test/gratin".into()), json_ld: None };
         let before = recipes::search(&db, &Default::default()).await.unwrap().len();
-        let draft = start(&db, &data, &fetcher(), &start_input).await.unwrap();
+        let draft = start(&db, &data, &fetcher(), &StaticPhotoSearch::default(), &start_input).await.unwrap();
         assert_eq!(
             recipes::search(&db, &Default::default()).await.unwrap().len(),
             before,
@@ -495,7 +507,7 @@ mod tests {
         assert!(list(&db).await.unwrap().is_empty(), "le brouillon validé disparaît");
 
         // Réimport : la même adresse est signalée, et les rattachements validés reviennent en confiance haute.
-        let again = start(&db, &data, &fetcher(), &start_input).await.unwrap();
+        let again = start(&db, &data, &fetcher(), &StaticPhotoSearch::default(), &start_input).await.unwrap();
         assert_eq!(again.existing.len(), 1, "R-REC-67");
         assert!(
             again
@@ -514,10 +526,10 @@ mod tests {
         seed::run(&db).await.unwrap();
         let data = DataDir::new(dir.path());
         let input = StartImport { url: Some("https://exemple.test/rien".into()), json_ld: None };
-        let result = start(&db, &data, &fetcher(), &input).await;
+        let result = start(&db, &data, &fetcher(), &StaticPhotoSearch::default(), &input).await;
         assert!(matches!(result, Err(AppError::Invalid { code: "NO_RECIPE_DATA", .. })));
         assert!(list(&db).await.unwrap().is_empty());
         let bad = StartImport { url: Some("file:///etc/passwd".into()), json_ld: None };
-        assert!(start(&db, &data, &fetcher(), &bad).await.is_err());
+        assert!(start(&db, &data, &fetcher(), &StaticPhotoSearch::default(), &bad).await.is_err());
     }
 }

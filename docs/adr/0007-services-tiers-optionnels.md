@@ -11,6 +11,7 @@ Plusieurs fonctions gagnent à appeler un service extérieur :
 - **Open Food Facts** : décrire un produit à partir de son code-barres ;
 - **sites de recettes** : télécharger une page pour en extraire la recette ;
 - **IA** (API compatible OpenAI, ADR-0014) : proposer des menus à partir des recettes, du stock et des objectifs ;
+- **photos libres** (Pixabay) : trouver une photo pour une recette créée sans image (R-REC-73) ;
 - **notifications push** (Web Push) : prévenir le téléphone de ce qui périme, via le service de
   notification de son navigateur (spec 07).
 
@@ -29,7 +30,8 @@ Option 3.
 
 - Chaque service a un **interrupteur** dans les réglages. Open Food Facts et l'import par URL sont activés
   par défaut (ils n'envoient qu'un code-barres ou une URL) ; **l'IA est désactivée par défaut** et
-  demande une clé d'API.
+  demande une clé d'API. Les photos libres sont désactivées par défaut et demandent une clé Pixabay
+  (gratuite) ; elles n'envoient que le nom de la recette, à la création d'un brouillon sans image.
 - **Chaque appel est déclenché par une action de l'utilisateur** (scanner, importer, demander des menus),
   jamais en tâche de fond.
 - Pour l'IA, **les données envoyées sont affichées avant l'envoi** et limitées au nécessaire : recettes
@@ -46,6 +48,7 @@ Option 3.
 
 ## Conséquences
 
-- Hors connexion à Internet, tout fonctionne sauf le scan d'un produit inconnu, l'import par URL et l'IA.
+- Hors connexion à Internet, tout fonctionne sauf le scan d'un produit inconnu, l'import par URL, l'IA et
+  les photos libres.
 - Les clés d'API sont dans la configuration du serveur, jamais dans le dépôt ni dans la base exportée.
 - Le format d'échange avec l'IA est décrit par l'ADR-0014 ; le modèle est un réglage du serveur.

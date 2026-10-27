@@ -18,7 +18,8 @@ pub async fn start(
     State(state): State<AppState>,
     Json(input): Json<StartImport>,
 ) -> AppResult<(StatusCode, Json<RecipeDraft>)> {
-    let draft = recipe_import::start(&state.db, &state.data, state.fetcher.as_ref(), &input).await?;
+    let draft =
+        recipe_import::start(&state.db, &state.data, state.fetcher.as_ref(), state.photos.as_ref(), &input).await?;
     Ok((StatusCode::CREATED, Json(draft)))
 }
 

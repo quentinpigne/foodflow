@@ -21,6 +21,7 @@ use super::meals::{Planner, create_from_template};
 use super::recipes::Kitchen;
 use super::stock::{self, LotQuery};
 use crate::clients::ai::{AiClient, AiRequest};
+use crate::clients::photos::PhotoSearch;
 use crate::clients::web::Fetcher;
 use crate::config::DataDir;
 use crate::db::generation::{RunId, RunRow};
@@ -496,6 +497,7 @@ pub async fn generate(
     db: &Db,
     data: &DataDir,
     fetcher: &dyn Fetcher,
+    photos: &dyn PhotoSearch,
     ai_client: &dyn AiClient,
     input: &PlanIdeaInput,
     today: Date,
@@ -517,7 +519,7 @@ pub async fn generate(
     let mut rejected = checked.rejected;
     let mut new_recipes = Vec::new();
     for (index, recipe) in &checked.new_recipes {
-        match ai::draft_from(db, data, fetcher, recipe).await {
+        match ai::draft_from(db, data, fetcher, photos, recipe).await {
             Ok(draft) => new_recipes.push(NewRecipe {
                 index: *index,
                 name: recipe.name.clone(),

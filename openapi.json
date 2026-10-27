@@ -3606,6 +3606,54 @@
         }
       }
     },
+    "/api/v1/settings/photos": {
+      "get": {
+        "tags": [
+          "system"
+        ],
+        "summary": "Réglages des photos libres des recettes ; la clé n'est jamais renvoyée (R-REC-73).",
+        "operationId": "getPhotoSettings",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PhotoSettings"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "system"
+        ],
+        "operationId": "updatePhotoSettings",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PhotoSettingsInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {},
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/system/info": {
       "get": {
         "tags": [
@@ -7084,6 +7132,46 @@
           "DAY",
           "WEEK"
         ]
+      },
+      "PhotoSettings": {
+        "type": "object",
+        "description": "Réglages des photos, tels que l'interface les voit : la clé n'est jamais renvoyée.",
+        "required": [
+          "enabled",
+          "has_key",
+          "ready"
+        ],
+        "properties": {
+          "enabled": {
+            "type": "boolean"
+          },
+          "has_key": {
+            "type": "boolean",
+            "description": "Une clé est enregistrée."
+          },
+          "ready": {
+            "type": "boolean",
+            "description": "Activée, avec une clé : utilisable."
+          }
+        }
+      },
+      "PhotoSettingsInput": {
+        "type": "object",
+        "required": [
+          "enabled"
+        ],
+        "properties": {
+          "api_key": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Absente : la clé enregistrée est gardée ; vide : elle est effacée."
+          },
+          "enabled": {
+            "type": "boolean"
+          }
+        }
       },
       "Plan": {
         "type": "object",

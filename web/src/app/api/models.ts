@@ -120,6 +120,8 @@ export type { NutritionAssessment } from './models/nutrition-assessment';
 export type { NutritionGoalId } from './models/nutrition-goal-id';
 export type { NutritionGroup } from './models/nutrition-group';
 export type { Period } from './models/period';
+export type { PhotoSettings } from './models/photo-settings';
+export type { PhotoSettingsInput } from './models/photo-settings-input';
 export type { Plan } from './models/plan';
 export type { PlanDay } from './models/plan-day';
 export type { PlanIdeaInput } from './models/plan-idea-input';

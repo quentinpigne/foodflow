@@ -8,6 +8,7 @@ use foodflow_domain::recipes::matching::Confidence;
 use super::recipe_import::{self, StartImport};
 use super::recipes::{self, RecipeQuery, RecipeSummary};
 use super::{demo, foods};
+use crate::clients::photos::StaticPhotoSearch;
 use crate::config::DataDir;
 use crate::db::{self, Db};
 use crate::error::AppError;
@@ -198,10 +199,15 @@ async fn r_rec_70_export_and_reimport() {
     let exported = recipes::json_ld(&db, gratin.id).await.unwrap();
     assert_eq!(exported["recipeIngredient"][0], "1000 g Courgette");
     let fetcher = crate::clients::web::StaticFetcher { pages: Default::default() };
-    let draft =
-        recipe_import::start(&db, &data, &fetcher, &StartImport { url: None, json_ld: Some(exported.to_string()) })
-            .await
-            .unwrap();
+    let draft = recipe_import::start(
+        &db,
+        &data,
+        &fetcher,
+        &StaticPhotoSearch::default(),
+        &StartImport { url: None, json_ld: Some(exported.to_string()) },
+    )
+    .await
+    .unwrap();
     let zucchini = draft.payload.lines.iter().find(|l| l.name == "Courgette").unwrap();
     assert_eq!(zucchini.confidence, Confidence::High, "nom identique");
     assert_eq!(zucchini.quantity.as_deref(), Some("1000"));
@@ -223,10 +229,13 @@ async fn r_rec_72_json_ld_sent_with_page_url() {
     ]);
     let input =
         StartImport { url: Some("https://exemple.test/recettes/soupe".into()), json_ld: Some(scripts.to_string()) };
-    let draft = recipe_import::start(&db, &data, &fetcher, &input).await.unwrap();
+    let draft = recipe_import::start(&db, &data, &fetcher, &StaticPhotoSearch::default(), &input).await.unwrap();
     assert_eq!(draft.payload.name, "Soupe envoyée");
     assert_eq!(draft.source_url.as_deref(), Some("https://exemple.test/recettes/soupe"));
 
     let invalid = StartImport { url: Some("ftp://exemple.test".into()), json_ld: Some(scripts.to_string()) };
-    assert!(recipe_import::start(&db, &data, &fetcher, &invalid).await.is_err(), "adresse vérifiée");
+    assert!(
+        recipe_import::start(&db, &data, &fetcher, &StaticPhotoSearch::default(), &invalid).await.is_err(),
+        "adresse vérifiée"
+    );
 }

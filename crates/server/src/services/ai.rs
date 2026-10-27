@@ -19,6 +19,7 @@ use super::recipe_import::{self, RecipeDraft, StartImport};
 use super::recipes::Kitchen;
 use super::stock::{self, Lot, LotQuery};
 use crate::clients::ai::{AiClient, AiConfig, AiRequest};
+use crate::clients::photos::PhotoSearch;
 use crate::clients::web::{Fetcher, check_url};
 use crate::config::DataDir;
 use crate::db::{self, Db};
@@ -414,9 +415,15 @@ pub fn parse_recipe(content: &str) -> AppResult<AiRecipe> {
 }
 
 /// Fait de la recette reçue un brouillon, relu comme un import (R-REC-82).
-pub async fn draft_from(db: &Db, data: &DataDir, fetcher: &dyn Fetcher, recipe: &AiRecipe) -> AppResult<RecipeDraft> {
+pub async fn draft_from(
+    db: &Db,
+    data: &DataDir,
+    fetcher: &dyn Fetcher,
+    photos: &dyn PhotoSearch,
+    recipe: &AiRecipe,
+) -> AppResult<RecipeDraft> {
     let input = StartImport { url: None, json_ld: Some(json_ld(recipe).to_string()) };
-    recipe_import::start(db, data, fetcher, &input).await
+    recipe_import::start(db, data, fetcher, photos, &input).await
 }
 
 /// Demande une recette à l'IA ; elle arrive en brouillon (REC-19).
@@ -424,6 +431,7 @@ pub async fn create_recipe(
     db: &Db,
     data: &DataDir,
     fetcher: &dyn Fetcher,
+    photos: &dyn PhotoSearch,
     ai: &dyn AiClient,
     input: &RecipeIdeaInput,
     today: Date,
@@ -438,5 +446,5 @@ pub async fn create_recipe(
     let content =
         ai.complete(&config, &request).await.map_err(|e| AppError::invalid("AI_UNAVAILABLE", e.to_string()))?;
     let recipe = parse_recipe(&content)?;
-    draft_from(db, data, fetcher, &recipe).await
+    draft_from(db, data, fetcher, photos, &recipe).await
 }

@@ -81,6 +81,7 @@ Langage commun du projet. Chaque terme métier a **un seul** nom français (docu
 | Aliment de référence | `reference food` | Aliment d'une famille qui fournit valeurs et prix d'un ingrédient « au choix ». |
 | Étape | `RecipeStep` | Instruction de recette, avec un minuteur facultatif. |
 | Brouillon de recette | `RecipeDraft` | Recette importée en attente de revue. |
+| Photo libre | `photos` | Photo de Pixabay trouvée d'après le nom d'une recette créée sans image (R-REC-73). |
 | Rattachement mémorisé | `IngredientMapping` | Lien validé entre un nom d'ingrédient importé et un aliment, une famille ou une recette. |
 | Confiance | `MatchConfidence` | Qualité d'un rattachement proposé : `HIGH`, `MEDIUM`, `LOW`, `NONE`. |
 | Sous-recette | `sub-recipe` | Recette utilisée comme ingrédient d'une autre (sauce tomate maison, pâte brisée). |

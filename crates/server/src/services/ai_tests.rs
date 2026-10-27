@@ -6,11 +6,13 @@ use serde_json::json;
 
 use super::ai::{self, AiProvider, AiSettingsInput, RecipeIdeaInput, RecipeIdeaMode};
 use super::ai_planning::{self, AcceptInput, PlanIdeaInput};
+use super::photos::PhotoSettingsInput;
 use super::recipe_import;
 use super::recipes::{self, RecipeQuery};
 use super::{demo, export, meals};
 use crate::clients::ai::StaticAiClient;
-use crate::clients::web::StaticFetcher;
+use crate::clients::photos::StaticPhotoSearch;
+use crate::clients::web::{Fetched, StaticFetcher};
 use crate::config::DataDir;
 use crate::db::{self, Db};
 use crate::error::AppError;
@@ -133,7 +135,8 @@ async fn r_rec_80_83_recipe_from_prompt() {
     let input =
         RecipeIdeaInput { mode: RecipeIdeaMode::Prompt, prompt: Some("une soupe d'automne".into()), recipe_id: None };
     let client = StaticAiClient::new(vec![soup().to_string(), soup().to_string()]);
-    let disabled = ai::create_recipe(&db, &data, &fetcher(), &client, &input, d(TODAY)).await;
+    let disabled =
+        ai::create_recipe(&db, &data, &fetcher(), &StaticPhotoSearch::default(), &client, &input, d(TODAY)).await;
     assert!(matches!(disabled, Err(AppError::Invalid { code: "AI_DISABLED", .. })));
     ai::update_settings(&db, &settings(Some("k"), 1)).await.unwrap();
 
@@ -143,14 +146,17 @@ async fn r_rec_80_83_recipe_from_prompt() {
     assert!(!preview.user.contains("Alex") && !preview.user.contains("Lou"), "jamais de nom (ADR-0007)");
     assert!(preview.user.ends_with("Propose une recette : une soupe d'automne"));
 
-    let draft = ai::create_recipe(&db, &data, &fetcher(), &client, &input, d(TODAY)).await.unwrap();
+    let draft = ai::create_recipe(&db, &data, &fetcher(), &StaticPhotoSearch::default(), &client, &input, d(TODAY))
+        .await
+        .unwrap();
     assert_eq!(draft.payload.name, "Soupe de courgettes");
     assert_eq!(draft.payload.portions.as_deref(), Some("4"));
     assert!(draft.payload.lines.iter().any(|l| l.target_name.as_deref() == Some("Courgette")));
     let first_sent = client.requests.lock().unwrap()[0].user.clone();
     assert_eq!(first_sent, preview.user, "l'aperçu est exactement ce qui part");
     assert_eq!(ai::get_settings(&db, d(TODAY)).await.unwrap().used_this_month, 1);
-    let limited = ai::create_recipe(&db, &data, &fetcher(), &client, &input, d(TODAY)).await;
+    let limited =
+        ai::create_recipe(&db, &data, &fetcher(), &StaticPhotoSearch::default(), &client, &input, d(TODAY)).await;
     assert!(matches!(limited, Err(AppError::Invalid { code: "AI_LIMIT", .. })), "plafond de 1 appel (R-REC-83)");
 }
 
@@ -182,7 +188,16 @@ async fn r_rec_82_invalid_answer_is_refused() {
     ai::update_settings(&db, &settings(Some("k"), 10)).await.unwrap();
     let input = RecipeIdeaInput { mode: RecipeIdeaMode::Prompt, prompt: Some("un dessert".into()), recipe_id: None };
     let client = StaticAiClient::new(vec![json!({ "name": "Rien" }).to_string()]);
-    let result = ai::create_recipe(&db, &DataDir::new(dir.path()), &fetcher(), &client, &input, d(TODAY)).await;
+    let result = ai::create_recipe(
+        &db,
+        &DataDir::new(dir.path()),
+        &fetcher(),
+        &StaticPhotoSearch::default(),
+        &client,
+        &input,
+        d(TODAY),
+    )
+    .await;
     assert!(matches!(result, Err(AppError::Domain(foodflow_domain::DomainError::AiResponse(_)))), "{result:?}");
 }
 
@@ -216,7 +231,10 @@ async fn r_pla_64_66_67_plan_with_new_recipe() {
         "new_recipes": [soup()]
     });
     let client = StaticAiClient::new(vec![answer.to_string()]);
-    let proposal = ai_planning::generate(&db, &data, &fetcher(), &client, &input, d(TODAY)).await.unwrap();
+    let proposal =
+        ai_planning::generate(&db, &data, &fetcher(), &StaticPhotoSearch::default(), &client, &input, d(TODAY))
+            .await
+            .unwrap();
     assert_eq!(proposal.meals.len(), 2);
     assert_eq!(proposal.rejected.len(), 2, "créneau non demandé, doublon : {:?}", proposal.rejected);
     assert!(proposal.meals[0].ready && !proposal.meals[1].ready);
@@ -239,4 +257,36 @@ async fn r_pla_64_66_67_plan_with_new_recipe() {
     let second = ai_planning::accept(&db, proposal.id, &AcceptInput { meals: vec![] }, d(TODAY)).await.unwrap();
     assert_eq!((second.accepted, second.skipped.len()), (1, 0));
     assert_eq!(ai_planning::get(&db, proposal.id, d(TODAY)).await.unwrap().status, "ACCEPTED");
+}
+
+/// Une recette sans image reçoit une photo libre cherchée d'après son nom, seulement si le réglage est actif ;
+/// la clé n'est ni renvoyée ni exportée (R-REC-73).
+#[tokio::test]
+async fn r_rec_73_free_photo_for_a_recipe_without_image() {
+    let (db, dir) = setup().await;
+    let data = DataDir::new(dir.path());
+    ai::update_settings(&db, &settings(Some("k"), 10)).await.unwrap();
+    let input = RecipeIdeaInput { mode: RecipeIdeaMode::Prompt, prompt: Some("une soupe".into()), recipe_id: None };
+    let client = StaticAiClient::new(vec![soup().to_string(), soup().to_string()]);
+    let image = "https://cdn.pixabay.test/soupe.jpg";
+    let photos = StaticPhotoSearch { image: Some(image.into()), ..Default::default() };
+    let mut pages = std::collections::HashMap::new();
+    pages.insert(
+        image.to_owned(),
+        Fetched { body: vec![0xFF, 0xD8, 0xFF, 0xE0, 0, 0], content_type: Some("image/jpeg".into()) },
+    );
+    let fetcher = StaticFetcher { pages };
+
+    let draft = ai::create_recipe(&db, &data, &fetcher, &photos, &client, &input, d(TODAY)).await.unwrap();
+    assert!(!draft.has_image, "réglage désactivé par défaut");
+    assert!(photos.queries.lock().unwrap().is_empty(), "aucun appel sans le réglage");
+
+    let enable = PhotoSettingsInput { enabled: true, api_key: Some("photo-secret".into()) };
+    super::photos::update_settings(&db, &enable).await.unwrap();
+    let settings = super::photos::get_settings(&db).await.unwrap();
+    assert!(settings.ready && settings.has_key);
+    let draft = ai::create_recipe(&db, &data, &fetcher, &photos, &client, &input, d(TODAY)).await.unwrap();
+    assert!(draft.has_image);
+    assert_eq!(*photos.queries.lock().unwrap(), ["Soupe de courgettes"], "seul le nom part");
+    assert!(!export::export(&db).await.unwrap().to_string().contains("photo-secret"), "la clé n'est pas exportée");
 }

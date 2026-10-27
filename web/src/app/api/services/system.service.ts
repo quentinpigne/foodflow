@@ -13,14 +13,19 @@ import { StrictHttpResponse } from '../strict-http-response';
 import { AppSettings } from '../models/app-settings';
 import { exportAll } from '../fn/system/export-all';
 import { ExportAll$Params } from '../fn/system/export-all';
+import { getPhotoSettings } from '../fn/system/get-photo-settings';
+import { GetPhotoSettings$Params } from '../fn/system/get-photo-settings';
 import { getSettings } from '../fn/system/get-settings';
 import { GetSettings$Params } from '../fn/system/get-settings';
 import { health } from '../fn/system/health';
 import { Health } from '../models/health';
 import { Health$Params } from '../fn/system/health';
+import { PhotoSettings } from '../models/photo-settings';
 import { systemInfo } from '../fn/system/system-info';
 import { SystemInfo } from '../models/system-info';
 import { SystemInfo$Params } from '../fn/system/system-info';
+import { updatePhotoSettings } from '../fn/system/update-photo-settings';
+import { UpdatePhotoSettings$Params } from '../fn/system/update-photo-settings';
 import { updateSettings } from '../fn/system/update-settings';
 import { UpdateSettings$Params } from '../fn/system/update-settings';
 
@@ -161,6 +166,68 @@ export class SystemService extends BaseService {
    */
   updateSettings(params: UpdateSettings$Params, context?: HttpContext): Observable<void> {
     const resp = this.updateSettings$Response(params, context);
+    return resp.pipe(
+      map((r: StrictHttpResponse<void>): void => r.body)
+    );
+  }
+
+  /** Path part for operation `getPhotoSettings()` */
+  static readonly GetPhotoSettingsPath = '/api/v1/settings/photos';
+
+  /**
+   * Réglages des photos libres des recettes ; la clé n'est jamais renvoyée (R-REC-73).
+   *
+   *
+   *
+   * This method provides access to the full `HttpResponse`, allowing access to response headers.
+   * To access only the response body, use `getPhotoSettings()` instead.
+   *
+   * This method doesn't expect any request body.
+   */
+  getPhotoSettings$Response(params?: GetPhotoSettings$Params, context?: HttpContext): Observable<StrictHttpResponse<PhotoSettings>> {
+    const obs = getPhotoSettings(this.http, this.rootUrl, params, context);
+    return obs;
+  }
+
+  /**
+   * Réglages des photos libres des recettes ; la clé n'est jamais renvoyée (R-REC-73).
+   *
+   *
+   *
+   * This method provides access only to the response body.
+   * To access the full response (for headers, for example), `getPhotoSettings$Response()` instead.
+   *
+   * This method doesn't expect any request body.
+   */
+  getPhotoSettings(params?: GetPhotoSettings$Params, context?: HttpContext): Observable<PhotoSettings> {
+    const resp = this.getPhotoSettings$Response(params, context);
+    return resp.pipe(
+      map((r: StrictHttpResponse<PhotoSettings>): PhotoSettings => r.body)
+    );
+  }
+
+  /** Path part for operation `updatePhotoSettings()` */
+  static readonly UpdatePhotoSettingsPath = '/api/v1/settings/photos';
+
+  /**
+   * This method provides access to the full `HttpResponse`, allowing access to response headers.
+   * To access only the response body, use `updatePhotoSettings()` instead.
+   *
+   * This method sends `application/json` and handles request body of type `application/json`.
+   */
+  updatePhotoSettings$Response(params: UpdatePhotoSettings$Params, context?: HttpContext): Observable<StrictHttpResponse<void>> {
+    const obs = updatePhotoSettings(this.http, this.rootUrl, params, context);
+    return obs;
+  }
+
+  /**
+   * This method provides access only to the response body.
+   * To access the full response (for headers, for example), `updatePhotoSettings$Response()` instead.
+   *
+   * This method sends `application/json` and handles request body of type `application/json`.
+   */
+  updatePhotoSettings(params: UpdatePhotoSettings$Params, context?: HttpContext): Observable<void> {
+    const resp = this.updatePhotoSettings$Response(params, context);
     return resp.pipe(
       map((r: StrictHttpResponse<void>): void => r.body)
     );

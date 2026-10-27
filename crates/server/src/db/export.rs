@@ -65,7 +65,7 @@ pub async fn dump(conn: &mut SqliteConnection) -> anyhow::Result<Map<String, Val
         let pairs = columns.iter().map(|c| format!("'{c}', \"{c}\"")).collect::<Vec<_>>().join(", ");
         // Ordre stable : les UUIDv7 suivent l'ordre de création ; `rowid` départage les autres tables.
         // La clé de l'IA n'est jamais exportée (ADR-0014) ; elle se ressaisit après une restauration.
-        let filter = if *table == "app_setting" { " WHERE key NOT IN ('ai.api_key')" } else { "" };
+        let filter = if *table == "app_setting" { " WHERE key NOT IN ('ai.api_key', 'photos.api_key')" } else { "" };
         let sql = format!("SELECT json_object({pairs}) FROM \"{table}\"{filter} ORDER BY rowid");
         let rows: Vec<String> = sqlx::query_scalar(AssertSqlSafe(sql)).fetch_all(&mut *conn).await?;
         let rows = rows.iter().map(|r| serde_json::from_str(r)).collect::<Result<Vec<Value>, _>>()?;

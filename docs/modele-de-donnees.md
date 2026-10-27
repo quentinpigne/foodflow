@@ -565,7 +565,8 @@ Articles figés au départ en magasin (R-COU-40).
 Réglages généraux de l'application (seuil `SOON`, durée des restes, début de semaine, fuseau du foyer,
 heures de notification, poids de génération…). Ceux de l'IA (ADR-0014) : `ai.enabled`, `ai.provider`
 (`MISTRAL` \| `OPENAI`), `ai.base_url`, `ai.model`, `ai.api_key` (jamais renvoyée par l'API, exclue de
-l'export), `ai.monthly_limit`, `ai.new_recipes_per_plan`, et le compteur `ai.usage.AAAA-MM`.
+l'export), `ai.monthly_limit`, `ai.new_recipes_per_plan`, et le compteur `ai.usage.AAAA-MM`. Ceux des
+photos libres (R-REC-73) : `photos.enabled` et `photos.api_key` (clé Pixabay, jamais renvoyée ni exportée).
 
 | Champ | Type | Contraintes |
 |---|---|---|

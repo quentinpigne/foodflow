@@ -3,6 +3,7 @@
 use std::sync::Arc;
 
 use crate::clients::ai::AiClient;
+use crate::clients::photos::PhotoSearch;
 use crate::clients::web::Fetcher;
 use crate::clock::Clock;
 use crate::config::DataDir;
@@ -21,4 +22,6 @@ pub struct AppState {
     pub fetcher: Arc<dyn Fetcher>,
     /// IA (ADR-0014), appelée seulement si elle est activée dans les réglages.
     pub ai: Arc<dyn AiClient>,
+    /// Photos libres des recettes (R-REC-73), cherchées seulement si elles sont activées dans les réglages.
+    pub photos: Arc<dyn PhotoSearch>,
 }

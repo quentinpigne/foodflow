@@ -59,6 +59,10 @@ export type { GetSettings$Params as GetSettings$Params } from './fn/system/get-s
 export { getSettings as getSettings } from './fn/system/get-settings';
 export type { UpdateSettings$Params as UpdateSettings$Params } from './fn/system/update-settings';
 export { updateSettings as updateSettings } from './fn/system/update-settings';
+export type { GetPhotoSettings$Params as GetPhotoSettings$Params } from './fn/system/get-photo-settings';
+export { getPhotoSettings as getPhotoSettings } from './fn/system/get-photo-settings';
+export type { UpdatePhotoSettings$Params as UpdatePhotoSettings$Params } from './fn/system/update-photo-settings';
+export { updatePhotoSettings as updatePhotoSettings } from './fn/system/update-photo-settings';
 export type { SystemInfo$Params as SystemInfo$Params } from './fn/system/system-info';
 export { systemInfo as systemInfo } from './fn/system/system-info';
 export type { ListFoodGroups$Params as ListFoodGroups$Params } from './fn/foods/list-food-groups';

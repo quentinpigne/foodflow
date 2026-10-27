@@ -176,6 +176,11 @@ Par portion (adulte) : 640 kcal · P 32 g · G 52 g · L 33 g · coût ≈ 2,10 
   page, et l'adresse devient l'URL d'origine. Sur le téléphone, Foodflow installé (PWA) reçoit les
   adresses partagées depuis une autre application et en lance l'import. Les deux mènent à la revue
   habituelle (R-REC-61).
+- **R-REC-73** — **Photo libre** : un brouillon créé sans image (réponse de l'IA, page ou fichier sans image)
+  reçoit une photo de Pixabay, cherchée d'après le nom de la recette (puis, sans résultat, d'après ses mots
+  principaux), si ce service est activé dans les réglages avec sa clé (ADR-0007). Seul le nom part ; la
+  photo est copiée dans le volume (R-REC-68) et se remplace dans la revue comme toute image. Sans réglage,
+  sans résultat ou en cas d'échec, la recette reste sans photo, sans erreur.
 
 ### Création par l'IA (ADR-0014)
 
@@ -209,7 +214,7 @@ Par portion (adulte) : 640 kcal · P 32 g · G 52 g · L 33 g · coût ≈ 2,10 
 | REC-07 | V1 | Import depuis une URL (schema.org JSON-LD) : brouillon, analyse des lignes, revue, rattachements mémorisés |
 | REC-08 | V1 | Mode cuisine sur le téléphone : étape par étape, quantités mises à l'échelle, minuteurs, écran maintenu allumé |
 | REC-09 | V1 | Recherche et filtres : catégorie, étiquette, temps actif maximum, préparable à l'avance, ingrédient présent, ce qui est en stock |
-| REC-10 | V1 | Photo de la recette (import ou téléversement) |
+| REC-10 | V1 | Photo de la recette (import, téléversement, ou photo libre de Pixabay, R-REC-73) |
 | REC-11 | V1 | Export d'une recette en schema.org JSON-LD, réimport |
 | REC-12 | V1 | Archivage, notes personnelles, duplication d'une recette pour en faire une variante |
 | REC-16 | V1 | Aliment de reste ; recettes qui utilisent un reste (par sous-recette ou par aliment de reste) |
