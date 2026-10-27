@@ -36,6 +36,9 @@ import { formatNutrient } from '../../core/nutrients';
     <div class="page">
       <div class="page-header">
         <h1>Recettes</h1>
+        <a mat-stroked-button routerLink="/recettes/ia"
+          ><mat-icon>auto_awesome</mat-icon>Avec l'IA</a
+        >
         <a mat-stroked-button routerLink="/recettes/import"><mat-icon>link</mat-icon>Importer</a>
         <a mat-flat-button routerLink="/recettes/nouvelle"><mat-icon>add</mat-icon>Recette</a>
       </div>

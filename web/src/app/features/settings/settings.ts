@@ -19,6 +19,7 @@ import { DataVersion } from '../../core/data-version';
 import { errorMessage } from '../../core/http-errors';
 import { LOCATION_KIND_LABELS } from '../../core/labels';
 import { confirm } from '../../shared/confirm-dialog';
+import { AiSettings } from './ai-settings';
 import { FrDatePipe } from '../../shared/date.pipe';
 import { LocationsStore } from '../../shared/stores';
 
@@ -40,6 +41,7 @@ interface LocationDraft {
     MatInputModule,
     MatSelectModule,
     FrDatePipe,
+    AiSettings,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
@@ -111,6 +113,8 @@ interface LocationDraft {
           </button>
         }
       </section>
+
+      <app-ai-settings />
 
       <section class="card">
         <h2 class="widget-title">Péremption</h2>

@@ -60,6 +60,11 @@ export const routes: Routes = [
         loadComponent: () => import('./features/recipes/recipe-editor').then((m) => m.RecipeEditor),
       },
       {
+        path: 'recettes/ia',
+        title: 'Recette par l’IA — Foodflow',
+        loadComponent: () => import('./features/recipes/ai-recipe').then((m) => m.AiRecipePage),
+      },
+      {
         path: 'recettes/import',
         title: 'Importer une recette — Foodflow',
         loadComponent: () => import('./features/recipes/import').then((m) => m.RecipeImportPage),
@@ -83,6 +88,16 @@ export const routes: Routes = [
         path: 'repas',
         title: 'Repas — Foodflow',
         loadComponent: () => import('./features/meals/plan').then((m) => m.PlanPage),
+      },
+      {
+        path: 'repas/ia',
+        title: 'Menus par l’IA — Foodflow',
+        loadComponent: () => import('./features/meals/ai-plan').then((m) => m.AiPlanPage),
+      },
+      {
+        path: 'repas/propositions/:id',
+        title: 'Menus proposés — Foodflow',
+        loadComponent: () => import('./features/meals/proposal').then((m) => m.ProposalPage),
       },
       {
         path: 'repas/:id',

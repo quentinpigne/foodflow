@@ -12,6 +12,8 @@ import { firstValueFrom } from 'rxjs';
 
 import { Meal } from '../../api/models/meal';
 import { MealSlotId } from '../../api/models/meal-slot-id';
+import { Proposal } from '../../api/models/proposal';
+import { AiService } from '../../api/services/ai.service';
 import { PlanningService } from '../../api/services/planning.service';
 import { DataVersion } from '../../core/data-version';
 import {
@@ -71,8 +73,18 @@ import { confirm } from '../../shared/confirm-dialog';
             }}
           </button>
         }
+        <a mat-stroked-button routerLink="/repas/ia" [queryParams]="{ semaine: start() }"
+          ><mat-icon>auto_awesome</mat-icon>Proposer avec l'IA</a
+        >
         <a mat-button routerLink="/foyer"><mat-icon>tune</mat-icon>Foyer et semaine type</a>
       </div>
+      @for (p of proposals.value() ?? []; track p.id) {
+        <a class="card proposal" [routerLink]="['/repas/propositions', p.id]">
+          <mat-icon>auto_awesome</mat-icon>
+          Menus proposés par l'IA du {{ shortDate(p.start) }} au {{ shortDate(p.end) }} :
+          {{ pendingCount(p) }} repas à examiner
+        </a>
+      }
       @if (plan.isLoading() || busy()) {
         <mat-progress-bar mode="indeterminate" />
       }
@@ -178,6 +190,15 @@ import { confirm } from '../../shared/confirm-dialog';
     .toolbar {
       margin-bottom: 1rem;
     }
+    .proposal {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 1rem;
+      color: var(--mat-sys-on-tertiary-container);
+      background: var(--mat-sys-tertiary-container);
+      text-decoration: none;
+    }
     .grid {
       display: grid;
       gap: 0.5rem;
@@ -273,6 +294,7 @@ import { confirm } from '../../shared/confirm-dialog';
 })
 export class PlanPage {
   private readonly api = inject(PlanningService);
+  private readonly ai = inject(AiService);
   private readonly router = inject(Router);
   private readonly dialog = inject(MatDialog);
   private readonly snack = inject(MatSnackBar);
@@ -296,6 +318,16 @@ export class PlanPage {
     params: () => ({ start: this.start(), v: this.version.value() }),
     stream: ({ params }) => this.api.getPlan({ start: params.start, days: 7 }),
   });
+
+  /** Propositions de l'IA encore ouvertes (R-PLA-64). */
+  protected readonly proposals = rxResource({
+    params: () => this.version.value(),
+    stream: () => this.ai.listAiPlans(),
+  });
+
+  protected pendingCount(p: Proposal): number {
+    return p.meals.filter((m) => !m.accepted).length;
+  }
 
   private readonly members = rxResource({
     params: () => this.version.value(),

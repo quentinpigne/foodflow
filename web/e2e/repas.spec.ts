@@ -57,7 +57,7 @@ test('validation : sorties, restes, puis annulation (PLA-04, R-PLA-34)', async (
   await login(page);
   await page.goto('/repas');
   await gratinDinner(page).click();
-  await page.getByRole('button', { name: 'Valider le repas' }).click();
+  await page.getByRole('button', { name: 'Valider le repas', exact: true }).click();
   await expect(page.getByRole('heading', { name: 'Valider le repas' })).toBeVisible();
   await expect(page.getByText('Courgette', { exact: true }).first()).toBeVisible();
   await expect(page.getByLabel('Portions restantes')).toHaveValue('3,4');
@@ -76,7 +76,7 @@ test('validation : sorties, restes, puis annulation (PLA-04, R-PLA-34)', async (
   await page.getByRole('button', { name: 'Annuler la validation' }).click();
   await page.getByRole('dialog').getByRole('button', { name: 'Annuler la validation' }).click();
   await expect(page.getByText('Validation annulée')).toBeVisible();
-  await expect(page.getByRole('button', { name: 'Valider le repas' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Valider le repas', exact: true })).toBeVisible();
   await page.goto('/stock');
   await expect(page.getByRole('link', { name: /Restes : Gratin de courgettes/ })).toHaveCount(0);
 });

@@ -23,12 +23,20 @@ export default defineConfig({
     },
     { name: 'mobile', use: { ...devices['Pixel 7'] } },
   ],
-  webServer: {
-    command: 'sh e2e/serve.sh',
-    url: 'http://127.0.0.1:3199/api/v1/health',
-    timeout: 600_000,
-    reuseExistingServer: false,
-    stdout: 'pipe',
-    stderr: 'pipe',
-  },
+  webServer: [
+    {
+      command: 'sh e2e/serve.sh',
+      url: 'http://127.0.0.1:3199/api/v1/health',
+      timeout: 600_000,
+      reuseExistingServer: false,
+      stdout: 'pipe',
+      stderr: 'pipe',
+    },
+    {
+      // IA factice (ADR-0014) : aucun appel réseau réel.
+      command: 'node e2e/ai-stub.mjs',
+      port: 3197,
+      reuseExistingServer: false,
+    },
+  ],
 });
