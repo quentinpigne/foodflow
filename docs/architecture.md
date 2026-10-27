@@ -129,7 +129,8 @@ Les exemples chiffrés des critères d'acceptation des specs sont repris **tels 
 ## Sécurité et confidentialité
 
 - Aucune donnée personnelle ni aucun secret dans le dépôt : base, images, certificats, clés VAPID,
-  jetons (IA, Cashflow, fournisseur DNS) sont hors du dépôt et hors de l'export.
+  jetons (IA, Cashflow, fournisseur DNS) sont hors du dépôt et hors de l'export. La clé de l'IA, saisie dans
+  les réglages, est gardée en base mais jamais renvoyée par l'API (ADR-0014).
 - HTTPS dès la V1 (ADR-0009), mot de passe unique et session par cookie `Secure` (comme Cashflow).
 - Flux sortants, tous déclenchés par une action ou un réglage explicite (ADR-0007) : Open Food Facts,
   pages de recettes, IA, services de notification push, Cashflow (réseau local). Chacun a un délai

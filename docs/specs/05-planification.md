@@ -170,7 +170,12 @@ Bilan prévu : énergie 1 980 kcal/j ✔ · fruits et légumes 4,2 portions/j �
   proposition » change la graine.
 - **R-PLA-66** — La génération par IA (ADR-0014) affiche les données envoyées et demande confirmation
   avant l'envoi ; ses recettes nouvelles deviennent des brouillons (R-REC-61), et les repas qui les
-  utilisent ne sont créés qu'une fois les brouillons validés.
+  utilisent ne sont créés qu'une fois les brouillons validés. Leur nombre est plafonné par un réglage
+  (3 par défaut, jusqu'à une par repas).
+- **R-PLA-67** — Une proposition par IA est contrôlée par le domaine avant d'être montrée : recette ou
+  aliment inconnu, créneau hors de la période, repas déjà validé ou verrouillé, élément refusé par un
+  convive présent, recettes nouvelles au-delà du plafond. Un élément invalide est **écarté et signalé**,
+  jamais corrigé en silence (ADR-0014).
 
 ## Features
 

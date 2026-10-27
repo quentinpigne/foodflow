@@ -1,6 +1,6 @@
 # ADR-0014 — Génération de menus par IA
 
-- **Statut** : Accepté (2026-10-25)
+- **Statut** : Accepté (2026-10-25), révisé le 2026-10-27
 - **Date** : 2026-10-25
 - **Concerne** : `PLA`, `REC`, ADR-0005, ADR-0007, ADR-0013
 
@@ -58,3 +58,30 @@ Option 2.
 - Coût maîtrisé : appel seulement à la demande, plafond mensuel, envoi limité aux recettes candidates.
 - Hors connexion à Internet ou sans clé, l'option est grisée ; la génération déterministe reste
   disponible.
+
+## Révision du 2026-10-27
+
+Décisions du propriétaire, qui remplacent les points correspondants ci-dessus.
+
+### Configuration dans les réglages
+- L'IA s'active dans les **Réglages** (désactivée par défaut, ADR-0007). On y choisit le **fournisseur** —
+  **Mistral** ou **OpenAI**, chacun avec son adresse par défaut, que l'on peut remplacer pour tout service
+  compatible (proxy LiteLLM, autre hébergeur) —, le **modèle** et la **clé d'accès**.
+- La clé est gardée en base, mais **jamais réaffichée** (on peut seulement la remplacer ou l'effacer),
+  jamais journalisée et **exclue de l'export** (ADR-0008) ; elle reste dans les sauvegardes de la base,
+  sur le serveur. Les deux fournisseurs exposent la même API (`POST {adresse}/chat/completions`) : un seul
+  client, sans code propre à un fournisseur.
+- Réglages associés : **plafond d'appels par mois** (50 par défaut) et **nombre de recettes nouvelles par
+  planning** (3 par défaut, jusqu'à une par repas).
+
+### Création de recettes par l'IA (REC-19)
+Hors planning, l'IA peut créer **une recette**, à partir de :
+- une **consigne libre** (« un plat végétarien rapide ») ;
+- le **stock à écouler** (lots `SOON`, restes, à date dépassée jugés encore bons) ;
+- une **recette existante**, dont elle fait une variante (« plus légère », « sans gluten ») ; l'originale
+  ne change pas ;
+- **son propre choix**, d'après le stock et les préférences du foyer (membres désignés par une lettre).
+
+Les données envoyées sont affichées avant l'envoi, comme pour un planning. La recette arrive en **brouillon**
+(R-REC-61), relu comme un import : ses lignes d'ingrédients sont analysées et rattachées (R-REC-63 à
+R-REC-66).

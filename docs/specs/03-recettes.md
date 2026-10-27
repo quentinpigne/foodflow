@@ -177,6 +177,19 @@ Par portion (adulte) : 640 kcal · P 32 g · G 52 g · L 33 g · coût ≈ 2,10 
   adresses partagées depuis une autre application et en lance l'import. Les deux mènent à la revue
   habituelle (R-REC-61).
 
+### Création par l'IA (ADR-0014)
+
+- **R-REC-80** — Avec l'IA activée, on peut demander **une recette** à partir d'une consigne libre, du stock
+  à écouler (lots `SOON`, restes, lots jugés encore bons), d'une recette existante (variante ; l'originale
+  ne change pas), ou au **choix de l'IA**, d'après le stock et les préférences du foyer.
+- **R-REC-81** — Les données envoyées sont **affichées avant l'envoi** et limitées au nécessaire : membres
+  désignés par une lettre, avec leurs préférences, jamais leur nom (ADR-0007).
+- **R-REC-82** — La réponse est une recette au format imposé (nom, catégorie, rendement, temps, lignes
+  d'ingrédients, étapes) ; elle devient un **brouillon** (R-REC-61) relu comme un import (R-REC-63 à
+  R-REC-66). Une réponse invalide est refusée avec un message, jamais corrigée en silence.
+- **R-REC-83** — Chaque appel compte dans le **plafond mensuel** des réglages ; au-delà, la demande est
+  refusée jusqu'au mois suivant.
+
 ### Export
 
 - **R-REC-70** — Une recette s'exporte seule au format schema.org/Recipe JSON-LD (ADR-0008), avec les
@@ -205,6 +218,7 @@ Par portion (adulte) : 640 kcal · P 32 g · G 52 g · L 33 g · coût ≈ 2,10 
 | REC-15 | V1 | Phases d'une recette et équipements qu'elles occupent (ADR-0015) |
 | REC-17 | V1 | Import par lot d'adresses, revue enchaînée des brouillons |
 | REC-18 | V1 | Envoi depuis le navigateur : favori sur l'ordinateur, partage vers la PWA sur le téléphone |
+| REC-19 | V1 | Création d'une recette par l'IA : consigne, stock à écouler, variante, choix de l'IA (ADR-0014) |
 
 ### Critères d'acceptation
 

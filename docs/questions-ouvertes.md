@@ -31,7 +31,7 @@ a été consignée (ADR, spec).
 | — | Choix des specs 01 et 02 | Validés (2026-10-25) | specs 01, 02 |
 | Q9 | Open Food Facts | Appel à la demande au scan, résultat gardé en base (2026-10-25) | ADR-0007, spec 01 |
 | Q10 | Prix aux courses | Par article, facultatif ; total payé facultatif, nécessaire au rapprochement avec Cashflow (2026-10-25) | spec 06 |
-| Q12 | Fournisseur d'IA | API compatible OpenAI (probablement derrière LiteLLM), modèle et plafond dans la configuration (2026-10-25) | ADR-0014 |
+| Q12 | Fournisseur d'IA | Mistral ou OpenAI (adresse remplaçable pour tout service compatible), modèle et clé dans les Réglages, clé jamais réaffichée et hors de l'export ; plafond mensuel et nombre de recettes nouvelles par planning réglables (2026-10-27, révise le 2026-10-25) | ADR-0014 |
 | — | Documents transverses et spec 09 | Validés ; phase 0 close (2026-10-25) | docs/ |
 | — | ADR des jetons d'accès dans Cashflow | Écrit par le propriétaire dans le dépôt Cashflow (2026-10-25) | spec 08, CSH-00 |
 | — | Spec 08 | Validée (2026-10-25) | spec 08 |

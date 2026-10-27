@@ -481,7 +481,8 @@ Consommation réelle, enregistrée à la validation (R-PLA-31), base du bilan r�
 | `settings` | `Json` | poids, itérations, plafond de coût, consigne libre |
 | `request_payload` | `Json` ? | `AI` : données envoyées, telles qu'affichées (ADR-0014) |
 | `response_payload` | `Json` ? | `AI` : réponse brute |
-| `proposal` | `Json` | repas proposés, raisons, bilan, contraintes non satisfaites |
+| `proposal` | `Json` | repas proposés, raisons, bilan, contraintes non satisfaites ; recettes nouvelles avec leur brouillon (`RecipeDraft`), puis la recette créée à sa validation |
+| `prompt` | texte ? | consigne libre |
 | `status` | `PENDING` \| `ACCEPTED` \| `PARTIALLY_ACCEPTED` \| `DISCARDED` | |
 | `created_at` | `Timestamp` | |
 
@@ -562,7 +563,9 @@ Articles figés au départ en magasin (R-COU-40).
 ### `Setting`
 
 Réglages généraux de l'application (seuil `SOON`, durée des restes, début de semaine, fuseau du foyer,
-heures de notification, poids de génération…).
+heures de notification, poids de génération…). Ceux de l'IA (ADR-0014) : `ai.enabled`, `ai.provider`
+(`MISTRAL` \| `OPENAI`), `ai.base_url`, `ai.model`, `ai.api_key` (jamais renvoyée par l'API, exclue de
+l'export), `ai.monthly_limit`, `ai.new_recipes_per_plan`, et le compteur `ai.usage.AAAA-MM`.
 
 | Champ | Type | Contraintes |
 |---|---|---|
