@@ -1,6 +1,9 @@
 //! Client de l'IA (ADR-0014) : une API de chat compatible OpenAI (`POST {adresse}/chat/completions`), que
 //! Mistral et OpenAI exposent toutes deux. Appelé seulement à la demande de l'utilisateur (ADR-0007) ; le
 //! contenu des requêtes et la clé ne sont jamais journalisés.
+//!
+//! La réponse est demandée en flux (`stream`) : ses morceaux arrivent au fil de la génération, si bien qu'un
+//! proxy qui coupe les connexions inactives (souvent après 60 s) ne l'interrompt pas.
 
 use std::future::Future;
 use std::pin::Pin;
@@ -9,15 +12,16 @@ use std::time::{Duration, Instant};
 use anyhow::{Context, bail};
 use serde_json::{Value, json};
 
-/// Délai de réponse : la réponse n'arrive qu'une fois générée en entier, et un planning de la semaine, ou un
-/// modèle qui raisonne, prend plusieurs minutes.
-pub const TIMEOUT: Duration = Duration::from_secs(300);
+/// Délai sans rien recevoir : un modèle qui raisonne peut se taire un moment avant d'écrire.
+pub const TIMEOUT: Duration = Duration::from_secs(180);
+/// Durée totale maximale d'une réponse : un planning de la semaine est long à écrire.
+const TOTAL_TIMEOUT: Duration = Duration::from_secs(600);
 /// Un échec plus rapide, sans réponse, vient d'une connexion déjà fermée par le fournisseur : la demande n'a
 /// pas été traitée, et se refait une fois.
 const QUICK_FAILURE: Duration = Duration::from_secs(2);
 
-/// Taille maximale d'une réponse.
-const MAX_BYTES: usize = 2 * 1024 * 1024;
+/// Taille maximale d'une réponse ; en flux, chaque morceau de texte est enveloppé de JSON.
+const MAX_BYTES: usize = 16 * 1024 * 1024;
 
 /// Où et comment appeler l'IA.
 #[derive(Debug, Clone)]
@@ -61,6 +65,7 @@ pub fn body(config: &AiConfig, request: &AiRequest, strict_schema: bool) -> Valu
             { "role": "user", "content": request.user },
         ],
         "response_format": format,
+        "stream": true,
     })
 }
 
@@ -71,7 +76,8 @@ pub struct HttpAiClient {
 impl HttpAiClient {
     pub fn new() -> anyhow::Result<Self> {
         let client = reqwest::Client::builder()
-            .timeout(TIMEOUT)
+            .read_timeout(TIMEOUT)
+            .timeout(TOTAL_TIMEOUT)
             .connect_timeout(Duration::from_secs(10))
             // Les fournisseurs ferment vite les connexions inactives : ne pas en réutiliser une trop ancienne.
             .pool_idle_timeout(Duration::from_secs(20))
@@ -133,8 +139,9 @@ fn failure(error: &reqwest::Error, started: Instant) -> anyhow::Error {
     tracing::warn!(error = describe(error), seconds, "appel à l'IA sans réponse");
     if error.is_timeout() {
         anyhow::anyhow!(
-            "l'IA n'a pas répondu en {} s : réessayer, ou choisir un modèle plus rapide dans les réglages",
-            TIMEOUT.as_secs()
+            "l'IA n'a rien envoyé pendant {} s, ou n'a pas fini en {} min : réessayer, ou choisir un modèle plus rapide",
+            TIMEOUT.as_secs(),
+            TOTAL_TIMEOUT.as_secs() / 60
         )
     } else if error.is_connect() {
         anyhow::anyhow!("IA injoignable (connexion impossible) : {}", describe(error))
@@ -143,7 +150,34 @@ fn failure(error: &reqwest::Error, started: Instant) -> anyhow::Error {
     }
 }
 
-/// Contenu du premier choix d'une réponse de chat.
+/// Contenu d'une réponse : en flux (`data: {…}` ligne à ligne, jusqu'à `data: [DONE]`), ou d'un seul bloc si
+/// le service ignore la demande de flux.
+pub fn reply(response: &str) -> anyhow::Result<String> {
+    if response.trim_start().starts_with('{') {
+        return content(response);
+    }
+    let mut text = String::new();
+    for data in response.lines().filter_map(|l| l.strip_prefix("data:")).map(str::trim) {
+        if data == "[DONE]" {
+            break;
+        }
+        let value: Value = serde_json::from_str(data).context("réponse de l'IA illisible")?;
+        if let Some(error) = value.get("error") {
+            let message = error.get("message").and_then(Value::as_str).unwrap_or("erreur inconnue");
+            bail!("le fournisseur d'IA s'est interrompu : {message}");
+        }
+        let choice = &value["choices"][0];
+        if let Some(part) = choice["delta"]["content"].as_str().or(choice["message"]["content"].as_str()) {
+            text.push_str(part);
+        }
+    }
+    if text.is_empty() {
+        bail!("réponse de l'IA sans contenu");
+    }
+    Ok(text)
+}
+
+/// Contenu du premier choix d'une réponse de chat d'un seul bloc.
 pub fn content(response: &str) -> anyhow::Result<String> {
     let value: Value = serde_json::from_str(response).context("réponse de l'IA illisible")?;
     value["choices"][0]["message"]["content"].as_str().map(str::to_owned).context("réponse de l'IA sans contenu")
@@ -160,7 +194,7 @@ impl AiClient for HttpAiClient {
                 (status, text)
             };
             match status.as_u16() {
-                200..=299 => content(&text),
+                200..=299 => reply(&text),
                 401 | 403 => bail!("clé d'accès refusée par le fournisseur d'IA"),
                 404 => bail!("adresse ou modèle inconnu du fournisseur d'IA"),
                 429 => bail!("limite d'appels du fournisseur d'IA atteinte, réessayer plus tard"),
@@ -219,6 +253,7 @@ mod tests {
         assert_eq!(strict["model"], "mistral-small");
         assert_eq!(strict["response_format"]["type"], "json_schema");
         assert_eq!(strict["messages"][1]["content"], "u");
+        assert_eq!(strict["stream"], true, "réponse en flux");
         assert_eq!(body(&config, &request, false)["response_format"]["type"], "json_object");
         assert!(!strict.to_string().contains("\"k\""), "la clé ne va que dans l'en-tête");
     }
@@ -259,6 +294,21 @@ mod tests {
         let error = client.complete(&config, &request).await.unwrap_err().to_string();
         assert!(error.starts_with("connexion à l'IA interrompue"), "{error}");
         server.await.unwrap();
+    }
+
+    #[test]
+    fn reply_joins_a_streamed_answer() {
+        let streamed = "data: {\"choices\":[{\"delta\":{\"role\":\"assistant\"}}]}\n\n\
+                        data: {\"choices\":[{\"delta\":{\"content\":\"{\\\"a\\\"\"}}]}\n\n\
+                        : commentaire de maintien\n\n\
+                        data: {\"choices\":[{\"delta\":{\"content\":\":1}\"}}]}\n\n\
+                        data: [DONE]\n\n";
+        assert_eq!(reply(streamed).unwrap(), "{\"a\":1}");
+        let failed = "data: {\"error\":{\"message\":\"surcharge\"}}\n\n";
+        assert_eq!(reply(failed).unwrap_err().to_string(), "le fournisseur d'IA s'est interrompu : surcharge");
+        assert!(reply("data: [DONE]\n").is_err());
+        let whole = r#"{"choices":[{"message":{"content":"{}"}}]}"#;
+        assert_eq!(reply(whole).unwrap(), "{}", "réponse d'un seul bloc acceptée");
     }
 
     #[test]

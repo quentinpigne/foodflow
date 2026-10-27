@@ -48,11 +48,19 @@ createServer((request, response) => {
     const user = payload.messages.find((m) => m.role === 'user').content;
     const kind = payload.response_format?.json_schema?.name;
     const content = kind === 'planning' ? plan(user) : soup;
-    response.writeHead(200, { 'content-type': 'application/json' });
-    response.end(
-      JSON.stringify({
-        choices: [{ message: { role: 'assistant', content: JSON.stringify(content) } }],
-      }),
-    );
+    const text = JSON.stringify(content);
+    if (!payload.stream) {
+      response.writeHead(200, { 'content-type': 'application/json' });
+      response.end(
+        JSON.stringify({ choices: [{ message: { role: 'assistant', content: text } }] }),
+      );
+      return;
+    }
+    // Réponse en flux, en deux morceaux, comme un vrai fournisseur.
+    const half = Math.floor(text.length / 2);
+    const event = (part) =>
+      `data: ${JSON.stringify({ choices: [{ delta: { content: part } }] })}\n\n`;
+    response.writeHead(200, { 'content-type': 'text/event-stream' });
+    response.end(event(text.slice(0, half)) + event(text.slice(half)) + 'data: [DONE]\n\n');
   });
 }).listen(3197, '127.0.0.1');

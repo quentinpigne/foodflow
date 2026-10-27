@@ -39,7 +39,9 @@ Option 2.
   proxy LiteLLM devant le modèle choisi (Q12, 2026-10-25). Adresse, clé, nom du modèle et plafond
   d'appels mensuel sont dans la configuration du serveur ; changer de modèle ne demande aucun code.
   Le format JSON est demandé par schéma (`response_format` de type `json_schema`) quand le modèle le
-  permet, et la réponse est de toute façon validée par le domaine. Le nombre de recettes nouvelles par
+  permet, et la réponse est de toute façon validée par le domaine. La réponse est demandée **en flux**
+  (`stream`) : elle arrive au fil de la génération, pour qu'un proxy qui coupe les connexions inactives
+  (constaté après 50 s) ne l'interrompe pas. Le nombre de recettes nouvelles par
   demande est plafonné (3 par défaut).
 
 ### Contrôle de la réponse
