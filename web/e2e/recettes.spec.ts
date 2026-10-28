@@ -197,3 +197,20 @@ test('choix d’un ingrédient : un aliment existant est proposé, jamais recré
   await dialog.getByRole('button', { name: "Utiliser l'aliment existant « Tomate »" }).click();
   await expect(picker).toHaveValue('Tomate');
 });
+
+test('changer de photo : propositions, adresse ou fichier (REC-10, R-REC-73)', async ({ page }) => {
+  await login(page);
+  await page.goto('/recettes');
+  await page.getByRole('link', { name: /Crêpes/ }).click();
+  await page.getByRole('button', { name: 'Autres actions' }).click();
+  await page.getByRole('menuitem', { name: 'Changer de photo' }).click();
+  const dialog = page.getByRole('dialog');
+  await expect(dialog.getByLabel('Chercher une photo')).toHaveValue('Crêpes');
+  // Pixabay n'est pas activé : la fenêtre le dit, et l'adresse ou le fichier restent possibles.
+  await expect(dialog.getByText(/photos Pixabay désactivées/)).toBeVisible();
+  await expect(dialog.getByRole('button', { name: 'Envoyer un fichier' })).toBeVisible();
+  await dialog.getByLabel('Depuis une adresse').fill('http://127.0.0.1:3197/photo.jpg');
+  await dialog.getByRole('button', { name: 'Utiliser' }).click();
+  await expect(page.getByText('Photo enregistrée')).toBeVisible();
+  await expect(page.locator('img.photo')).toHaveAttribute('src', /\/image\?v=1$/);
+});

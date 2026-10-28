@@ -3,7 +3,7 @@
 use std::path::PathBuf;
 
 use anyhow::Context;
-use foodflow_domain::shared::ids::RecipeId;
+use foodflow_domain::shared::ids::{RecipeDraftId, RecipeId};
 
 use crate::clients::web::MAX_BYTES;
 use crate::config::DataDir;
@@ -67,15 +67,44 @@ pub fn remove(data: &DataDir, name: &str) {
     }
 }
 
+/// Nom de fichier unique d'une nouvelle image (le navigateur ne garde pas l'ancienne en cache).
+fn stem(prefix: &str) -> String {
+    format!("{prefix}-{}", crate::clock::timestamp().replace([':', '.'], ""))
+}
+
+async fn draft_image(db: &Db, id: RecipeDraftId) -> AppResult<Option<String>> {
+    let draft = db::recipes::drafts(&db.read).await?.into_iter().find(|d| d.id == id);
+    Ok(draft.ok_or(AppError::NotFound("brouillon"))?.image_path)
+}
+
+/// Remplace l'image d'un brouillon ; son nom commence par `draft-{id}`, renommé à la validation.
+pub async fn upload_draft(
+    db: &Db,
+    data: &DataDir,
+    id: RecipeDraftId,
+    content_type: Option<&str>,
+    bytes: &[u8],
+) -> AppResult<()> {
+    let old = draft_image(db, id).await?;
+    let name = store(data, &stem(&format!("draft-{id}")), content_type, bytes)?;
+    db::recipes::set_draft_image(&db.write, id, Some(&name)).await?;
+    if let Some(old) = old {
+        remove(data, &old);
+    }
+    Ok(())
+}
+
+/// Octets et type de l'image d'un brouillon.
+pub async fn read_draft(db: &Db, data: &DataDir, id: RecipeDraftId) -> AppResult<(Vec<u8>, &'static str)> {
+    let name = draft_image(db, id).await?.ok_or(AppError::NotFound("image"))?;
+    let bytes = std::fs::read(path(data, &name)?).map_err(|_| AppError::NotFound("image"))?;
+    Ok((bytes, content_type(&name)))
+}
+
 /// Remplace l'image d'une recette.
 pub async fn upload(db: &Db, data: &DataDir, id: RecipeId, content_type: Option<&str>, bytes: &[u8]) -> AppResult<()> {
     let recipe = db::recipes::find(&db.read, id).await?.ok_or(AppError::NotFound("recette"))?;
-    let name = store(
-        data,
-        &format!("recipe-{id}-{}", crate::clock::timestamp().replace([':', '.'], "")),
-        content_type,
-        bytes,
-    )?;
+    let name = store(data, &stem(&format!("recipe-{id}")), content_type, bytes)?;
     db::recipes::set_image(&db.write, id, Some(&name)).await?;
     if let Some(old) = recipe.image_path {
         remove(data, &old);

@@ -409,6 +409,15 @@ pub async fn update_draft(db: impl SqliteExecutor<'_>, id: RecipeDraftId, payloa
     Ok(())
 }
 
+pub async fn set_draft_image(db: impl SqliteExecutor<'_>, id: RecipeDraftId, path: Option<&str>) -> anyhow::Result<()> {
+    let id = id.to_string();
+    let now = timestamp();
+    sqlx::query!("UPDATE recipe_draft SET image_path = ?, updated_at = ? WHERE id = ?", path, now, id)
+        .execute(db)
+        .await?;
+    Ok(())
+}
+
 pub async fn delete_draft(db: impl SqliteExecutor<'_>, id: RecipeDraftId) -> anyhow::Result<()> {
     let id = id.to_string();
     sqlx::query!("DELETE FROM recipe_draft WHERE id = ?", id).execute(db).await?;

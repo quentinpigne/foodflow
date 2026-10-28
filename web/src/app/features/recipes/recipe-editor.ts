@@ -5,6 +5,7 @@ import {
   effect,
   inject,
   input,
+  linkedSignal,
   signal,
   untracked,
 } from '@angular/core';
@@ -45,6 +46,7 @@ import { UNITS, defaultUnit, formatIn, parseQuantity, quantityInput } from '../.
 import { confirm } from '../../shared/confirm-dialog';
 import { ItemPicker, StockItem } from '../../shared/item-picker';
 import { TargetPicker } from '../../shared/target-picker';
+import { choosePhoto } from '../../shared/photo-dialog';
 
 interface IngredientDraft {
   key: number;
@@ -116,6 +118,22 @@ let keys = 0;
           }
           On peut tout de même créer une autre recette.
         </p>
+      }
+      @if (draftId(); as draft) {
+        <section class="card photo-card">
+          @if (draftHasImage()) {
+            <img
+              class="draft-photo"
+              [src]="'/api/v1/recipe-drafts/' + draft + '/image?v=' + draftImageVersion()"
+              alt=""
+            />
+          } @else {
+            <p class="muted">Pas de photo.</p>
+          }
+          <button mat-stroked-button type="button" (click)="changeDraftPhoto(draft)">
+            <mat-icon>image</mat-icon>Changer de photo
+          </button>
+        </section>
       }
       <form (ngSubmit)="save()">
         <section class="card">
@@ -507,6 +525,19 @@ let keys = 0;
     .card {
       margin-bottom: 1rem;
     }
+    .photo-card {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+    .draft-photo {
+      width: 12rem;
+      max-width: 100%;
+      aspect-ratio: 3 / 2;
+      object-fit: cover;
+      border-radius: var(--mat-sys-corner-small);
+    }
     .widget-title {
       margin-bottom: 1rem;
     }
@@ -650,6 +681,9 @@ export class RecipeEditor {
   });
 
   protected readonly loading = computed(() => this.recipe.isLoading() || this.draft.isLoading());
+  /** Photo du brouillon : changée sans recharger le brouillon, pour garder les corrections en cours. */
+  protected readonly draftHasImage = linkedSignal(() => this.draft.value()?.has_image ?? false);
+  protected readonly draftImageVersion = signal(0);
   protected readonly back = computed(() =>
     this.id() ? ['/recettes', this.id()] : this.draftId() ? ['/recettes/import'] : ['/recettes'],
   );
@@ -936,6 +970,24 @@ export class RecipeEditor {
       if (!(await this.openNextDraft(draft, 'Import abandonné'))) {
         await this.router.navigate(['/recettes/import']);
       }
+    }
+  }
+
+  /** Photo proposée, adresse saisie ou fichier envoyé (R-REC-73). */
+  protected async changeDraftPhoto(draft: string): Promise<void> {
+    const chosen = await choosePhoto(this.dialog, this.name());
+    if (!chosen) return;
+    try {
+      await firstValueFrom(
+        'file' in chosen
+          ? this.api.uploadRecipeDraftImage({ id: draft, body: { image: chosen.file } as never })
+          : this.api.chooseRecipeDraftPhoto({ id: draft, body: { url: chosen.url } }),
+      );
+      this.draftHasImage.set(true);
+      this.draftImageVersion.update((v) => v + 1);
+      this.snack.open('Photo enregistrée', undefined, { duration: 3000 });
+    } catch (error) {
+      this.snack.open(errorMessage(error), 'Fermer');
     }
   }
 

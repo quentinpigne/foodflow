@@ -12,6 +12,10 @@ import { StrictHttpResponse } from '../strict-http-response';
 
 import { archiveRecipe } from '../fn/recipes/archive-recipe';
 import { ArchiveRecipe$Params } from '../fn/recipes/archive-recipe';
+import { chooseRecipeDraftPhoto } from '../fn/recipes/choose-recipe-draft-photo';
+import { ChooseRecipeDraftPhoto$Params } from '../fn/recipes/choose-recipe-draft-photo';
+import { chooseRecipePhoto } from '../fn/recipes/choose-recipe-photo';
+import { ChooseRecipePhoto$Params } from '../fn/recipes/choose-recipe-photo';
 import { commitRecipeDraft } from '../fn/recipes/commit-recipe-draft';
 import { CommitRecipeDraft$Params } from '../fn/recipes/commit-recipe-draft';
 import { CreatedRecipe } from '../models/created-recipe';
@@ -31,23 +35,30 @@ import { getRecipe } from '../fn/recipes/get-recipe';
 import { GetRecipe$Params } from '../fn/recipes/get-recipe';
 import { getRecipeDraft } from '../fn/recipes/get-recipe-draft';
 import { GetRecipeDraft$Params } from '../fn/recipes/get-recipe-draft';
+import { getRecipeDraftImage } from '../fn/recipes/get-recipe-draft-image';
+import { GetRecipeDraftImage$Params } from '../fn/recipes/get-recipe-draft-image';
 import { getRecipeImage } from '../fn/recipes/get-recipe-image';
 import { GetRecipeImage$Params } from '../fn/recipes/get-recipe-image';
 import { listRecipeDrafts } from '../fn/recipes/list-recipe-drafts';
 import { ListRecipeDrafts$Params } from '../fn/recipes/list-recipe-drafts';
 import { listRecipeTags } from '../fn/recipes/list-recipe-tags';
 import { ListRecipeTags$Params } from '../fn/recipes/list-recipe-tags';
+import { PhotoCandidate } from '../models/photo-candidate';
 import { RecipeDetail } from '../models/recipe-detail';
 import { RecipeDraft } from '../models/recipe-draft';
 import { RecipeSummary } from '../models/recipe-summary';
 import { saveRecipeDraft } from '../fn/recipes/save-recipe-draft';
 import { SaveRecipeDraft$Params } from '../fn/recipes/save-recipe-draft';
+import { searchPhotos } from '../fn/recipes/search-photos';
+import { SearchPhotos$Params } from '../fn/recipes/search-photos';
 import { searchRecipes } from '../fn/recipes/search-recipes';
 import { SearchRecipes$Params } from '../fn/recipes/search-recipes';
 import { startRecipeImport } from '../fn/recipes/start-recipe-import';
 import { StartRecipeImport$Params } from '../fn/recipes/start-recipe-import';
 import { updateRecipe } from '../fn/recipes/update-recipe';
 import { UpdateRecipe$Params } from '../fn/recipes/update-recipe';
+import { uploadRecipeDraftImage } from '../fn/recipes/upload-recipe-draft-image';
+import { UploadRecipeDraftImage$Params } from '../fn/recipes/upload-recipe-draft-image';
 import { uploadRecipeImage } from '../fn/recipes/upload-recipe-image';
 import { UploadRecipeImage$Params } from '../fn/recipes/upload-recipe-image';
 
@@ -59,6 +70,41 @@ import { UploadRecipeImage$Params } from '../fn/recipes/upload-recipe-image';
 export class RecipesService extends BaseService {
   constructor(config: ApiConfiguration, http: HttpClient) {
     super(config, http);
+  }
+
+  /** Path part for operation `searchPhotos()` */
+  static readonly SearchPhotosPath = '/api/v1/photos';
+
+  /**
+   * Photos libres proposées pour des mots-clés (Pixabay, R-REC-73).
+   *
+   *
+   *
+   * This method provides access to the full `HttpResponse`, allowing access to response headers.
+   * To access only the response body, use `searchPhotos()` instead.
+   *
+   * This method doesn't expect any request body.
+   */
+  searchPhotos$Response(params: SearchPhotos$Params, context?: HttpContext): Observable<StrictHttpResponse<Array<PhotoCandidate>>> {
+    const obs = searchPhotos(this.http, this.rootUrl, params, context);
+    return obs;
+  }
+
+  /**
+   * Photos libres proposées pour des mots-clés (Pixabay, R-REC-73).
+   *
+   *
+   *
+   * This method provides access only to the response body.
+   * To access the full response (for headers, for example), `searchPhotos$Response()` instead.
+   *
+   * This method doesn't expect any request body.
+   */
+  searchPhotos(params: SearchPhotos$Params, context?: HttpContext): Observable<Array<PhotoCandidate>> {
+    const resp = this.searchPhotos$Response(params, context);
+    return resp.pipe(
+      map((r: StrictHttpResponse<Array<PhotoCandidate>>): Array<PhotoCandidate> => r.body)
+    );
   }
 
   /** Path part for operation `listRecipeDrafts()` */
@@ -260,6 +306,111 @@ export class RecipesService extends BaseService {
     const resp = this.commitRecipeDraft$Response(params, context);
     return resp.pipe(
       map((r: StrictHttpResponse<CreatedRecipe>): CreatedRecipe => r.body)
+    );
+  }
+
+  /** Path part for operation `getRecipeDraftImage()` */
+  static readonly GetRecipeDraftImagePath = '/api/v1/recipe-drafts/{id}/image';
+
+  /**
+   * Image d'un brouillon (R-REC-68, R-REC-73).
+   *
+   *
+   *
+   * This method provides access to the full `HttpResponse`, allowing access to response headers.
+   * To access only the response body, use `getRecipeDraftImage()` instead.
+   *
+   * This method doesn't expect any request body.
+   */
+  getRecipeDraftImage$Response(params: GetRecipeDraftImage$Params, context?: HttpContext): Observable<StrictHttpResponse<any>> {
+    const obs = getRecipeDraftImage(this.http, this.rootUrl, params, context);
+    return obs;
+  }
+
+  /**
+   * Image d'un brouillon (R-REC-68, R-REC-73).
+   *
+   *
+   *
+   * This method provides access only to the response body.
+   * To access the full response (for headers, for example), `getRecipeDraftImage$Response()` instead.
+   *
+   * This method doesn't expect any request body.
+   */
+  getRecipeDraftImage(params: GetRecipeDraftImage$Params, context?: HttpContext): Observable<any> {
+    const resp = this.getRecipeDraftImage$Response(params, context);
+    return resp.pipe(
+      map((r: StrictHttpResponse<any>): any => r.body)
+    );
+  }
+
+  /** Path part for operation `uploadRecipeDraftImage()` */
+  static readonly UploadRecipeDraftImagePath = '/api/v1/recipe-drafts/{id}/image';
+
+  /**
+   * Remplace l'image d'un brouillon (formulaire `multipart`, champ `image`).
+   *
+   *
+   *
+   * This method provides access to the full `HttpResponse`, allowing access to response headers.
+   * To access only the response body, use `uploadRecipeDraftImage()` instead.
+   *
+   * This method sends `multipart/form-data` and handles request body of type `multipart/form-data`.
+   */
+  uploadRecipeDraftImage$Response(params: UploadRecipeDraftImage$Params, context?: HttpContext): Observable<StrictHttpResponse<void>> {
+    const obs = uploadRecipeDraftImage(this.http, this.rootUrl, params, context);
+    return obs;
+  }
+
+  /**
+   * Remplace l'image d'un brouillon (formulaire `multipart`, champ `image`).
+   *
+   *
+   *
+   * This method provides access only to the response body.
+   * To access the full response (for headers, for example), `uploadRecipeDraftImage$Response()` instead.
+   *
+   * This method sends `multipart/form-data` and handles request body of type `multipart/form-data`.
+   */
+  uploadRecipeDraftImage(params: UploadRecipeDraftImage$Params, context?: HttpContext): Observable<void> {
+    const resp = this.uploadRecipeDraftImage$Response(params, context);
+    return resp.pipe(
+      map((r: StrictHttpResponse<void>): void => r.body)
+    );
+  }
+
+  /** Path part for operation `chooseRecipeDraftPhoto()` */
+  static readonly ChooseRecipeDraftPhotoPath = '/api/v1/recipe-drafts/{id}/photo';
+
+  /**
+   * Retient pour un brouillon l'image d'une adresse : photo proposée, ou adresse saisie (R-REC-73).
+   *
+   *
+   *
+   * This method provides access to the full `HttpResponse`, allowing access to response headers.
+   * To access only the response body, use `chooseRecipeDraftPhoto()` instead.
+   *
+   * This method sends `application/json` and handles request body of type `application/json`.
+   */
+  chooseRecipeDraftPhoto$Response(params: ChooseRecipeDraftPhoto$Params, context?: HttpContext): Observable<StrictHttpResponse<void>> {
+    const obs = chooseRecipeDraftPhoto(this.http, this.rootUrl, params, context);
+    return obs;
+  }
+
+  /**
+   * Retient pour un brouillon l'image d'une adresse : photo proposée, ou adresse saisie (R-REC-73).
+   *
+   *
+   *
+   * This method provides access only to the response body.
+   * To access the full response (for headers, for example), `chooseRecipeDraftPhoto$Response()` instead.
+   *
+   * This method sends `application/json` and handles request body of type `application/json`.
+   */
+  chooseRecipeDraftPhoto(params: ChooseRecipeDraftPhoto$Params, context?: HttpContext): Observable<void> {
+    const resp = this.chooseRecipeDraftPhoto$Response(params, context);
+    return resp.pipe(
+      map((r: StrictHttpResponse<void>): void => r.body)
     );
   }
 
@@ -648,6 +799,41 @@ export class RecipesService extends BaseService {
     const resp = this.exportRecipe$Response(params, context);
     return resp.pipe(
       map((r: StrictHttpResponse<any>): any => r.body)
+    );
+  }
+
+  /** Path part for operation `chooseRecipePhoto()` */
+  static readonly ChooseRecipePhotoPath = '/api/v1/recipes/{id}/photo';
+
+  /**
+   * Retient l'image d'une adresse : photo proposée, ou adresse saisie (R-REC-73).
+   *
+   *
+   *
+   * This method provides access to the full `HttpResponse`, allowing access to response headers.
+   * To access only the response body, use `chooseRecipePhoto()` instead.
+   *
+   * This method sends `application/json` and handles request body of type `application/json`.
+   */
+  chooseRecipePhoto$Response(params: ChooseRecipePhoto$Params, context?: HttpContext): Observable<StrictHttpResponse<void>> {
+    const obs = chooseRecipePhoto(this.http, this.rootUrl, params, context);
+    return obs;
+  }
+
+  /**
+   * Retient l'image d'une adresse : photo proposée, ou adresse saisie (R-REC-73).
+   *
+   *
+   *
+   * This method provides access only to the response body.
+   * To access the full response (for headers, for example), `chooseRecipePhoto$Response()` instead.
+   *
+   * This method sends `application/json` and handles request body of type `application/json`.
+   */
+  chooseRecipePhoto(params: ChooseRecipePhoto$Params, context?: HttpContext): Observable<void> {
+    const resp = this.chooseRecipePhoto$Response(params, context);
+    return resp.pipe(
+      map((r: StrictHttpResponse<void>): void => r.body)
     );
   }
 

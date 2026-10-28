@@ -21,6 +21,10 @@ pub struct AiRecipe {
     pub steps: Vec<String>,
     #[serde(default)]
     pub tags: Vec<String>,
+    /// Mots-clés en anglais pour chercher une photo du plat (R-REC-73) : une aide à la recherche, pas une
+    /// donnée de la recette.
+    #[serde(default)]
+    pub image_query: Option<String>,
 }
 
 fn invalid(reason: &'static str) -> DomainError {
@@ -28,6 +32,11 @@ fn invalid(reason: &'static str) -> DomainError {
 }
 
 impl AiRecipe {
+    /// Mots-clés de recherche de photo, s'ils sont utilisables (non vides, 100 caractères au plus).
+    pub fn photo_query(&self) -> Option<&str> {
+        self.image_query.as_deref().map(str::trim).filter(|q| !q.is_empty() && q.chars().count() <= 100)
+    }
+
     /// Vérifie une recette reçue (R-REC-82).
     pub fn check(&self) -> Result<(), DomainError> {
         let name = self.name.trim();
@@ -65,6 +74,7 @@ pub(crate) mod tests {
             ingredients: vec!["800 g de potiron".into(), "1 oignon".into()],
             steps: vec!["Tout cuire, mixer.".into()],
             tags: vec![],
+            image_query: None,
         }
     }
 

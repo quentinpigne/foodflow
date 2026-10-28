@@ -278,9 +278,11 @@ async fn r_rec_73_free_photo_for_a_recipe_without_image() {
     let data = DataDir::new(dir.path());
     ai::update_settings(&db, &settings(Some("k"), 10)).await.unwrap();
     let input = RecipeIdeaInput { mode: RecipeIdeaMode::Prompt, prompt: Some("une soupe".into()), recipe_id: None };
-    let client = StaticAiClient::new(vec![soup().to_string(), soup().to_string()]);
+    let mut with_query = soup();
+    with_query["image_query"] = json!(" zucchini soup bowl ");
+    let client = StaticAiClient::new(vec![soup().to_string(), soup().to_string(), with_query.to_string()]);
     let image = "https://cdn.pixabay.test/soupe.jpg";
-    let photos = StaticPhotoSearch { image: Some(image.into()), ..Default::default() };
+    let photos = StaticPhotoSearch::one(image);
     let mut pages = std::collections::HashMap::new();
     pages.insert(
         image.to_owned(),
@@ -291,6 +293,8 @@ async fn r_rec_73_free_photo_for_a_recipe_without_image() {
     let draft = ai::create_recipe(&db, &data, &fetcher, &photos, &client, &input, d(TODAY)).await.unwrap();
     assert!(!draft.has_image, "réglage désactivé par défaut");
     assert!(photos.queries.lock().unwrap().is_empty(), "aucun appel sans le réglage");
+    let disabled = super::photos::search(&db, &photos, "soupe").await;
+    assert!(matches!(disabled, Err(AppError::Invalid { code: "PHOTOS_DISABLED", .. })));
 
     let enable = PhotoSettingsInput { enabled: true, api_key: Some("photo-secret".into()) };
     super::photos::update_settings(&db, &enable).await.unwrap();
@@ -298,8 +302,52 @@ async fn r_rec_73_free_photo_for_a_recipe_without_image() {
     assert!(settings.ready && settings.has_key);
     let draft = ai::create_recipe(&db, &data, &fetcher, &photos, &client, &input, d(TODAY)).await.unwrap();
     assert!(draft.has_image);
-    assert_eq!(*photos.queries.lock().unwrap(), ["Soupe de courgettes"], "seul le nom part");
+    assert_eq!(*photos.queries.lock().unwrap(), ["Soupe de courgettes|fr"], "seul le nom part");
+
+    // Les mots-clés de l'IA, en anglais, passent avant le nom.
+    photos.queries.lock().unwrap().clear();
+    let draft = ai::create_recipe(&db, &data, &fetcher, &photos, &client, &input, d(TODAY)).await.unwrap();
+    assert!(draft.has_image);
+    assert_eq!(*photos.queries.lock().unwrap(), ["zucchini soup bowl|en"]);
     assert!(!export::export(&db).await.unwrap().to_string().contains("photo-secret"), "la clé n'est pas exportée");
+}
+
+/// Changer de photo : des photos proposées, ou une adresse saisie, pour un brouillon comme pour une recette ;
+/// la photo du brouillon passe à la recette validée (R-REC-73, R-REC-68).
+#[tokio::test]
+async fn r_rec_73_choose_a_photo() {
+    let (db, dir) = setup().await;
+    let data = DataDir::new(dir.path());
+    let image = "https://cdn.pixabay.test/soupe.jpg";
+    let photos = StaticPhotoSearch::one(image);
+    let jpeg = || Fetched { body: vec![0xFF, 0xD8, 0xFF, 0xE0, 1, 2], content_type: Some("image/jpeg".into()) };
+    let fetcher = StaticFetcher {
+        pages: [(image.to_owned(), jpeg()), ("https://exemple.test/ma-photo.jpg".to_owned(), jpeg())].into(),
+    };
+    super::photos::update_settings(&db, &PhotoSettingsInput { enabled: true, api_key: Some("k".into()) })
+        .await
+        .unwrap();
+    let found = super::photos::search(&db, &photos, "soupe de courgettes").await.unwrap();
+    assert_eq!(found[0].image_url, image);
+    assert_eq!(*photos.queries.lock().unwrap(), ["soupe de courgettes|fr"]);
+
+    let json_ld = json!({ "@type": "Recipe", "name": "Soupe", "recipeIngredient": ["1 courgette"] }).to_string();
+    let start = recipe_import::StartImport { url: None, json_ld: Some(json_ld) };
+    let draft = recipe_import::start(&db, &data, &fetcher, &StaticPhotoSearch::default(), &start).await.unwrap();
+    let chosen = super::photos::ImageUrlInput { url: image.into() };
+    super::photos::choose_for_draft(&db, &data, &fetcher, draft.id, &chosen).await.unwrap();
+    let (bytes, kind) = super::images::read_draft(&db, &data, draft.id).await.unwrap();
+    assert_eq!((bytes.len(), kind), (6, "image/jpeg"));
+    let review = recipe_import::get(&db, draft.id).await.unwrap();
+    assert!(review.has_image);
+    let created = recipe_import::commit(&db, &data, draft.id, &input_from(&review.payload)).await.unwrap();
+    assert!(super::images::read(&db, &data, created).await.is_ok(), "la photo passe à la recette");
+
+    let typed = super::photos::ImageUrlInput { url: "https://exemple.test/ma-photo.jpg".into() };
+    super::photos::choose_for_recipe(&db, &data, &fetcher, created, &typed).await.unwrap();
+    let invalid = super::photos::ImageUrlInput { url: "file:///etc/passwd".into() };
+    let refused = super::photos::choose_for_recipe(&db, &data, &fetcher, created, &invalid).await;
+    assert!(matches!(refused, Err(AppError::Invalid { code: "INVALID_URL", .. })));
 }
 
 /// Le planning désigne créneaux, recettes et lots par des références courtes, retraduites en identifiants ;

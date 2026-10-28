@@ -10,6 +10,7 @@ use utoipa::{IntoParams, ToSchema};
 
 use crate::error::{AppError, AppResult, Problem};
 use crate::services::images;
+use crate::services::photos::{self, ImageUrlInput, PhotoCandidate};
 use crate::services::recipes::{self, RecipeDetail, RecipeInput, RecipeQuery, RecipeSummary};
 use crate::state::AppState;
 
@@ -149,17 +150,55 @@ pub async fn image(State(state): State<AppState>, Path(id): Path<RecipeId>) -> A
 pub async fn upload_image(
     State(state): State<AppState>,
     Path(id): Path<RecipeId>,
-    mut form: Multipart,
+    form: Multipart,
 ) -> AppResult<StatusCode> {
+    let (content_type, bytes) = image_field(form).await?;
+    images::upload(&state.db, &state.data, id, content_type.as_deref(), &bytes).await?;
+    Ok(StatusCode::NO_CONTENT)
+}
+
+/// Champ `image` d'un formulaire `multipart` : son type et ses octets.
+pub async fn image_field(mut form: Multipart) -> AppResult<(Option<String>, Bytes)> {
     while let Some(field) = form.next_field().await.map_err(|e| AppError::invalid("INVALID_UPLOAD", e.to_string()))? {
         if field.name() == Some("image") {
             let content_type = field.content_type().map(str::to_owned);
             let bytes = field.bytes().await.map_err(|e| AppError::invalid("INVALID_UPLOAD", e.to_string()))?;
-            images::upload(&state.db, &state.data, id, content_type.as_deref(), &bytes).await?;
-            return Ok(StatusCode::NO_CONTENT);
+            return Ok((content_type, bytes));
         }
     }
     Err(AppError::invalid_field("REQUIRED", "image", "image manquante"))
+}
+
+/// Retient l'image d'une adresse : photo proposée, ou adresse saisie (R-REC-73).
+#[utoipa::path(
+    put, operation_id = "chooseRecipePhoto", path = "/recipes/{id}/photo", tag = "recipes", params(("id" = RecipeId, Path)),
+    request_body = ImageUrlInput, responses((status = 204), (status = 422, body = Problem))
+)]
+pub async fn choose_photo(
+    State(state): State<AppState>,
+    Path(id): Path<RecipeId>,
+    Json(input): Json<ImageUrlInput>,
+) -> AppResult<StatusCode> {
+    photos::choose_for_recipe(&state.db, &state.data, state.fetcher.as_ref(), id, &input).await?;
+    Ok(StatusCode::NO_CONTENT)
+}
+
+#[derive(Deserialize, IntoParams)]
+pub struct PhotoQueryParams {
+    /// Mots-clés, en français.
+    pub q: String,
+}
+
+/// Photos libres proposées pour des mots-clés (Pixabay, R-REC-73).
+#[utoipa::path(
+    get, operation_id = "searchPhotos", path = "/photos", tag = "recipes", params(PhotoQueryParams),
+    responses((status = 200, body = Vec<PhotoCandidate>), (status = 422, body = Problem))
+)]
+pub async fn search_photos(
+    State(state): State<AppState>,
+    Query(query): Query<PhotoQueryParams>,
+) -> AppResult<Json<Vec<PhotoCandidate>>> {
+    Ok(Json(photos::search(&state.db, state.photos.as_ref(), &query.q).await?))
 }
 
 #[utoipa::path(delete, operation_id = "deleteRecipeImage", path = "/recipes/{id}/image", tag = "recipes", params(("id" = RecipeId, Path)), responses((status = 204)))]

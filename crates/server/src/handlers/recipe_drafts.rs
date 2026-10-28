@@ -1,10 +1,14 @@
 use axum::Json;
-use axum::extract::{Path, State};
-use axum::http::StatusCode;
+use axum::body::Bytes;
+use axum::extract::{Multipart, Path, State};
+use axum::http::{StatusCode, header};
+use axum::response::IntoResponse;
 use foodflow_domain::shared::ids::RecipeDraftId;
 
-use super::recipes::CreatedRecipe;
+use super::recipes::{CreatedRecipe, image_field};
 use crate::error::{AppResult, Problem};
+use crate::services::images;
+use crate::services::photos::{self, ImageUrlInput};
 use crate::services::recipe_import::{self, DraftPayload, RecipeDraft, StartImport};
 use crate::services::recipes::RecipeInput;
 use crate::state::AppState;
@@ -66,5 +70,48 @@ pub async fn commit(
 #[utoipa::path(delete, operation_id = "discardRecipeDraft", path = "/recipe-drafts/{id}", tag = "recipes", params(("id" = RecipeDraftId, Path)), responses((status = 204)))]
 pub async fn discard(State(state): State<AppState>, Path(id): Path<RecipeDraftId>) -> AppResult<StatusCode> {
     recipe_import::discard(&state.db, &state.data, id).await?;
+    Ok(StatusCode::NO_CONTENT)
+}
+
+/// Image d'un brouillon (R-REC-68, R-REC-73).
+#[utoipa::path(
+    get, operation_id = "getRecipeDraftImage", path = "/recipe-drafts/{id}/image", tag = "recipes",
+    params(("id" = RecipeDraftId, Path)),
+    responses((status = 200, description = "Image", content_type = "image/*"), (status = 404, body = Problem))
+)]
+pub async fn image(State(state): State<AppState>, Path(id): Path<RecipeDraftId>) -> AppResult<impl IntoResponse> {
+    let (bytes, content_type) = images::read_draft(&state.db, &state.data, id).await?;
+    Ok(([(header::CONTENT_TYPE, content_type), (header::CACHE_CONTROL, "private, max-age=3600")], Bytes::from(bytes)))
+}
+
+/// Remplace l'image d'un brouillon (formulaire `multipart`, champ `image`).
+#[utoipa::path(
+    put, operation_id = "uploadRecipeDraftImage", path = "/recipe-drafts/{id}/image", tag = "recipes",
+    params(("id" = RecipeDraftId, Path)),
+    request_body(content_type = "multipart/form-data", description = "Champ `image` : JPEG, PNG ou WebP"),
+    responses((status = 204), (status = 422, body = Problem))
+)]
+pub async fn upload_image(
+    State(state): State<AppState>,
+    Path(id): Path<RecipeDraftId>,
+    form: Multipart,
+) -> AppResult<StatusCode> {
+    let (content_type, bytes) = image_field(form).await?;
+    images::upload_draft(&state.db, &state.data, id, content_type.as_deref(), &bytes).await?;
+    Ok(StatusCode::NO_CONTENT)
+}
+
+/// Retient pour un brouillon l'image d'une adresse : photo proposée, ou adresse saisie (R-REC-73).
+#[utoipa::path(
+    put, operation_id = "chooseRecipeDraftPhoto", path = "/recipe-drafts/{id}/photo", tag = "recipes",
+    params(("id" = RecipeDraftId, Path)), request_body = ImageUrlInput,
+    responses((status = 204), (status = 422, body = Problem))
+)]
+pub async fn choose_photo(
+    State(state): State<AppState>,
+    Path(id): Path<RecipeDraftId>,
+    Json(input): Json<ImageUrlInput>,
+) -> AppResult<StatusCode> {
+    photos::choose_for_draft(&state.db, &state.data, state.fetcher.as_ref(), id, &input).await?;
     Ok(StatusCode::NO_CONTENT)
 }

@@ -180,10 +180,13 @@ Par portion (adulte) : 640 kcal · P 32 g · G 52 g · L 33 g · coût ≈ 2,10 
   adresses partagées depuis une autre application et en lance l'import. Les deux mènent à la revue
   habituelle (R-REC-61).
 - **R-REC-73** — **Photo libre** : un brouillon créé sans image (réponse de l'IA, page ou fichier sans image)
-  reçoit une photo de Pixabay, cherchée d'après le nom de la recette (puis, sans résultat, d'après ses mots
-  principaux), si ce service est activé dans les réglages avec sa clé (ADR-0007). Seul le nom part ; la
-  photo est copiée dans le volume (R-REC-68) et se remplace dans la revue comme toute image. Sans réglage,
-  sans résultat ou en cas d'échec, la recette reste sans photo, sans erreur.
+  reçoit une photo de Pixabay si ce service est activé dans les réglages avec sa clé (ADR-0007). Pour une
+  recette de l'IA, la recherche se fait d'abord avec les mots-clés en anglais que l'IA joint à sa réponse
+  (`image_query`), puis d'après le nom de la recette (et, sans résultat, ses mots principaux). Seuls des
+  mots-clés partent ; la photo est copiée dans le volume (R-REC-68). Sans réglage, sans résultat ou en cas
+  d'échec, la recette reste sans photo, sans erreur. **Changer de photo**, dans la revue d'un brouillon comme
+  sur la fiche d'une recette, propose jusqu'à 9 photos Pixabay pour des mots-clés modifiables (le nom par
+  défaut), une image depuis une adresse, ou un fichier envoyé ; rien ne change avant le choix.
 
 ### Création par l'IA (ADR-0014)
 
@@ -193,8 +196,8 @@ Par portion (adulte) : 640 kcal · P 32 g · G 52 g · L 33 g · coût ≈ 2,10 
 - **R-REC-81** — Les données envoyées sont **affichées avant l'envoi** et limitées au nécessaire : membres
   désignés par une lettre, avec leurs préférences, jamais leur nom (ADR-0007).
 - **R-REC-82** — La réponse est une recette au format imposé (nom, catégorie, rendement, temps, lignes
-  d'ingrédients, étapes) ; elle devient un **brouillon** (R-REC-61) relu comme un import (R-REC-63 à
-  R-REC-66). Une réponse invalide est refusée avec un message, jamais corrigée en silence.
+  d'ingrédients, étapes, et des mots-clés de photo en anglais, R-REC-73) ; elle devient un **brouillon**
+  (R-REC-61) relu comme un import (R-REC-63 à R-REC-66). Une réponse invalide est refusée avec un message, jamais corrigée en silence.
 - **R-REC-83** — Chaque appel compte dans le **plafond mensuel** des réglages ; au-delà, la demande est
   refusée jusqu'au mois suivant.
 

@@ -2,13 +2,14 @@
 //! brouillon (ADR-0007). Seul le nom de la recette part ; l'image trouvée est copiée dans le volume
 //! (R-REC-68).
 
+use foodflow_domain::shared::ids::{RecipeDraftId, RecipeId};
 use serde::{Deserialize, Serialize};
 use sqlx::SqliteConnection;
 use utoipa::ToSchema;
 
 use super::images;
-use crate::clients::photos::PhotoSearch;
-use crate::clients::web::{Fetcher, check_url};
+use crate::clients::photos::{PhotoQuery, PhotoSearch};
+use crate::clients::web::{Fetched, Fetcher, check_url};
 use crate::config::DataDir;
 use crate::db::{self, Db};
 use crate::error::{AppError, AppResult};
@@ -77,8 +78,16 @@ pub fn queries(name: &str) -> Vec<String> {
     queries
 }
 
+/// Clé de Pixabay, si le service est activé.
+async fn ready_key(db: &Db) -> anyhow::Result<Option<String>> {
+    let mut conn = db.read.acquire().await?;
+    let enabled: bool = db::settings::get(&mut *conn, ENABLED).await?.unwrap_or(false);
+    Ok(if enabled { key(&mut conn).await? } else { None })
+}
+
 /// Cherche une photo pour une recette et la copie dans le volume sous `stem` ; renvoie son nom de fichier.
-/// La photo est un plus : sans réglage, sans résultat ou en cas d'échec, la recette reste sans photo.
+/// Les mots-clés de l'IA (en anglais) passent d'abord, puis le nom de la recette. La photo est un plus : sans
+/// réglage, sans résultat ou en cas d'échec, la recette reste sans photo.
 pub async fn find(
     db: &Db,
     data: &DataDir,
@@ -86,22 +95,18 @@ pub async fn find(
     photos: &dyn PhotoSearch,
     stem: &str,
     name: &str,
+    ai_query: Option<&str>,
 ) -> Option<String> {
-    let key = {
-        let mut conn = db.read.acquire().await.ok()?;
-        let enabled: bool = db::settings::get(&mut *conn, ENABLED).await.ok()?.unwrap_or(false);
-        if !enabled {
-            return None;
-        }
-        key(&mut conn).await.ok()??
-    };
-    for query in queries(name) {
-        match photos.search(&key, &query).await {
-            Ok(Some(url)) if check_url(&url).is_ok() => {
-                let fetched = fetcher.get(&url).await.ok()?;
+    let key = ready_key(db).await.ok()??;
+    let searches =
+        ai_query.map(|q| (q.to_owned(), "en")).into_iter().chain(queries(name).into_iter().map(|q| (q, "fr")));
+    for (text, lang) in searches {
+        match photos.search(&key, PhotoQuery { text: &text, lang, count: 3 }).await {
+            Ok(found) => {
+                let Some(photo) = found.into_iter().find(|p| check_url(&p.image_url).is_ok()) else { continue };
+                let fetched = fetcher.get(&photo.image_url).await.ok()?;
                 return images::store(data, stem, fetched.content_type.as_deref(), &fetched.body).ok();
             }
-            Ok(_) => {}
             Err(error) => {
                 tracing::warn!(error = format!("{error:#}"), "recherche de photo impossible");
                 return None;
@@ -109,6 +114,76 @@ pub async fn find(
         }
     }
     None
+}
+
+/// Nombre de photos proposées au choix.
+pub const CHOICES: u32 = 9;
+
+/// Une photo proposée au choix : l'aperçu montré, et l'adresse de l'image à retenir.
+#[derive(Debug, Clone, Serialize, ToSchema)]
+pub struct PhotoCandidate {
+    pub preview_url: String,
+    pub image_url: String,
+}
+
+/// Adresse d'une image à retenir (une photo proposée, ou une adresse saisie).
+#[derive(Debug, Deserialize, ToSchema)]
+pub struct ImageUrlInput {
+    pub url: String,
+}
+
+/// Photos proposées pour des mots-clés en français (R-REC-73).
+pub async fn search(db: &Db, photos: &dyn PhotoSearch, text: &str) -> AppResult<Vec<PhotoCandidate>> {
+    let text = text.trim();
+    if text.is_empty() || text.chars().count() > 100 {
+        return Err(AppError::invalid_field("INVALID_QUERY", "q", "de 1 à 100 caractères"));
+    }
+    let key = ready_key(db).await?.ok_or_else(|| {
+        AppError::invalid("PHOTOS_DISABLED", "photos Pixabay désactivées : les activer avec leur clé dans les réglages")
+    })?;
+    let found = photos
+        .search(&key, PhotoQuery { text, lang: "fr", count: CHOICES })
+        .await
+        .map_err(|e| AppError::invalid("PHOTOS_UNAVAILABLE", format!("{e:#}")))?;
+    Ok(found
+        .into_iter()
+        .filter(|p| check_url(&p.image_url).is_ok())
+        .map(|p| PhotoCandidate { preview_url: p.preview_url, image_url: p.image_url })
+        .collect())
+}
+
+/// Télécharge l'image d'une adresse http(s), à la demande de l'utilisateur.
+async fn download(fetcher: &dyn Fetcher, url: &str) -> AppResult<Fetched> {
+    let url = url.trim();
+    check_url(url).map_err(|e| AppError::invalid_field("INVALID_URL", "url", e.to_string()))?;
+    fetcher
+        .get(url)
+        .await
+        .map_err(|e| AppError::invalid_field("IMAGE_UNREACHABLE", "url", format!("image inaccessible : {e}")))
+}
+
+/// Retient pour une recette l'image d'une adresse (photo proposée ou adresse saisie).
+pub async fn choose_for_recipe(
+    db: &Db,
+    data: &DataDir,
+    fetcher: &dyn Fetcher,
+    id: RecipeId,
+    input: &ImageUrlInput,
+) -> AppResult<()> {
+    let fetched = download(fetcher, &input.url).await?;
+    images::upload(db, data, id, fetched.content_type.as_deref(), &fetched.body).await
+}
+
+/// Retient pour un brouillon l'image d'une adresse (photo proposée ou adresse saisie).
+pub async fn choose_for_draft(
+    db: &Db,
+    data: &DataDir,
+    fetcher: &dyn Fetcher,
+    id: RecipeDraftId,
+    input: &ImageUrlInput,
+) -> AppResult<()> {
+    let fetched = download(fetcher, &input.url).await?;
+    images::upload_draft(db, data, id, fetched.content_type.as_deref(), &fetched.body).await
 }
 
 #[cfg(test)]

@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "UPDATE recipe_draft SET image_path = ?, updated_at = ? WHERE id = ?",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 3
+    },
+    "nullable": []
+  },
+  "hash": "db85255a964d6c985bac163bf4cb798a2a70362b3eadae6b3a66bdcdc377d00a"
+}

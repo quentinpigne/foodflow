@@ -181,6 +181,8 @@ export type { WasteLot$Params as WasteLot$Params } from './fn/stock/waste-lot';
 export { wasteLot as wasteLot } from './fn/stock/waste-lot';
 export type { ReverseMovement$Params as ReverseMovement$Params } from './fn/stock/reverse-movement';
 export { reverseMovement as reverseMovement } from './fn/stock/reverse-movement';
+export type { SearchPhotos$Params as SearchPhotos$Params } from './fn/recipes/search-photos';
+export { searchPhotos as searchPhotos } from './fn/recipes/search-photos';
 export type { ListRecipeDrafts$Params as ListRecipeDrafts$Params } from './fn/recipes/list-recipe-drafts';
 export { listRecipeDrafts as listRecipeDrafts } from './fn/recipes/list-recipe-drafts';
 export type { StartRecipeImport$Params as StartRecipeImport$Params } from './fn/recipes/start-recipe-import';
@@ -193,6 +195,12 @@ export type { DiscardRecipeDraft$Params as DiscardRecipeDraft$Params } from './f
 export { discardRecipeDraft as discardRecipeDraft } from './fn/recipes/discard-recipe-draft';
 export type { CommitRecipeDraft$Params as CommitRecipeDraft$Params } from './fn/recipes/commit-recipe-draft';
 export { commitRecipeDraft as commitRecipeDraft } from './fn/recipes/commit-recipe-draft';
+export type { GetRecipeDraftImage$Params as GetRecipeDraftImage$Params } from './fn/recipes/get-recipe-draft-image';
+export { getRecipeDraftImage as getRecipeDraftImage } from './fn/recipes/get-recipe-draft-image';
+export type { UploadRecipeDraftImage$Params as UploadRecipeDraftImage$Params } from './fn/recipes/upload-recipe-draft-image';
+export { uploadRecipeDraftImage as uploadRecipeDraftImage } from './fn/recipes/upload-recipe-draft-image';
+export type { ChooseRecipeDraftPhoto$Params as ChooseRecipeDraftPhoto$Params } from './fn/recipes/choose-recipe-draft-photo';
+export { chooseRecipeDraftPhoto as chooseRecipeDraftPhoto } from './fn/recipes/choose-recipe-draft-photo';
 export type { SearchRecipes$Params as SearchRecipes$Params } from './fn/recipes/search-recipes';
 export { searchRecipes as searchRecipes } from './fn/recipes/search-recipes';
 export type { CreateRecipe$Params as CreateRecipe$Params } from './fn/recipes/create-recipe';
@@ -217,3 +225,5 @@ export type { DeleteRecipeImage$Params as DeleteRecipeImage$Params } from './fn/
 export { deleteRecipeImage as deleteRecipeImage } from './fn/recipes/delete-recipe-image';
 export type { ExportRecipe$Params as ExportRecipe$Params } from './fn/recipes/export-recipe';
 export { exportRecipe as exportRecipe } from './fn/recipes/export-recipe';
+export type { ChooseRecipePhoto$Params as ChooseRecipePhoto$Params } from './fn/recipes/choose-recipe-photo';
+export { chooseRecipePhoto as chooseRecipePhoto } from './fn/recipes/choose-recipe-photo';

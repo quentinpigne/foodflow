@@ -31,6 +31,7 @@ import { NUTRITION_GROUP_LABELS, RECIPE_KIND_LABELS, formatMinutes } from '../..
 import { NUTRIENTS, formatNutrient } from '../../core/nutrients';
 import { formatIn, formatQuantity, parseQuantity, UNITS } from '../../core/quantity';
 import { confirm } from '../../shared/confirm-dialog';
+import { choosePhoto } from '../../shared/photo-dialog';
 
 const BASIS_LABELS: Record<ValuesBasis, string> = {
   PORTION: 'par portion adulte',
@@ -87,8 +88,8 @@ const BASIS_LABELS: Record<ValuesBasis, string> = {
             <a mat-menu-item [href]="'/api/v1/recipes/' + r.id + '/json-ld'" download
               ><mat-icon>download</mat-icon>Exporter (JSON-LD)</a
             >
-            <button mat-menu-item (click)="fileInput.click()">
-              <mat-icon>image</mat-icon>Changer la photo
+            <button mat-menu-item (click)="changePhoto(r)">
+              <mat-icon>image</mat-icon>Changer de photo
             </button>
             @if (r.has_image) {
               <button mat-menu-item (click)="removeImage(r)">
@@ -97,13 +98,6 @@ const BASIS_LABELS: Record<ValuesBasis, string> = {
             }
             <button mat-menu-item (click)="remove(r)"><mat-icon>delete</mat-icon>Supprimer</button>
           </mat-menu>
-          <input
-            #fileInput
-            type="file"
-            accept="image/jpeg,image/png,image/webp"
-            hidden
-            (change)="upload(r, $event)"
-          />
         }
       </div>
       @if (recipe.isLoading()) {
@@ -461,15 +455,15 @@ export class RecipePage {
     }
   }
 
-  protected async upload(r: RecipeDetail, event: Event): Promise<void> {
-    const file = (event.target as HTMLInputElement).files?.[0];
-    if (!file) return;
-    if (
-      (await this.run(
-        this.api.uploadRecipeImage({ id: r.id, body: { image: file } as never }),
-        'Photo enregistrée',
-      )) !== null
-    ) {
+  /** Photo proposée, adresse saisie ou fichier envoyé (R-REC-73). */
+  protected async changePhoto(r: RecipeDetail): Promise<void> {
+    const chosen = await choosePhoto(this.dialog, r.name);
+    if (!chosen) return;
+    const request =
+      'file' in chosen
+        ? this.api.uploadRecipeImage({ id: r.id, body: { image: chosen.file } as never })
+        : this.api.chooseRecipePhoto({ id: r.id, body: { url: chosen.url } });
+    if ((await this.run(request, 'Photo enregistrée')) !== null) {
       this.imageVersion.update((v) => v + 1);
     }
   }

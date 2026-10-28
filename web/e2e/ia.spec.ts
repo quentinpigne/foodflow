@@ -50,6 +50,14 @@ test('IA : une recette demandée arrive en brouillon, après l’aperçu de ce q
   await confirmSend(page);
   await expect(page.getByRole('heading', { name: 'Revue de l’import' })).toBeVisible();
   await expect(page.getByLabel('Nom')).toHaveValue('Velouté de courgettes');
+  // La photo se choisit dans la revue (R-REC-73).
+  await page.getByRole('button', { name: 'Changer de photo' }).click();
+  await page
+    .getByRole('dialog')
+    .getByLabel('Depuis une adresse')
+    .fill('http://127.0.0.1:3197/photo.jpg');
+  await page.getByRole('dialog').getByRole('button', { name: 'Utiliser' }).click();
+  await expect(page.locator('img.draft-photo')).toBeVisible();
   await page.getByRole('button', { name: 'Abandonner l’import' }).click();
   await page.getByRole('dialog').getByRole('button', { name: 'Abandonner' }).click();
   await expect(page.getByRole('heading', { name: 'Importer des recettes' })).toBeVisible();

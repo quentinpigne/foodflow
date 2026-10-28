@@ -297,7 +297,7 @@ pub fn recipe_schema() -> Value {
     json!({
         "type": "object",
         "additionalProperties": false,
-        "required": ["name", "kind", "description", "portions", "active_minutes", "passive_minutes", "ingredients", "steps", "tags"],
+        "required": ["name", "kind", "description", "portions", "active_minutes", "passive_minutes", "ingredients", "steps", "tags", "image_query"],
         "properties": {
             "name": { "type": "string" },
             "kind": { "type": "string", "enum": kinds },
@@ -307,7 +307,8 @@ pub fn recipe_schema() -> Value {
             "passive_minutes": { "type": "integer" },
             "ingredients": { "type": "array", "items": { "type": "string" }, "description": "une ligne par ingrédient, quantité et unité d'abord : « 200 g de farine »" },
             "steps": { "type": "array", "items": { "type": "string" }, "description": "une étape par élément, sans numéro" },
-            "tags": { "type": "array", "items": { "type": "string" } }
+            "tags": { "type": "array", "items": { "type": "string" } },
+            "image_query": { "type": "string", "description": "3 à 5 mots-clés en anglais pour chercher une photo du plat : « zucchini soup bowl »" }
         }
     })
 }
@@ -425,7 +426,7 @@ pub async fn draft_from(
     recipe: &AiRecipe,
 ) -> AppResult<RecipeDraft> {
     let input = StartImport { url: None, json_ld: Some(json_ld(recipe).to_string()) };
-    recipe_import::start(db, data, fetcher, photos, &input).await
+    recipe_import::start_with(db, data, fetcher, photos, &input, recipe.photo_query()).await
 }
 
 /// Demande une recette à l'IA ; elle arrive en brouillon (REC-19).

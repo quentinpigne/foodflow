@@ -281,6 +281,18 @@ pub async fn start(
     photos: &dyn PhotoSearch,
     input: &StartImport,
 ) -> AppResult<RecipeDraft> {
+    start_with(db, data, fetcher, photos, input, None).await
+}
+
+/// Comme `start`, avec des mots-clés de photo en anglais (ceux de l'IA), essayés avant le nom (R-REC-73).
+pub async fn start_with(
+    db: &Db,
+    data: &DataDir,
+    fetcher: &dyn Fetcher,
+    photos: &dyn PhotoSearch,
+    input: &StartImport,
+    photo_query: Option<&str>,
+) -> AppResult<RecipeDraft> {
     let url = input.url.as_deref().map(str::trim).filter(|u| !u.is_empty());
     if let Some(url) = url {
         check_url(url).map_err(|e| AppError::invalid_field("INVALID_URL", "url", e.to_string()))?;
@@ -345,7 +357,8 @@ pub async fn start(
     }
     // Sans image, une photo libre est cherchée d'après le nom, si le réglage l'active (R-REC-73).
     if image_path.is_none() {
-        image_path = super::photos::find(db, data, fetcher, photos, &format!("draft-{id}"), &payload.name).await;
+        image_path =
+            super::photos::find(db, data, fetcher, photos, &format!("draft-{id}"), &payload.name, photo_query).await;
     }
     let row = DraftRow {
         id,

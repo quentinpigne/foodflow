@@ -2588,6 +2588,49 @@
         }
       }
     },
+    "/api/v1/photos": {
+      "get": {
+        "tags": [
+          "recipes"
+        ],
+        "summary": "Photos libres proposées pour des mots-clés (Pixabay, R-REC-73).",
+        "operationId": "searchPhotos",
+        "parameters": [
+          {
+            "name": "q",
+            "in": "query",
+            "description": "Mots-clés, en français.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PhotoCandidate"
+                  }
+                }
+              }
+            }
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/plan": {
       "get": {
         "tags": [
@@ -3063,6 +3106,118 @@
               }
             }
           },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/recipe-drafts/{id}/image": {
+      "get": {
+        "tags": [
+          "recipes"
+        ],
+        "summary": "Image d'un brouillon (R-REC-68, R-REC-73).",
+        "operationId": "getRecipeDraftImage",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/RecipeDraftId"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Image",
+            "content": {
+              "image/*": {}
+            }
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "recipes"
+        ],
+        "summary": "Remplace l'image d'un brouillon (formulaire `multipart`, champ `image`).",
+        "operationId": "uploadRecipeDraftImage",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/RecipeDraftId"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "Champ `image` : JPEG, PNG ou WebP",
+          "content": {
+            "multipart/form-data": {}
+          }
+        },
+        "responses": {
+          "204": {},
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/recipe-drafts/{id}/photo": {
+      "put": {
+        "tags": [
+          "recipes"
+        ],
+        "summary": "Retient pour un brouillon l'image d'une adresse : photo proposée, ou adresse saisie (R-REC-73).",
+        "operationId": "chooseRecipeDraftPhoto",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/RecipeDraftId"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ImageUrlInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {},
           "422": {
             "content": {
               "application/json": {
@@ -3553,6 +3708,47 @@
             "description": "JSON-LD schema.org/Recipe",
             "content": {
               "application/ld+json": {}
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/recipes/{id}/photo": {
+      "put": {
+        "tags": [
+          "recipes"
+        ],
+        "summary": "Retient l'image d'une adresse : photo proposée, ou adresse saisie (R-REC-73).",
+        "operationId": "chooseRecipePhoto",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/RecipeId"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ImageUrlInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {},
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
             }
           }
         }
@@ -5449,6 +5645,18 @@
           }
         }
       },
+      "ImageUrlInput": {
+        "type": "object",
+        "description": "Adresse d'une image à retenir (une photo proposée, ou une adresse saisie).",
+        "required": [
+          "url"
+        ],
+        "properties": {
+          "url": {
+            "type": "string"
+          }
+        }
+      },
       "Importance": {
         "type": "string",
         "enum": [
@@ -7132,6 +7340,22 @@
           "DAY",
           "WEEK"
         ]
+      },
+      "PhotoCandidate": {
+        "type": "object",
+        "description": "Une photo proposée au choix : l'aperçu montré, et l'adresse de l'image à retenir.",
+        "required": [
+          "preview_url",
+          "image_url"
+        ],
+        "properties": {
+          "image_url": {
+            "type": "string"
+          },
+          "preview_url": {
+            "type": "string"
+          }
+        }
       },
       "PhotoSettings": {
         "type": "object",

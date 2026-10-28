@@ -1,4 +1,5 @@
-// IA factice des tests de bout en bout : une API de chat compatible OpenAI, en local, aux réponses fixes.
+// IA factice des tests de bout en bout : une API de chat compatible OpenAI, en local, aux réponses fixes ;
+// elle sert aussi une image, pour le choix d'une photo par adresse.
 // Elle lit dans la demande les références des créneaux et des recettes : aucun appel réseau réel.
 import { createServer } from 'node:http';
 
@@ -34,6 +35,12 @@ createServer((request, response) => {
   let body = '';
   request.on('data', (chunk) => (body += chunk));
   request.on('end', () => {
+    // Une image servie par adresse, pour « Changer de photo » : seuls ses premiers octets (JPEG) comptent.
+    if (request.method === 'GET' && request.url === '/photo.jpg') {
+      response.writeHead(200, { 'content-type': 'image/jpeg' });
+      response.end(Buffer.from([0xff, 0xd8, 0xff, 0xe0, 0x00, 0x10]));
+      return;
+    }
     if (request.method !== 'POST' || !request.url.endsWith('/chat/completions')) {
       response.writeHead(404).end();
       return;
