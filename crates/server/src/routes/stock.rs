@@ -10,6 +10,8 @@ pub fn router() -> OpenApiRouter<AppState> {
         .routes(routes!(locations::list, locations::create))
         .routes(routes!(locations::update, locations::delete))
         .routes(routes!(stock::list, stock::create))
+        .routes(routes!(stock::create_batch))
+        .routes(routes!(stock::reverse_batch))
         .routes(routes!(stock::get, stock::update))
         .routes(routes!(stock::consume))
         .routes(routes!(stock::waste))

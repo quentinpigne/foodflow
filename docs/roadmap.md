@@ -81,6 +81,8 @@ Objectif : n'acheter que ce qui manque, liste en main en magasin.
 - COU-01 à COU-04 — besoins, couverture datée, liste, ajustements, validation vers le stock
 - COU-05 à COU-09 — rayons et magasins, mode magasin hors connexion (PWA), scan, prix, stock minimum
 - ALI-07, ALI-08 — scan du code-barres, Open Food Facts
+- STK-12, STK-13 — mise en stock et inventaire par scan (ajoutées le 2026-11-01, réalisées en tête de
+  phase : la mise en stock seule n'attend pas les sessions de courses)
 - REC-04 — coût des recettes
 
 **Critère de sortie** : quatre sessions de courses réelles faites avec la liste, dont une sans réseau ;

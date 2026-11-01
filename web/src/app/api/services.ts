@@ -4,9 +4,9 @@
 export { AiService } from './services/ai.service';
 export { GoalsService } from './services/goals.service';
 export { AuthService } from './services/auth.service';
+export { FoodsService } from './services/foods.service';
+export { StockService } from './services/stock.service';
 export { DashboardService } from './services/dashboard.service';
 export { SystemService } from './services/system.service';
-export { FoodsService } from './services/foods.service';
 export { PlanningService } from './services/planning.service';
-export { StockService } from './services/stock.service';
 export { RecipesService } from './services/recipes.service';

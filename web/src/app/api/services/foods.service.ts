@@ -12,6 +12,7 @@ import { StrictHttpResponse } from '../strict-http-response';
 
 import { addFoodUnit } from '../fn/foods/add-food-unit';
 import { AddFoodUnit$Params } from '../fn/foods/add-food-unit';
+import { BarcodeLookup } from '../models/barcode-lookup';
 import { changeTrackingMode } from '../fn/foods/change-tracking-mode';
 import { ChangeTrackingMode$Params } from '../fn/foods/change-tracking-mode';
 import { CreatedFood } from '../models/created-food';
@@ -43,6 +44,8 @@ import { listFoodGroups } from '../fn/foods/list-food-groups';
 import { ListFoodGroups$Params } from '../fn/foods/list-food-groups';
 import { listUnits } from '../fn/foods/list-units';
 import { ListUnits$Params } from '../fn/foods/list-units';
+import { lookupBarcode } from '../fn/foods/lookup-barcode';
+import { LookupBarcode$Params } from '../fn/foods/lookup-barcode';
 import { mergeFoodGroup } from '../fn/foods/merge-food-group';
 import { MergeFoodGroup$Params } from '../fn/foods/merge-food-group';
 import { Product } from '../models/product';
@@ -72,6 +75,41 @@ import { UpdateProduct$Params } from '../fn/foods/update-product';
 export class FoodsService extends BaseService {
   constructor(config: ApiConfiguration, http: HttpClient) {
     super(config, http);
+  }
+
+  /** Path part for operation `lookupBarcode()` */
+  static readonly LookupBarcodePath = '/api/v1/barcodes/{code}';
+
+  /**
+   * Lecture d'un code-barres : produit connu ou non, valeurs proposées pour ses lots (R-STK-50, R-STK-53).
+   *
+   *
+   *
+   * This method provides access to the full `HttpResponse`, allowing access to response headers.
+   * To access only the response body, use `lookupBarcode()` instead.
+   *
+   * This method doesn't expect any request body.
+   */
+  lookupBarcode$Response(params: LookupBarcode$Params, context?: HttpContext): Observable<StrictHttpResponse<BarcodeLookup>> {
+    const obs = lookupBarcode(this.http, this.rootUrl, params, context);
+    return obs;
+  }
+
+  /**
+   * Lecture d'un code-barres : produit connu ou non, valeurs proposées pour ses lots (R-STK-50, R-STK-53).
+   *
+   *
+   *
+   * This method provides access only to the response body.
+   * To access the full response (for headers, for example), `lookupBarcode$Response()` instead.
+   *
+   * This method doesn't expect any request body.
+   */
+  lookupBarcode(params: LookupBarcode$Params, context?: HttpContext): Observable<BarcodeLookup> {
+    const resp = this.lookupBarcode$Response(params, context);
+    return resp.pipe(
+      map((r: StrictHttpResponse<BarcodeLookup>): BarcodeLookup => r.body)
+    );
   }
 
   /** Path part for operation `listFoodGroups()` */

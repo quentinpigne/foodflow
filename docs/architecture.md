@@ -221,7 +221,9 @@ en mémoire. Le relire à chaque appel coûtait plus d'une seconde quand une pag
 - Quantités : module `quantity.ts` (analyse d'une saisie « 1,5 kg », « 2 c. à s. », formatage), et
   `money.ts` repris de Cashflow ; aucune arithmétique flottante sur une quantité ou un montant.
 - PWA (`@angular/service-worker`) : installation, mode magasin hors connexion, notifications push.
-  Scan de code-barres par la caméra (API `BarcodeDetector`, bibliothèque de repli sinon). Mode cuisine :
+  Scan de code-barres par la caméra (API `BarcodeDetector`, sinon la bibliothèque `barcode-detector`
+  dont le module WebAssembly est servi par Foodflow, sans appel extérieur) ou par un lecteur de
+  code-barres, reconnu à sa frappe rapide terminée par Entrée. Mode cuisine :
   écran maintenu allumé (API Wake Lock).
 
 ### Commandes

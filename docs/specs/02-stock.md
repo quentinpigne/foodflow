@@ -133,6 +133,38 @@ décongélation (R-STK-30 à R-STK-34), et de ta décision de le garder malgré 
   `PRESENCE`). En dessous, l'aliment est proposé pour la liste de courses (spec 06), même sans repas
   qui le demande.
 
+### Scan (2026-11-01)
+
+Saisir les courses une à une est trop long : on les range en **scannant** les codes-barres à la suite,
+puis on valide le tout. L'inventaire d'un emplacement se fait de la même façon.
+
+- **R-STK-50** — Un code-barres se lit avec la **caméra** du téléphone ou avec un **lecteur de
+  code-barres** (douchette USB ou Bluetooth, qui tape le code puis Entrée) ; on peut aussi le taper.
+  Un code dont la clé est fausse (R-ALI-41) est refusé avec un signal distinct, sans rien ajouter.
+  La caméra ignore un même code relu dans les 2 secondes ; avec un lecteur, chaque lecture compte.
+- **R-STK-51** — **Mise en stock par scan** : chaque lecture d'un produit connu ajoute **un
+  conditionnement** à sa ligne (trois paquets de pâtes scannés : une ligne « × 3 »). Le nombre se
+  corrige à la main. Rien n'entre en stock avant la validation (ADR-0005).
+- **R-STK-52** — Un code **inconnu** donne une ligne « à rattacher » : on crée le produit (code prérempli,
+  Open Food Facts quand ALI-08 sera là) ou on donne le code à un produit existant qui n'en a pas. Une
+  ligne non rattachée empêche la validation ; on peut la retirer.
+- **R-STK-53** — Chaque ligne propose **un lot par conditionnement scanné** (R-STK-6), prérempli :
+  quantité = conditionnement du produit (R-ALI-42, à saisir s'il n'en a pas) ; emplacement = celui du
+  dernier lot du produit, sinon du dernier lot de son aliment, sinon l'emplacement choisi pour la
+  séance ; nature de la péremption = celle du dernier lot du produit (DLC sinon), ou `NONE` si l'aliment
+  a une durée de conservation sans date. La date se saisit vite (+3 j, +1 semaine, +1 mois, JJ/MM)
+  ou reste **à compléter** (R-COU-51) : on peut valider sans elle.
+- **R-STK-54** — La validation crée tous les lots et leurs mouvements `PURCHASE` en **un seul lot
+  d'opérations**, annulable d'un geste (R-STK-12). Hors session de courses, elle n'enregistre ni magasin
+  ni total payé. Quand une session de courses est en cours (spec 06), la même séance de scan coche ses
+  articles et alimente « Terminer les courses » (R-COU-50) ; sinon c'est une mise en stock seule.
+- **R-STK-55** — **Inventaire par scan** d'un emplacement : chaque lecture d'un produit **constate**
+  un de ses lots non épuisés à cet emplacement, pas encore constaté, le plus proche de sa date limite
+  effective : présent avec sa quantité calculée (modifiable, pour un paquet entamé), ou `AVAILABLE` en
+  `PRESENCE`. Une lecture de plus que de lots à l'emplacement donne un **lot trouvé** (R-STK-41), d'un
+  conditionnement, date à compléter. Les lots **non scannés restent inchangés** : on les traite dans
+  l'inventaire classique (R-STK-40). Les constats et les lots trouvés forment un seul lot d'opérations.
+
 ## Features
 
 | ID | Priorité | Feature |
@@ -148,12 +180,20 @@ décongélation (R-STK-30 à R-STK-34), et de ta décision de le garder malgré 
 | STK-09 | V1 | Stock minimum par aliment |
 | STK-10 | V1 | Sortie rapide depuis le téléphone (scan du code-barres, premier périmé premier sorti) |
 | STK-11 | V2 | Statistiques de consommation par aliment et par mois |
+| STK-12 | V1 | Mise en stock par scan en rafale (caméra ou lecteur), revue des lots et validation unique (2026-11-01) |
+| STK-13 | V1 | Inventaire d'un emplacement par scan, lots non scannés inchangés (2026-11-01) |
 
 ### Critères d'acceptation
 
 - Étant donné un lot de 1 L de lait, des sorties de 250 mL et 200 mL, alors sa quantité est 550 mL ;
   et après un inventaire à 500 mL puis une sortie de 100 mL, elle est de 400 mL, avec un écart
   d'inventaire de −50 mL conservé (R-STK-2, R-STK-40).
+- Étant donné le produit « Panzani spaghetti 500 g » scanné trois fois, alors la revue propose 3 lots de
+  500 g ; et après validation, une seule annulation retire les 3 lots (R-STK-51, R-STK-53, R-STK-54).
+- Étant donné deux lots de ce produit au placard (300 g, péremption 10/11 ; 500 g, 20/12), quand
+  j'inventorie le placard en scannant le produit trois fois, alors le lot du 10/11 est constaté à 300 g,
+  celui du 20/12 à 500 g, et un lot trouvé de 500 g est créé ; un lot de riz non scanné ne reçoit aucun
+  mouvement (R-STK-55).
 - Étant donné un lot de 200 g, quand je valide une sortie de 300 g, alors 200 g sortent, le lot est
   épuisé et signalé « à vérifier » avec un écart de 100 g (R-STK-3).
 - Étant donné un yaourt de DLC le 30/10 ouvert le 24/10 avec une durée après ouverture de 2 jours,

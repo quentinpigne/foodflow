@@ -52,6 +52,9 @@ Langage commun du projet. Chaque terme métier a **un seul** nom français (docu
 | Jugé encore bon | `CHECKED` | Décision de garder un lot dont la date est dépassée, avec une nouvelle date limite. |
 | Premier périmé, premier sorti | `FEFO` | Règle de choix des lots lors d'une sortie : la date limite effective la plus proche d'abord. |
 | Stock minimum | `minimum stock` | Seuil en dessous duquel un aliment est proposé pour les courses. |
+| Lecteur de code-barres | `barcode reader` | Douchette USB ou Bluetooth qui tape le code lu comme un clavier, suivi d'Entrée. |
+| Mise en stock par scan | `scan entry` | Séance où l'on scanne les produits rangés à la suite, puis valide d'un coup les lots proposés. |
+| Inventaire par scan | `scan inventory` | Inventaire d'un emplacement où chaque lecture constate un lot ; les lots non scannés restent inchangés. |
 
 ## Foyer (ADR-0004)
 

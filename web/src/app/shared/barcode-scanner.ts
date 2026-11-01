@@ -1,0 +1,211 @@
+import {
+  ChangeDetectionStrategy,
+  Component,
+  DestroyRef,
+  ElementRef,
+  inject,
+  output,
+  signal,
+  viewChild,
+} from '@angular/core';
+import { FormsModule } from '@angular/forms';
+import { MatButtonModule } from '@angular/material/button';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatIconModule } from '@angular/material/icon';
+import { MatInputModule } from '@angular/material/input';
+
+import { Detector, ReaderInput, RepeatFilter, createDetector } from '../core/barcode';
+
+/**
+ * Lecture de codes-barres en rafale (R-STK-50) : caméra du téléphone, lecteur de code-barres (reconnu à sa
+ * frappe rapide, où que soit la page) ou saisie du code.
+ */
+@Component({
+  selector: 'app-barcode-scanner',
+  imports: [FormsModule, MatButtonModule, MatFormFieldModule, MatIconModule, MatInputModule],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  host: { '(document:keydown)': 'onKey($event)' },
+  template: `
+    <div class="scanner">
+      @if (camera()) {
+        <div class="video">
+          <video #video muted playsinline></video>
+          <div class="aim"></div>
+        </div>
+      }
+      @if (error()) {
+        <p class="error">{{ error() }}</p>
+      }
+      <div class="controls">
+        <button mat-stroked-button type="button" (click)="toggleCamera()">
+          <mat-icon>{{ camera() ? 'videocam_off' : 'photo_camera' }}</mat-icon>
+          {{ camera() ? 'Arrêter la caméra' : 'Caméra' }}
+        </button>
+        <form class="manual" (ngSubmit)="submitManual()">
+          <mat-form-field subscriptSizing="dynamic">
+            <mat-label>Code-barres</mat-label>
+            <input
+              matInput
+              name="code"
+              inputmode="numeric"
+              autocomplete="off"
+              [ngModel]="manual()"
+              (ngModelChange)="manual.set($event)"
+            />
+            <button mat-icon-button matIconSuffix type="submit" aria-label="Ajouter le code">
+              <mat-icon>keyboard_return</mat-icon>
+            </button>
+          </mat-form-field>
+        </form>
+      </div>
+      <p class="muted hint">Un lecteur de code-barres branché scanne directement, sans clic.</p>
+    </div>
+  `,
+  styles: `
+    .scanner {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+    .video {
+      position: relative;
+      overflow: hidden;
+      border-radius: var(--mat-sys-corner-medium);
+      background: #000;
+      max-height: 40vh;
+    }
+    video {
+      display: block;
+      width: 100%;
+      max-height: 40vh;
+      object-fit: cover;
+    }
+    .aim {
+      position: absolute;
+      inset: 35% 10%;
+      border: 2px solid rgb(255 255 255 / 70%);
+      border-radius: 8px;
+      pointer-events: none;
+    }
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: var(--field-gap);
+    }
+    .manual {
+      flex: 1;
+      min-width: 12rem;
+    }
+    .manual mat-form-field {
+      width: 100%;
+    }
+    .hint {
+      margin: 0;
+    }
+    .error {
+      color: var(--mat-sys-error);
+      margin: 0;
+    }
+  `,
+})
+export class BarcodeScanner {
+  readonly scanned = output<string>();
+
+  private readonly video = viewChild<ElementRef<HTMLVideoElement>>('video');
+  protected readonly camera = signal(false);
+  protected readonly manual = signal('');
+  protected readonly error = signal<string | null>(null);
+
+  private readonly reader = new ReaderInput();
+  private readonly repeats = new RepeatFilter();
+  private stream: MediaStream | null = null;
+  private detector: Detector | null = null;
+  private timer: ReturnType<typeof setTimeout> | null = null;
+
+  constructor() {
+    inject(DestroyRef).onDestroy(() => this.stop());
+  }
+
+  /** Lecteur de code-barres : il tape comme un clavier ; ignoré quand on saisit dans un champ. */
+  protected onKey(event: KeyboardEvent): void {
+    const target = event.target as HTMLElement | null;
+    if (
+      target &&
+      (target.isContentEditable || ['INPUT', 'TEXTAREA', 'SELECT'].includes(target.tagName))
+    ) {
+      return;
+    }
+    const code = this.reader.key(event.key, event.timeStamp);
+    if (code) {
+      event.preventDefault();
+      this.scanned.emit(code);
+    }
+  }
+
+  protected submitManual(): void {
+    const code = this.manual().replace(/\s/g, '');
+    if (code) {
+      this.scanned.emit(code);
+      this.manual.set('');
+    }
+  }
+
+  protected async toggleCamera(): Promise<void> {
+    if (this.camera()) {
+      this.stop();
+      return;
+    }
+    this.error.set(null);
+    try {
+      this.stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: 'environment' },
+        audio: false,
+      });
+      this.camera.set(true);
+      this.detector ??= await createDetector();
+      // La vidéo n'existe qu'après l'affichage du bloc caméra.
+      await new Promise((resolve) => setTimeout(resolve));
+      const video = this.video()?.nativeElement;
+      if (!video || !this.stream) {
+        return;
+      }
+      video.srcObject = this.stream;
+      await video.play();
+      this.loop();
+    } catch {
+      this.stop();
+      this.error.set(
+        'Caméra indisponible : autoriser son accès (l’application doit être servie en HTTPS), ou utiliser un lecteur de code-barres.',
+      );
+    }
+  }
+
+  private loop(): void {
+    this.timer = setTimeout(async () => {
+      const video = this.video()?.nativeElement;
+      if (!this.camera() || !video || !this.detector) {
+        return;
+      }
+      try {
+        for (const code of await this.detector.detect(video)) {
+          if (this.repeats.accept(code.rawValue, performance.now())) {
+            this.scanned.emit(code.rawValue);
+          }
+        }
+      } catch {
+        // Image illisible : on passe à la suivante.
+      }
+      this.loop();
+    }, 150);
+  }
+
+  private stop(): void {
+    if (this.timer) {
+      clearTimeout(this.timer);
+    }
+    this.stream?.getTracks().forEach((t) => t.stop());
+    this.stream = null;
+    this.camera.set(false);
+  }
+}

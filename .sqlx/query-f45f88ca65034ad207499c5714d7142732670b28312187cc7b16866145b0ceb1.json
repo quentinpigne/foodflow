@@ -1,0 +1,38 @@
+{
+  "db_name": "SQLite",
+  "query": "SELECT s.location_id, s.expiry_kind\n           FROM stock_lot s LEFT JOIN product p ON p.id = s.product_id\n           WHERE (?1 IS NOT NULL AND s.product_id = ?1)\n              OR (?2 IS NOT NULL AND (s.food_id = ?2 OR p.food_id = ?2))\n           ORDER BY s.stocked_on DESC, s.created_at DESC\n           LIMIT 1",
+  "describe": {
+    "columns": [
+      {
+        "name": "location_id",
+        "ordinal": 0,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "stock_lot",
+            "name": "location_id"
+          }
+        }
+      },
+      {
+        "name": "expiry_kind",
+        "ordinal": 1,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "stock_lot",
+            "name": "expiry_kind"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Right": 2
+    },
+    "nullable": [
+      false,
+      false
+    ]
+  },
+  "hash": "f45f88ca65034ad207499c5714d7142732670b28312187cc7b16866145b0ceb1"
+}

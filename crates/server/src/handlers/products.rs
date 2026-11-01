@@ -6,12 +6,21 @@ use serde::Serialize;
 use utoipa::ToSchema;
 
 use crate::error::{AppResult, Problem};
-use crate::services::products::{self, Product, ProductInput, ProductQuery};
+use crate::services::products::{self, BarcodeLookup, Product, ProductInput, ProductQuery};
 use crate::state::AppState;
 
 #[derive(Serialize, ToSchema)]
 pub struct CreatedProduct {
     pub id: ProductId,
+}
+
+/// Lecture d'un code-barres : produit connu ou non, valeurs proposées pour ses lots (R-STK-50, R-STK-53).
+#[utoipa::path(
+    get, operation_id = "lookupBarcode", path = "/barcodes/{code}", tag = "foods", params(("code" = String, Path)),
+    responses((status = 200, body = BarcodeLookup), (status = 422, body = Problem))
+)]
+pub async fn lookup(State(state): State<AppState>, Path(code): Path<String>) -> AppResult<Json<BarcodeLookup>> {
+    Ok(Json(products::lookup_barcode(&state.db, &code).await?))
 }
 
 /// Recherche de produits, par code-barres ou par nom (ALI-05, ALI-06).

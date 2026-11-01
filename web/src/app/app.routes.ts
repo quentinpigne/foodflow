@@ -35,6 +35,17 @@ export const routes: Routes = [
         loadComponent: () => import('./features/stock/inventory').then((m) => m.InventoryPage),
       },
       {
+        path: 'stock/scan',
+        title: 'Ranger les courses — Foodflow',
+        loadComponent: () => import('./features/stock/scan-entry').then((m) => m.ScanEntryPage),
+      },
+      {
+        path: 'stock/inventaire/scan',
+        title: 'Inventaire par scan — Foodflow',
+        loadComponent: () =>
+          import('./features/stock/scan-inventory').then((m) => m.ScanInventoryPage),
+      },
+      {
         path: 'stock/:id',
         title: 'Lot — Foodflow',
         loadComponent: () => import('./features/stock/lot-page').then((m) => m.LotPage),

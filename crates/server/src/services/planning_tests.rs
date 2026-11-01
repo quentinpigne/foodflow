@@ -396,6 +396,7 @@ async fn r_pla_30_lot_counted_after_the_meal_is_not_withdrawn() {
     let input_inventory = stock::InventoryInput {
         date: Some(d(TODAY)),
         entries: vec![stock::InventoryEntry { lot_id: lot, amount: Some(Amount::from_raw(300_000)), presence: None }],
+        found: vec![],
     };
     stock::inventory(&db, &input_inventory, d(TODAY)).await.unwrap();
     let after = meal_validation::proposal(&db, meal.id, d(TODAY)).await.unwrap();

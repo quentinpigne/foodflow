@@ -23,6 +23,8 @@ export interface ProductDialogData {
   foodId: string;
   measure: Measure;
   product?: Product;
+  /** Code lu au scan, prérempli pour un nouveau produit (R-STK-52). */
+  barcode?: string;
 }
 
 /** Produit du commerce d'un aliment (ALI-05) : marque, code-barres, conditionnement (R-ALI-41, R-ALI-42). */
@@ -148,7 +150,7 @@ export class ProductDialog {
   protected readonly product = this.data.product;
   protected readonly name = signal(this.product?.name ?? '');
   protected readonly brand = signal(this.product?.brand ?? '');
-  protected readonly barcode = signal(this.product?.barcode ?? '');
+  protected readonly barcode = signal(this.product?.barcode ?? this.data.barcode ?? '');
   protected readonly pack = signal(
     this.product?.package_amount
       ? quantityInput(this.product.package_amount, this.data.measure)

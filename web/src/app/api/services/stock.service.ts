@@ -17,9 +17,12 @@ import { CheckLot$Params } from '../fn/stock/check-lot';
 import { consumeLot } from '../fn/stock/consume-lot';
 import { ConsumeLot$Params } from '../fn/stock/consume-lot';
 import { CreatedLocation } from '../models/created-location';
+import { CreatedLotBatch } from '../models/created-lot-batch';
 import { CreatedLots } from '../models/created-lots';
 import { createLocation } from '../fn/stock/create-location';
 import { CreateLocation$Params } from '../fn/stock/create-location';
+import { createLotBatch } from '../fn/stock/create-lot-batch';
+import { CreateLotBatch$Params } from '../fn/stock/create-lot-batch';
 import { createLots } from '../fn/stock/create-lots';
 import { CreateLots$Params } from '../fn/stock/create-lots';
 import { deleteLocation } from '../fn/stock/delete-location';
@@ -41,6 +44,8 @@ import { openLot } from '../fn/stock/open-lot';
 import { OpenLot$Params } from '../fn/stock/open-lot';
 import { recordInventory } from '../fn/stock/record-inventory';
 import { RecordInventory$Params } from '../fn/stock/record-inventory';
+import { reverseBatch } from '../fn/stock/reverse-batch';
+import { ReverseBatch$Params } from '../fn/stock/reverse-batch';
 import { reverseMovement } from '../fn/stock/reverse-movement';
 import { ReverseMovement$Params } from '../fn/stock/reverse-movement';
 import { updateLocation } from '../fn/stock/update-location';
@@ -58,6 +63,41 @@ import { WasteLot$Params } from '../fn/stock/waste-lot';
 export class StockService extends BaseService {
   constructor(config: ApiConfiguration, http: HttpClient) {
     super(config, http);
+  }
+
+  /** Path part for operation `reverseBatch()` */
+  static readonly ReverseBatchPath = '/api/v1/batches/{id}/reverse';
+
+  /**
+   * Annule tout un lot d'opérations : mise en stock par scan, inventaire (R-STK-12).
+   *
+   *
+   *
+   * This method provides access to the full `HttpResponse`, allowing access to response headers.
+   * To access only the response body, use `reverseBatch()` instead.
+   *
+   * This method doesn't expect any request body.
+   */
+  reverseBatch$Response(params: ReverseBatch$Params, context?: HttpContext): Observable<StrictHttpResponse<void>> {
+    const obs = reverseBatch(this.http, this.rootUrl, params, context);
+    return obs;
+  }
+
+  /**
+   * Annule tout un lot d'opérations : mise en stock par scan, inventaire (R-STK-12).
+   *
+   *
+   *
+   * This method provides access only to the response body.
+   * To access the full response (for headers, for example), `reverseBatch$Response()` instead.
+   *
+   * This method doesn't expect any request body.
+   */
+  reverseBatch(params: ReverseBatch$Params, context?: HttpContext): Observable<void> {
+    const resp = this.reverseBatch$Response(params, context);
+    return resp.pipe(
+      map((r: StrictHttpResponse<void>): void => r.body)
+    );
   }
 
   /** Path part for operation `recordInventory()` */
@@ -216,6 +256,41 @@ export class StockService extends BaseService {
     const resp = this.deleteLocation$Response(params, context);
     return resp.pipe(
       map((r: StrictHttpResponse<void>): void => r.body)
+    );
+  }
+
+  /** Path part for operation `createLotBatch()` */
+  static readonly CreateLotBatchPath = '/api/v1/lot-batches';
+
+  /**
+   * Mise en stock par scan : tous les lots en un seul lot d'opérations (STK-12, R-STK-54).
+   *
+   *
+   *
+   * This method provides access to the full `HttpResponse`, allowing access to response headers.
+   * To access only the response body, use `createLotBatch()` instead.
+   *
+   * This method sends `application/json` and handles request body of type `application/json`.
+   */
+  createLotBatch$Response(params: CreateLotBatch$Params, context?: HttpContext): Observable<StrictHttpResponse<CreatedLotBatch>> {
+    const obs = createLotBatch(this.http, this.rootUrl, params, context);
+    return obs;
+  }
+
+  /**
+   * Mise en stock par scan : tous les lots en un seul lot d'opérations (STK-12, R-STK-54).
+   *
+   *
+   *
+   * This method provides access only to the response body.
+   * To access the full response (for headers, for example), `createLotBatch$Response()` instead.
+   *
+   * This method sends `application/json` and handles request body of type `application/json`.
+   */
+  createLotBatch(params: CreateLotBatch$Params, context?: HttpContext): Observable<CreatedLotBatch> {
+    const resp = this.createLotBatch$Response(params, context);
+    return resp.pipe(
+      map((r: StrictHttpResponse<CreatedLotBatch>): CreatedLotBatch => r.body)
     );
   }
 

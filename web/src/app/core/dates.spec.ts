@@ -1,5 +1,6 @@
 import {
   addDays,
+  addMonths,
   formatDate,
   formatDayHeader,
   fromIsoDate,
@@ -27,5 +28,11 @@ describe('semaine', () => {
     expect(addDays('2026-10-31', 1)).toBe('2026-11-01');
     expect(weekdayOf('2026-10-25')).toBe(7);
     expect(weekdayOf('2026-10-26')).toBe(1);
+  });
+
+  it('décale d’un mois en restant dans le mois visé', () => {
+    expect(addMonths('2026-11-01', 1)).toBe('2026-12-01');
+    expect(addMonths('2026-01-31', 1)).toBe('2026-02-28');
+    expect(addMonths('2026-12-15', 1)).toBe('2027-01-15');
   });
 });

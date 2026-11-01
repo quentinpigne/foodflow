@@ -494,6 +494,85 @@
         }
       }
     },
+    "/api/v1/barcodes/{code}": {
+      "get": {
+        "tags": [
+          "foods"
+        ],
+        "summary": "Lecture d'un code-barres : produit connu ou non, valeurs proposées pour ses lots (R-STK-50, R-STK-53).",
+        "operationId": "lookupBarcode",
+        "parameters": [
+          {
+            "name": "code",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BarcodeLookup"
+                }
+              }
+            }
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/batches/{id}/reverse": {
+      "post": {
+        "tags": [
+          "stock"
+        ],
+        "summary": "Annule tout un lot d'opérations : mise en stock par scan, inventaire (R-STK-12).",
+        "operationId": "reverseBatch",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/BatchId"
+            }
+          }
+        ],
+        "responses": {
+          "204": {},
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/dashboard": {
       "get": {
         "tags": [
@@ -1669,6 +1748,45 @@
         ],
         "responses": {
           "204": {},
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/lot-batches": {
+      "post": {
+        "tags": [
+          "stock"
+        ],
+        "summary": "Mise en stock par scan : tous les lots en un seul lot d'opérations (STK-12, R-STK-54).",
+        "operationId": "createLotBatch",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LotBatchInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreatedLotBatch"
+                }
+              }
+            }
+          },
           "422": {
             "content": {
               "application/json": {
@@ -4202,6 +4320,62 @@
           }
         }
       },
+      "BarcodeLookup": {
+        "type": "object",
+        "description": "Ce que donne la lecture d'un code-barres (R-STK-50) : le produit s'il est connu, et les valeurs\nproposées pour ses lots (R-STK-53).",
+        "required": [
+          "barcode"
+        ],
+        "properties": {
+          "barcode": {
+            "type": "string",
+            "description": "Code nettoyé et vérifié (R-ALI-41)."
+          },
+          "expiry_kind": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/ExpiryKind",
+                "description": "Nature de péremption du dernier lot du produit ; sinon `NONE` si l'aliment a une durée de\nconservation sans date, `USE_BY` sinon."
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "location_id": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/LocationId",
+                "description": "Emplacement du dernier lot du produit, sinon de son aliment."
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "product": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/Product",
+                "description": "`None` : code inconnu, à rattacher (R-STK-52)."
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "tracking_mode": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/TrackingMode"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        }
+      },
       "BatchId": {
         "type": "string",
         "format": "uuid",
@@ -4432,6 +4606,25 @@
         "properties": {
           "id": {
             "$ref": "#/components/schemas/LocationId"
+          }
+        }
+      },
+      "CreatedLotBatch": {
+        "type": "object",
+        "required": [
+          "batch_id",
+          "ids"
+        ],
+        "properties": {
+          "batch_id": {
+            "$ref": "#/components/schemas/BatchId",
+            "description": "Lot d'opérations de la mise en stock, pour l'annuler d'un geste (R-STK-54)."
+          },
+          "ids": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LotId"
+            }
           }
         }
       },
@@ -5904,6 +6097,13 @@
             "items": {
               "$ref": "#/components/schemas/InventoryEntry"
             }
+          },
+          "found": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LotInput"
+            },
+            "description": "Lots trouvés (R-STK-41), créés dans le même lot d'opérations (R-STK-55) ; leur origine est\nforcée à `ADJUSTMENT` et leur date à celle de l'inventaire."
           }
         }
       },
@@ -6359,6 +6559,20 @@
                 "type": "null"
               }
             ]
+          }
+        }
+      },
+      "LotBatchInput": {
+        "type": "object",
+        "required": [
+          "lines"
+        ],
+        "properties": {
+          "lines": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LotInput"
+            }
           }
         }
       },

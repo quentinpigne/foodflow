@@ -161,7 +161,7 @@ stockées **pour 100 g** ou **pour 100 mL** (la **base nutritionnelle** de l'ali
 | ALI-04 | MVP | Unités générales et unités propres, conversions entre mesures |
 | ALI-05 | MVP | Produits saisis à la main, code-barres, conditionnement, produit habituel |
 | ALI-06 | MVP | Recherche d'aliments et de produits, sans accents ni casse, par alias, code-barres |
-| ALI-07 | V1 | Scan du code-barres avec la caméra du téléphone |
+| ALI-07 | V1 | Scan du code-barres avec la caméra du téléphone ou un lecteur de code-barres (R-STK-50) |
 | ALI-08 | V1 | Brouillon de produit depuis Open Food Facts, rattachement mémorisé par catégorie |
 | ALI-09 | V1 | Fusion d'aliments |
 | ALI-10 | V2 | Partie comestible (épluchures, os) : valeurs nutritionnelles rapportées à la quantité achetée |

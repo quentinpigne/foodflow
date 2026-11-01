@@ -1,8 +1,10 @@
 //! Produits du commerce (spec 01, ALI-05).
 
 use foodflow_domain::foods::NutrientBasis;
+use foodflow_domain::foods::TrackingMode;
 use foodflow_domain::foods::barcode;
-use foodflow_domain::shared::ids::{FoodGroupId, FoodId, ProductId};
+use foodflow_domain::shared::ids::{FoodGroupId, FoodId, LocationId, ProductId};
+use foodflow_domain::stock::ExpiryKind;
 use foodflow_domain::text::matches;
 use foodflow_domain::{Amount, DomainError, Measure};
 use serde::{Deserialize, Serialize};
@@ -97,6 +99,56 @@ pub async fn search(db: &Db, query: &ProductQuery) -> AppResult<Vec<Product>> {
     products.sort_by_key(|p| p.name.to_lowercase());
     products.truncate(50);
     Ok(products)
+}
+
+/// Ce que donne la lecture d'un code-barres (R-STK-50) : le produit s'il est connu, et les valeurs
+/// proposées pour ses lots (R-STK-53).
+#[derive(Debug, Serialize, ToSchema)]
+pub struct BarcodeLookup {
+    /// Code nettoyé et vérifié (R-ALI-41).
+    pub barcode: String,
+    /// `None` : code inconnu, à rattacher (R-STK-52).
+    pub product: Option<Product>,
+    pub tracking_mode: Option<TrackingMode>,
+    /// Emplacement du dernier lot du produit, sinon de son aliment.
+    pub location_id: Option<LocationId>,
+    /// Nature de péremption du dernier lot du produit ; sinon `NONE` si l'aliment a une durée de
+    /// conservation sans date, `USE_BY` sinon.
+    pub expiry_kind: Option<ExpiryKind>,
+}
+
+/// Lecture d'un code-barres pour la mise en stock ou l'inventaire par scan (R-STK-50, R-STK-53).
+pub async fn lookup_barcode(db: &Db, code: &str) -> AppResult<BarcodeLookup> {
+    let code = barcode::validate(code)?;
+    let mut conn = db.read.acquire().await?;
+    let catalog = Catalog::load(&mut conn).await?;
+    let Some(row) = catalog.products.values().find(|p| p.barcode.as_deref() == Some(code.as_str())) else {
+        return Ok(BarcodeLookup {
+            barcode: code,
+            product: None,
+            tracking_mode: None,
+            location_id: None,
+            expiry_kind: None,
+        });
+    };
+    let settings = catalog.product_settings(row);
+    let own = db::stock::latest_lot_of(&mut *conn, Some(row.id), None).await?;
+    let food = match (own, row.food_id) {
+        (None, Some(food)) => db::stock::latest_lot_of(&mut *conn, None, Some(food)).await?,
+        _ => None,
+    };
+    let expiry_kind = match own {
+        Some((_, kind)) => kind,
+        None if settings.shelf_life_days.is_some() => ExpiryKind::None,
+        None => ExpiryKind::UseBy,
+    };
+    Ok(BarcodeLookup {
+        barcode: code,
+        product: Some(to_product(&catalog, row)),
+        tracking_mode: Some(settings.tracking_mode),
+        location_id: own.or(food).map(|(location, _)| location),
+        expiry_kind: Some(expiry_kind),
+    })
 }
 
 pub async fn get(db: &Db, id: ProductId) -> AppResult<Product> {

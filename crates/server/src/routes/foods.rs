@@ -19,5 +19,6 @@ pub fn router() -> OpenApiRouter<AppState> {
         .routes(routes!(foods::update_unit, foods::delete_unit))
         .routes(routes!(units::list))
         .routes(routes!(products::search, products::create))
+        .routes(routes!(products::lookup))
         .routes(routes!(products::get, products::update, products::delete))
 }

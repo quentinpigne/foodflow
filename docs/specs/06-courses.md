@@ -114,7 +114,8 @@ Total estimé ≈ 48,60 € (incomplet : 2 articles sans prix connu) · reste du
 - **R-COU-50** — **Terminer les courses** propose, pour chaque article coché d'aliment ou de produit, un
   ou plusieurs **lots** (R-STK-6) préremplis : produit, quantité, emplacement (dernier emplacement connu
   du produit, sinon celui de la famille), nature et date de péremption (durée de conservation par
-  défaut pour `NONE`), prix. On ajuste, puis on valide : la validation crée les lots et les mouvements
+  défaut pour `NONE`), prix. Les articles se cochent aussi en scannant les produits qu'on range
+  (R-STK-54). On ajuste, puis on valide : la validation crée les lots et les mouvements
   `PURCHASE`, en un seul lot d'opérations annulable (R-STK-12).
 - **R-COU-51** — Une date de péremption peut rester **à compléter** : le lot est créé et signalé, pour
   saisir la date en rangeant les courses.

@@ -52,6 +52,9 @@ import { AddLot } from './add-lot';
           ><mat-icon>arrow_back</mat-icon></a
         >
         <h1>Inventaire</h1>
+        <a mat-button routerLink="/stock/inventaire/scan"
+          ><mat-icon>barcode_scanner</mat-icon>Par scan</a
+        >
       </div>
       <p class="muted">
         Pour chaque lot, indiquer ce qu'il y a vraiment. L'écart avec le calcul est conservé ; un

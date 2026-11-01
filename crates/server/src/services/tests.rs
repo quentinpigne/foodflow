@@ -1,15 +1,16 @@
 //! Tests d'intégration des services, sur une vraie base SQLite (architecture.md § Stratégie de test).
 
 use foodflow_domain::foods::TrackingMode;
-use foodflow_domain::shared::ids::{FoodGroupId, FoodId, LocationId, LotId};
+use foodflow_domain::shared::ids::{FoodGroupId, FoodId, LocationId, LotId, ProductId};
 use foodflow_domain::stock::{ExpiryKind, ExpiryStatus, LocationKind, MovementKind, PresenceState, WasteReason};
 use foodflow_domain::{Amount, Date, DomainError, Measure};
 
 use super::foods::{self, FoodInput, FoodQuery};
 use super::groups::{self, FoodGroupInput};
+use super::products::{self, ProductInput};
 use super::stock::{
-    self, AdjustInput, CheckInput, ConsumeInput, DateInput, InventoryEntry, InventoryInput, LotInput, LotOrigin,
-    MoveInput, TrackingModeInput, WasteInput,
+    self, AdjustInput, CheckInput, ConsumeInput, DateInput, InventoryEntry, InventoryInput, LotBatchInput, LotInput,
+    LotOrigin, MoveInput, TrackingModeInput, WasteInput,
 };
 use super::{locations, seed};
 use crate::db::groups::Settings;
@@ -100,7 +101,9 @@ async fn r_stk_2_and_r_stk_40_quantity_and_inventory() {
     assert_eq!(detail.lot.measure, Measure::Volume, "mesure héritée de la famille (R-ALI-2)");
 
     let entry = InventoryEntry { lot_id: id, amount: Some(Amount::from_raw(500_000)), presence: None };
-    stock::inventory(&db, &InventoryInput { date: Some(d(TODAY)), entries: vec![entry] }, d(TODAY)).await.unwrap();
+    stock::inventory(&db, &InventoryInput { date: Some(d(TODAY)), entries: vec![entry], found: vec![] }, d(TODAY))
+        .await
+        .unwrap();
     stock::consume(&db, id, &consume(TODAY, 100_000), d(TODAY)).await.unwrap();
     assert_eq!(quantity(&db, id).await, 400_000);
     let detail = stock::get(&db, id, d(TODAY)).await.unwrap();
@@ -337,4 +340,134 @@ async fn r_ali_1_and_r_ali_3_groups() {
     let list = groups::list(&db).await.unwrap();
     assert!(!list.iter().any(|g| g.id == cheese));
     assert_eq!(list.iter().find(|g| g.id == other).unwrap().food_count, 1);
+}
+
+// ===================================================================== Scan (STK-12, STK-13)
+
+async fn product(db: &Db, food: FoodId, name: &str, barcode: &str, package: i64) -> ProductId {
+    let input = ProductInput {
+        food_id: Some(food),
+        group_id: None,
+        name: name.into(),
+        brand: None,
+        barcode: Some(barcode.into()),
+        stock_measure: None,
+        package_amount: Some(Amount::from_raw(package)),
+        package_units: None,
+        nutrient_basis: None,
+    };
+    products::create(db, &input).await.unwrap()
+}
+
+fn product_lot(product: ProductId, location: LocationId, amount: i64, expiry: Option<&str>) -> LotInput {
+    LotInput {
+        product_id: Some(product),
+        food_id: None,
+        expiry_missing: expiry.is_none(),
+        expiry_kind: ExpiryKind::UseBy,
+        ..lot_input(FoodId::new(), location, TODAY, Some(amount), expiry)
+    }
+}
+
+/// Lecture d'un code : refusé si la clé est fausse, inconnu, ou connu avec les valeurs proposées pour ses
+/// lots (R-STK-50, R-STK-52, R-STK-53).
+#[tokio::test]
+async fn r_stk_50_52_53_barcode_lookup() {
+    let (db, _dir) = setup().await;
+    let g = group(&db, "Pâtes", Settings::default()).await;
+    let pasta = food(&db, g, "Pâtes", Settings::default()).await;
+    let pantry = location(&db, LocationKind::Pantry).await;
+    let panzani = product(&db, pasta, "Panzani spaghetti", "3017620422003", 500_000).await;
+    let barilla = product(&db, pasta, "Barilla penne", "96385074", 500_000).await;
+
+    let invalid = products::lookup_barcode(&db, "3017620422004").await;
+    assert!(matches!(invalid, Err(AppError::Domain(DomainError::InvalidBarcode))), "R-STK-50");
+    let unknown = products::lookup_barcode(&db, "036000291452").await.unwrap();
+    assert!(unknown.product.is_none(), "R-STK-52");
+
+    // Sans lot : aucun emplacement proposé, DLC par défaut.
+    let first = products::lookup_barcode(&db, "3017 6204 2200 3").await.unwrap();
+    assert_eq!(first.barcode, "3017620422003");
+    assert_eq!(first.product.unwrap().id, panzani);
+    assert_eq!(first.location_id, None);
+    assert_eq!(first.expiry_kind, Some(ExpiryKind::UseBy));
+
+    // Le dernier lot de l'aliment donne l'emplacement ; celui du produit donne aussi la nature.
+    let bb =
+        LotInput { expiry_kind: ExpiryKind::BestBefore, ..product_lot(panzani, pantry, 500_000, Some("2027-03-01")) };
+    lot(&db, &bb).await;
+    let other = products::lookup_barcode(&db, "96385074").await.unwrap();
+    assert_eq!(other.product.unwrap().id, barilla);
+    assert_eq!(other.location_id, Some(pantry), "emplacement du dernier lot de l'aliment");
+    assert_eq!(other.expiry_kind, Some(ExpiryKind::UseBy));
+    let again = products::lookup_barcode(&db, "3017620422003").await.unwrap();
+    assert_eq!(again.location_id, Some(pantry));
+    assert_eq!(again.expiry_kind, Some(ExpiryKind::BestBefore), "nature du dernier lot du produit");
+
+    // Un aliment conservé sans date propose `NONE`.
+    let fruits = group(&db, "Fruits", Settings { shelf_life_days: Some(7), ..Settings::default() }).await;
+    let apple = food(&db, fruits, "Pomme", Settings::default()).await;
+    product(&db, apple, "Pommes en filet", "40123455", 1_000_000).await;
+    let apples = products::lookup_barcode(&db, "40123455").await.unwrap();
+    assert_eq!(apples.expiry_kind, Some(ExpiryKind::None));
+}
+
+/// Critère d'acceptation : Panzani 500 g scanné trois fois → 3 lots de 500 g, retirés par une seule
+/// annulation (R-STK-51, R-STK-53, R-STK-54).
+#[tokio::test]
+async fn r_stk_51_53_54_scan_entry_is_one_batch() {
+    let (db, _dir) = setup().await;
+    let g = group(&db, "Pâtes", Settings::default()).await;
+    let pasta = food(&db, g, "Pâtes", Settings::default()).await;
+    let pantry = location(&db, LocationKind::Pantry).await;
+    let panzani = product(&db, pasta, "Panzani spaghetti", "3017620422003", 500_000).await;
+    let line = LotInput { count: Some(3), ..product_lot(panzani, pantry, 500_000, None) };
+    let (batch, ids) = stock::create_batch(&db, &LotBatchInput { lines: vec![line] }, d(TODAY)).await.unwrap();
+    assert_eq!(ids.len(), 3);
+    for id in &ids {
+        let lot = stock::get(&db, *id, d(TODAY)).await.unwrap().lot;
+        assert_eq!(lot.quantity, Some(Amount::from_raw(500_000)));
+        assert!(lot.expiry_missing, "date à compléter (R-COU-51)");
+    }
+    let query = stock::LotQuery { location_id: None, food_id: Some(pasta), include_depleted: false };
+    assert_eq!(stock::list(&db, &query, d(TODAY)).await.unwrap().len(), 3);
+
+    stock::reverse_whole_batch(&db, batch, d(TODAY)).await.unwrap();
+    assert!(stock::list(&db, &query, d(TODAY)).await.unwrap().is_empty(), "R-STK-12");
+}
+
+/// Critère d'acceptation : inventaire du placard par scan, deux lots constatés, un lot trouvé, le riz
+/// non scanné inchangé, le tout en un lot d'opérations (R-STK-55).
+#[tokio::test]
+async fn r_stk_55_scan_inventory() {
+    let (db, _dir) = setup().await;
+    let g = group(&db, "Féculents", Settings::default()).await;
+    let pasta = food(&db, g, "Pâtes", Settings::default()).await;
+    let rice = food(&db, g, "Riz", Settings::default()).await;
+    let pantry = location(&db, LocationKind::Pantry).await;
+    let panzani = product(&db, pasta, "Panzani spaghetti", "3017620422003", 500_000).await;
+    let soon = lot(&db, &product_lot(panzani, pantry, 500_000, Some("2026-11-10"))).await;
+    stock::consume(&db, soon, &consume(TODAY, 200_000), d(TODAY)).await.unwrap();
+    let later = lot(&db, &product_lot(panzani, pantry, 500_000, Some("2026-12-20"))).await;
+    let rice_lot = lot(&db, &lot_input(rice, pantry, TODAY, Some(1_000_000), None)).await;
+
+    let entry = |lot, amount| InventoryEntry { lot_id: lot, amount: Some(Amount::from_raw(amount)), presence: None };
+    let input = InventoryInput {
+        date: None,
+        entries: vec![entry(soon, 300_000), entry(later, 500_000)],
+        found: vec![product_lot(panzani, pantry, 500_000, None)],
+    };
+    let batch = stock::inventory(&db, &input, d(TODAY)).await.unwrap();
+
+    assert_eq!(quantity(&db, soon).await, 300_000);
+    assert_eq!(quantity(&db, later).await, 500_000);
+    let query = stock::LotQuery { location_id: Some(pantry), food_id: Some(pasta), include_depleted: false };
+    let lots = stock::list(&db, &query, d(TODAY)).await.unwrap();
+    assert_eq!(lots.len(), 3);
+    let found = lots.iter().find(|l| l.id != soon && l.id != later).unwrap();
+    let detail = stock::get(&db, found.id, d(TODAY)).await.unwrap();
+    assert_eq!(detail.movements[0].kind, MovementKind::Adjustment, "lot trouvé (R-STK-41)");
+    assert_eq!(detail.movements[0].batch_id, Some(batch));
+    let rice_detail = stock::get(&db, rice_lot, d(TODAY)).await.unwrap();
+    assert_eq!(rice_detail.movements.len(), 1, "lot non scanné inchangé");
 }

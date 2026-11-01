@@ -23,6 +23,7 @@
     "@angular/material": "^22.2.3",
     "@angular/platform-browser": "^22.1.0",
     "@angular/router": "^22.1.0",
+    "barcode-detector": "3.2.3",
     "material-symbols": "^0.48.0",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0"

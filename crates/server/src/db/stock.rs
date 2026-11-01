@@ -349,3 +349,27 @@ pub async fn insert_movement(db: impl SqliteExecutor<'_>, m: &MovementRow) -> an
     .await?;
     Ok(())
 }
+
+/// Emplacement et nature de péremption du dernier lot entré d'un produit, ou d'un aliment (lots de ses
+/// produits compris) : les valeurs proposées par la mise en stock par scan (R-STK-53).
+pub async fn latest_lot_of(
+    db: impl SqliteExecutor<'_>,
+    product: Option<ProductId>,
+    food: Option<FoodId>,
+) -> anyhow::Result<Option<(LocationId, ExpiryKind)>> {
+    let product = product.map(|p| p.to_string());
+    let food = food.map(|f| f.to_string());
+    let row = sqlx::query!(
+        r#"SELECT s.location_id, s.expiry_kind
+           FROM stock_lot s LEFT JOIN product p ON p.id = s.product_id
+           WHERE (?1 IS NOT NULL AND s.product_id = ?1)
+              OR (?2 IS NOT NULL AND (s.food_id = ?2 OR p.food_id = ?2))
+           ORDER BY s.stocked_on DESC, s.created_at DESC
+           LIMIT 1"#,
+        product,
+        food
+    )
+    .fetch_optional(db)
+    .await?;
+    row.map(|r| Ok((id_from_db(&r.location_id)?, enum_from_db(&r.expiry_kind)?))).transpose()
+}

@@ -73,6 +73,13 @@ export function addDays(iso: string, delta: number): string {
   return toIsoDate(date);
 }
 
+/** Date `AAAA-MM-JJ` décalée de `delta` mois, ramenée au dernier jour du mois s'il le faut (31/01 → 28/02). */
+export function addMonths(iso: string, delta: number): string {
+  const [y, m, d] = iso.split('-').map(Number);
+  const last = new Date(y, m - 1 + delta + 1, 0).getDate();
+  return toIsoDate(new Date(y, m - 1 + delta, Math.min(d, last)));
+}
+
 /** Lundi de la semaine d'une date (R-PLA-4 : la semaine commence le lundi). */
 export function weekStart(iso: string): string {
   const day = fromIsoDate(iso).getDay();

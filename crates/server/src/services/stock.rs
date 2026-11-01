@@ -341,7 +341,7 @@ pub enum LotOrigin {
     Adjustment,
 }
 
-#[derive(Debug, Deserialize, ToSchema)]
+#[derive(Debug, Clone, Deserialize, ToSchema)]
 pub struct LotInput {
     pub product_id: Option<ProductId>,
     pub food_id: Option<FoodId>,
@@ -368,12 +368,44 @@ pub struct LotInput {
 
 /// Ajoute un ou plusieurs lots (STK-02, R-STK-1, R-STK-6).
 pub async fn create(db: &Db, input: &LotInput, today: Date) -> AppResult<Vec<LotId>> {
+    let mut tx = db.write.begin().await?;
+    let context = Context::load(&mut tx, today).await?;
+    let ids = insert_lots(&mut tx, &context, input, BatchId::new()).await?;
+    tx.commit().await?;
+    Ok(ids)
+}
+
+#[derive(Debug, Deserialize, ToSchema)]
+pub struct LotBatchInput {
+    pub lines: Vec<LotInput>,
+}
+
+/// Ajoute les lots d'une mise en stock par scan en un seul lot d'opérations, annulable d'un geste
+/// (STK-12, R-STK-54).
+pub async fn create_batch(db: &Db, input: &LotBatchInput, today: Date) -> AppResult<(BatchId, Vec<LotId>)> {
+    let batch = BatchId::new();
+    let mut tx = db.write.begin().await?;
+    let context = Context::load(&mut tx, today).await?;
+    let mut ids = Vec::new();
+    for line in &input.lines {
+        ids.extend(insert_lots(&mut tx, &context, line, batch).await?);
+    }
+    tx.commit().await?;
+    Ok((batch, ids))
+}
+
+/// Crée les lots d'une saisie et leur mouvement d'entrée, dans le lot d'opérations donné.
+async fn insert_lots(
+    conn: &mut SqliteConnection,
+    context: &Context,
+    input: &LotInput,
+    batch: BatchId,
+) -> AppResult<Vec<LotId>> {
+    let today = context.today;
     let date = input.date.unwrap_or(today);
     if date > today {
         return Err(DomainError::MovementInFuture.into());
     }
-    let mut tx = db.write.begin().await?;
-    let context = Context::load(&mut tx, today).await?;
     if !context.locations.contains_key(&input.location_id) {
         return Err(AppError::NotFound("emplacement"));
     }
@@ -400,7 +432,6 @@ pub async fn create(db: &Db, input: &LotInput, today: Date) -> AppResult<Vec<Lot
     };
     let location_kind = context.locations.get(&input.location_id).map(|l| l.kind);
     let count = input.count.unwrap_or(1).clamp(1, 100);
-    let batch = BatchId::new();
     let mut ids = Vec::new();
     for _ in 0..count {
         let lot = LotRow {
@@ -427,19 +458,18 @@ pub async fn create(db: &Db, input: &LotInput, today: Date) -> AppResult<Vec<Lot
             depleted: false,
             note: clean(input.note.as_deref()),
         };
-        db::stock::insert(&mut *tx, &lot).await?;
+        db::stock::insert(&mut *conn, &lot).await?;
         let kind = match input.origin {
             LotOrigin::Purchase => MovementKind::Purchase,
             LotOrigin::Adjustment => MovementKind::Adjustment,
         };
         let entry = MovementRow { amount, presence, batch_id: Some(batch), ..movement(lot.id, date, kind) };
-        db::stock::insert_movement(&mut *tx, &entry).await?;
+        db::stock::insert_movement(&mut *conn, &entry).await?;
         ids.push(lot.id);
     }
     if let Some(food) = input.food_id {
-        db::foods::unhide(&mut *tx, food).await?;
+        db::foods::unhide(&mut *conn, food).await?;
     }
-    tx.commit().await?;
     Ok(ids)
 }
 
@@ -885,6 +915,18 @@ pub(crate) async fn create_leftover(
     Ok(())
 }
 
+/// Annule tout un lot d'opérations : une mise en stock par scan, un inventaire (R-STK-12, R-STK-54).
+pub async fn reverse_whole_batch(db: &Db, batch: BatchId, today: Date) -> AppResult<()> {
+    let mut tx = db.write.begin().await?;
+    let movements = db::stock::movements_of_batch(&mut *tx, batch).await?;
+    if movements.is_empty() {
+        return Err(AppError::NotFound("lot d'opérations"));
+    }
+    reverse_movements(&mut tx, movements, today).await?;
+    tx.commit().await?;
+    Ok(())
+}
+
 /// Annule un lot d'opérations dans une transaction ouverte (R-STK-12) : voir `reverse`.
 pub(crate) async fn reverse_batch(conn: &mut SqliteConnection, batch: BatchId, today: Date) -> AppResult<()> {
     let movements = db::stock::movements_of_batch(&mut *conn, batch).await?;
@@ -907,6 +949,10 @@ pub struct InventoryEntry {
 pub struct InventoryInput {
     pub date: Option<Date>,
     pub entries: Vec<InventoryEntry>,
+    /// Lots trouvés (R-STK-41), créés dans le même lot d'opérations (R-STK-55) ; leur origine est
+    /// forcée à `ADJUSTMENT` et leur date à celle de l'inventaire.
+    #[serde(default)]
+    pub found: Vec<LotInput>,
 }
 
 /// Inventaire : constate la quantité réelle de chaque lot et conserve l'écart (R-STK-40, R-STK-41).
@@ -933,6 +979,13 @@ pub async fn inventory(db: &Db, input: &InventoryInput, today: Date) -> AppResul
         loaded.record(&mut tx, row).await?;
         loaded.lot.needs_review = false;
         loaded.save(&mut tx).await?;
+    }
+    if !input.found.is_empty() {
+        let context = Context::load(&mut tx, today).await?;
+        for found in &input.found {
+            let found = LotInput { date: Some(date), origin: LotOrigin::Adjustment, ..found.clone() };
+            insert_lots(&mut tx, &context, &found, batch).await?;
+        }
     }
     tx.commit().await?;
     Ok(batch)

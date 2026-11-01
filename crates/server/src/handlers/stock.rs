@@ -7,13 +7,20 @@ use utoipa::ToSchema;
 
 use crate::error::{AppResult, Problem};
 use crate::services::stock::{
-    self, AdjustInput, CheckInput, ConsumeInput, DateInput, InventoryInput, Lot, LotDetail, LotInput, LotQuery,
-    LotUpdate, MoveInput, WasteInput,
+    self, AdjustInput, CheckInput, ConsumeInput, DateInput, InventoryInput, Lot, LotBatchInput, LotDetail, LotInput,
+    LotQuery, LotUpdate, MoveInput, WasteInput,
 };
 use crate::state::AppState;
 
 #[derive(Serialize, ToSchema)]
 pub struct CreatedLots {
+    pub ids: Vec<LotId>,
+}
+
+#[derive(Serialize, ToSchema)]
+pub struct CreatedLotBatch {
+    /// Lot d'opérations de la mise en stock, pour l'annuler d'un geste (R-STK-54).
+    pub batch_id: BatchId,
     pub ids: Vec<LotId>,
 }
 
@@ -45,6 +52,29 @@ pub async fn create(
 ) -> AppResult<(StatusCode, Json<CreatedLots>)> {
     let ids = stock::create(&state.db, &input, state.clock.today()).await?;
     Ok((StatusCode::CREATED, Json(CreatedLots { ids })))
+}
+
+/// Mise en stock par scan : tous les lots en un seul lot d'opérations (STK-12, R-STK-54).
+#[utoipa::path(
+    post, operation_id = "createLotBatch", path = "/lot-batches", tag = "stock", request_body = LotBatchInput,
+    responses((status = 201, body = CreatedLotBatch), (status = 422, body = Problem))
+)]
+pub async fn create_batch(
+    State(state): State<AppState>,
+    Json(input): Json<LotBatchInput>,
+) -> AppResult<(StatusCode, Json<CreatedLotBatch>)> {
+    let (batch_id, ids) = stock::create_batch(&state.db, &input, state.clock.today()).await?;
+    Ok((StatusCode::CREATED, Json(CreatedLotBatch { batch_id, ids })))
+}
+
+/// Annule tout un lot d'opérations : mise en stock par scan, inventaire (R-STK-12).
+#[utoipa::path(
+    post, operation_id = "reverseBatch", path = "/batches/{id}/reverse", tag = "stock", params(("id" = BatchId, Path)),
+    responses((status = 204), (status = 404, body = Problem), (status = 422, body = Problem))
+)]
+pub async fn reverse_batch(State(state): State<AppState>, Path(id): Path<BatchId>) -> AppResult<StatusCode> {
+    stock::reverse_whole_batch(&state.db, id, state.clock.today()).await?;
+    Ok(StatusCode::NO_CONTENT)
 }
 
 /// Un lot et son journal, du plus récent au plus ancien (STK-03).
