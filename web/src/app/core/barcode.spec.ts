@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { ReaderInput, RepeatFilter } from './barcode';
+import { ReaderInput, RepeatFilter, aimRegion } from './barcode';
 
 function type(reader: ReaderInput, keys: string[], start: number, gap: number): (string | null)[] {
   return keys.map((k, i) => reader.key(k, start + i * gap));
@@ -47,5 +47,20 @@ describe('R-STK-50 caméra', () => {
     const filter = new RepeatFilter();
     filter.accept('96385074', 0);
     expect(filter.accept('96385074', 2500)).toBe(true);
+  });
+});
+
+describe('R-STK-50 zone décodée par la caméra', () => {
+  it('reporte le cadre affiché sur l’image de la caméra, rognée pour remplir la vidéo', () => {
+    // Image 1280×720 affichée dans 400×300 : rognée de 160 px à gauche et à droite.
+    expect(
+      aimRegion({ width: 1280, height: 720 }, { width: 400, height: 300 }, { x: 0.05, y: 0.25 }),
+    ).toEqual({ x: 208, y: 180, width: 864, height: 360 });
+  });
+
+  it('décode toute l’image si la vidéo n’est pas affichée', () => {
+    expect(
+      aimRegion({ width: 640, height: 480 }, { width: 0, height: 0 }, { x: 0.05, y: 0.25 }),
+    ).toEqual({ x: 0, y: 0, width: 640, height: 480 });
   });
 });

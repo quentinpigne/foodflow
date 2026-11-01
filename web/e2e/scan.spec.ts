@@ -53,3 +53,28 @@ test('inventaire par scan : le lot lu est constaté (STK-13, R-STK-55)', async (
   await page.getByRole('button', { name: 'Enregistrer l’inventaire' }).click();
   await expect(page.getByText('Inventaire enregistré')).toBeVisible();
 });
+
+test('ranger par scan : la ligne s’affiche dès la lecture, avant la réponse (R-STK-50)', async ({
+  page,
+}) => {
+  await login(page);
+  // Une recherche lente, comme quand Open Food Facts tarde à répondre.
+  let release: () => void = () => undefined;
+  const answered = new Promise<void>((resolve) => (release = resolve));
+  await page.route('**/api/v1/barcodes/*', async (route) => {
+    await answered;
+    await route.continue();
+  });
+  await page.goto('/stock/scan');
+  const code = page.getByLabel('Code-barres');
+  await code.fill(LACTEL);
+  await code.press('Enter');
+  await expect(page.getByText('Recherche…', { exact: true })).toBeVisible();
+  await code.fill(LACTEL);
+  await code.press('Enter');
+  await expect(page.getByText('× 2', { exact: true })).toBeVisible();
+  release();
+  await expect(page.getByText('Lait demi-écrémé 1 L × 2')).toBeVisible();
+  await expect(page.getByText('Recherche…', { exact: true })).toHaveCount(0);
+  await page.getByRole('button', { name: 'Tout effacer' }).click();
+});

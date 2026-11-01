@@ -16,13 +16,24 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 
-import { Detector, ReaderInput, RepeatFilter, createDetector } from '../core/barcode';
+import {
+  AIM,
+  CAMERA_CONSTRAINTS,
+  Detector,
+  READ_ZONE,
+  ReaderInput,
+  RepeatFilter,
+  aimRegion,
+  continuousFocus,
+  createDetector,
+  scanFeedback,
+} from '../core/barcode';
 import { ScanDevice } from '../core/scan-device';
 
 /**
  * Lecture de codes-barres en rafale (R-STK-50), selon le moyen réglé pour l'appareil : la caméra démarre
  * dès l'affichage ; le lecteur de code-barres est reconnu à sa frappe rapide, où que soit la page. Le code
- * peut toujours être tapé.
+ * peut toujours être tapé. Chaque lecture est signalée aussitôt (bip, vibration), avant toute recherche.
  */
 @Component({
   selector: 'app-barcode-scanner',
@@ -41,7 +52,7 @@ import { ScanDevice } from '../core/scan-device';
       @if (camera()) {
         <div class="video">
           <video #video muted playsinline></video>
-          <div class="aim"></div>
+          <div class="aim" [style.inset]="aimInset"></div>
         </div>
       }
       @if (error()) {
@@ -102,7 +113,6 @@ import { ScanDevice } from '../core/scan-device';
     }
     .aim {
       position: absolute;
-      inset: 35% 10%;
       border: 2px solid rgb(255 255 255 / 70%);
       border-radius: 8px;
       pointer-events: none;
@@ -137,12 +147,15 @@ export class BarcodeScanner {
   protected readonly camera = signal(false);
   protected readonly manual = signal('');
   protected readonly error = signal<string | null>(null);
+  protected readonly aimInset = `${AIM.y * 100}% ${AIM.x * 100}%`;
 
   private readonly reader = new ReaderInput();
   private readonly repeats = new RepeatFilter();
   private stream: MediaStream | null = null;
   private detector: Detector | null = null;
   private timer: ReturnType<typeof setTimeout> | null = null;
+  /** Image de la zone décodée, copiée de la vidéo à chaque passage. */
+  private canvas: HTMLCanvasElement | null = null;
 
   constructor() {
     inject(DestroyRef).onDestroy(() => this.stop());
@@ -166,14 +179,20 @@ export class BarcodeScanner {
     const code = this.reader.key(event.key, event.timeStamp);
     if (code) {
       event.preventDefault();
-      this.scanned.emit(code);
+      this.emit(code);
     }
+  }
+
+  /** Signale la lecture tout de suite, puis la transmet (R-STK-50). */
+  private emit(code: string): void {
+    scanFeedback('read');
+    this.scanned.emit(code);
   }
 
   protected submitManual(): void {
     const code = this.manual().replace(/\s/g, '');
     if (code) {
-      this.scanned.emit(code);
+      this.emit(code);
       this.manual.set('');
     }
   }
@@ -184,13 +203,16 @@ export class BarcodeScanner {
       return;
     }
     this.error.set(null);
+    // Le décodeur se prépare pendant que la caméra s'ouvre.
+    const detector = this.detector ? Promise.resolve(this.detector) : createDetector();
     try {
-      this.stream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: 'environment' },
-        audio: false,
-      });
+      this.stream = await navigator.mediaDevices.getUserMedia(CAMERA_CONSTRAINTS);
+      const track = this.stream.getVideoTracks()[0];
+      if (track) {
+        await continuousFocus(track);
+      }
       this.camera.set(true);
-      this.detector ??= await createDetector();
+      this.detector = await detector;
       // La vidéo n'existe qu'après l'affichage du bloc caméra.
       await new Promise((resolve) => setTimeout(resolve));
       const video = this.video()?.nativeElement;
@@ -215,9 +237,10 @@ export class BarcodeScanner {
         return;
       }
       try {
-        for (const code of await this.detector.detect(video)) {
+        const zone = this.zone(video);
+        for (const code of zone ? await this.detector.detect(zone) : []) {
           if (this.repeats.accept(code.rawValue, performance.now())) {
-            this.scanned.emit(code.rawValue);
+            this.emit(code.rawValue);
           }
         }
       } catch {
@@ -225,6 +248,40 @@ export class BarcodeScanner {
       }
       this.loop();
     }, 150);
+  }
+
+  /** Copie la zone du cadre de visée (élargie) : seule elle est décodée. */
+  private zone(video: HTMLVideoElement): HTMLCanvasElement | null {
+    if (!video.videoWidth || !video.videoHeight) {
+      return null;
+    }
+    const region = aimRegion(
+      { width: video.videoWidth, height: video.videoHeight },
+      { width: video.clientWidth, height: video.clientHeight },
+      READ_ZONE,
+    );
+    this.canvas ??= document.createElement('canvas');
+    const canvas = this.canvas;
+    if (canvas.width !== region.width || canvas.height !== region.height) {
+      canvas.width = region.width;
+      canvas.height = region.height;
+    }
+    const context = canvas.getContext('2d', { willReadFrequently: true });
+    if (!context) {
+      return null;
+    }
+    context.drawImage(
+      video,
+      region.x,
+      region.y,
+      region.width,
+      region.height,
+      0,
+      0,
+      region.width,
+      region.height,
+    );
+    return canvas;
   }
 
   private stop(): void {

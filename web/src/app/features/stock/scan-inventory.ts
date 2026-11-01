@@ -307,6 +307,8 @@ export class ScanInventoryPage {
     if (!this.lots.hasValue()) {
       return;
     }
+    // La lecture est déjà signalée par le scanner (R-STK-50) ; la recherche peut prendre un moment.
+    this.last.set({ outcome: 'known', text: `Code ${code} lu, recherche…` });
     let lookup: BarcodeLookup;
     try {
       lookup = await firstValueFrom(this.foods.lookupBarcode({ code }));
@@ -355,7 +357,6 @@ export class ScanInventoryPage {
       }
       this.last.set({ outcome: 'known', text: `${product.name} trouvé en plus` });
     }
-    scanFeedback('known');
   }
 
   /** Code inconnu : brouillon d'Open Food Facts à valider, ou rattachement à la main (R-STK-52). */

@@ -145,6 +145,11 @@ puis on valide le tout. L'inventaire d'un emplacement se fait de la même façon
   Le moyen de scan (caméra ou lecteur) est un **réglage de l'appareil**, gardé dans son navigateur (par
   défaut : la caméra sur un écran tactile, le lecteur ailleurs) ; en mode caméra, elle démarre dès
   l'ouverture du scan, sans second geste.
+  Chaque lecture est **signalée aussitôt** (bip court, vibration sur un téléphone qui la permet), avant
+  la recherche du produit : un nouveau code s'affiche « en recherche » et les lectures suivantes s'y
+  ajoutent ; un code inconnu ou refusé reçoit ensuite son propre signal. La caméra ne décode que la zone
+  du cadre de visée, un peu élargie, avec une image fine (1280×720 si possible) et la mise au point
+  continue quand elle existe.
 - **R-STK-51** — **Mise en stock par scan** : chaque lecture d'un produit connu ajoute **un
   conditionnement** à sa ligne (trois paquets de pâtes scannés : une ligne « × 3 »). Le nombre se
   corrige à la main. Rien n'entre en stock avant la validation (ADR-0005).

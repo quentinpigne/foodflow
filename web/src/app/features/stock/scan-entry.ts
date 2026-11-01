@@ -41,7 +41,7 @@ import { parseQuantity } from '../../core/quantity';
 import { BarcodeScanner } from '../../shared/barcode-scanner';
 import { LocationsStore } from '../../shared/stores';
 import { AttachBarcodeDialog } from './attach-barcode';
-import { EntryLine, addAgain, addScan, newLine } from './scan';
+import { EntryLine, addAgain, newLine, pendingLine, resolveLine } from './scan';
 
 const DRAFT_KEY = 'foodflow.scan-entry';
 
@@ -98,10 +98,13 @@ const DRAFT_KEY = 'foodflow.scan-entry';
 
       <div class="lines">
         @for (line of lines(); track line.barcode; let i = $index) {
-          <div class="line" [class.unknown]="!line.product">
+          <div class="line" [class.unknown]="!line.product && !line.pending">
             <div class="head">
               <div class="name">
-                @if (line.product; as p) {
+                @if (line.pending) {
+                  <div class="title">Recherche…</div>
+                  <div class="muted">{{ line.barcode }}</div>
+                } @else if (line.product; as p) {
                   <div class="title">
                     {{ p.name }}
                     @if (p.brand) {
@@ -157,7 +160,9 @@ const DRAFT_KEY = 'foodflow.scan-entry';
               </div>
             </div>
 
-            @if (!line.product) {
+            @if (line.pending) {
+              <!-- Les champs du lot attendent la réponse de la recherche. -->
+            } @else if (!line.product) {
               @if (line.draft) {
                 <button mat-flat-button (click)="attach(i, line)">
                   <mat-icon>check</mat-icon>Vérifier et créer le produit
@@ -392,32 +397,53 @@ export class ScanEntryPage {
     });
     // Brouillon gardé sur l'appareil : une page rechargée en plein rangement ne perd rien.
     effect(() => saveDraft(this.lines()));
+    // Recherches interrompues par un rechargement : relancées.
+    for (const line of this.lines().filter((l) => l.pending)) {
+      void this.resolve(line.barcode);
+    }
   }
 
+  /**
+   * Une lecture a déjà été signalée par le scanner (R-STK-50) : un code déjà présent ajoute un
+   * conditionnement à sa ligne ; un nouveau code s'affiche aussitôt « en recherche », puis se complète.
+   */
   protected async onScan(code: string): Promise<void> {
     const again = addAgain(this.lines(), code);
     if (again) {
       this.lines.set(again);
       const line = again[0];
-      scanFeedback(line.product ? 'known' : 'unknown');
+      const unknown = !line.product && !line.pending;
+      if (unknown) {
+        scanFeedback('unknown');
+      }
       this.last.set({
-        outcome: line.product ? 'known' : 'unknown',
+        outcome: unknown ? 'unknown' : 'known',
         text: `${line.product?.name ?? line.draft?.name ?? 'Code ' + code} × ${line.count}`,
       });
       return;
     }
+    this.lines.update((lines) => [pendingLine(code, this.defaultLocation()), ...lines]);
+    this.last.set({ outcome: 'known', text: `Code ${code} lu, recherche…` });
+    await this.resolve(code);
+  }
+
+  /** Recherche du code lu : produit connu, sinon brouillon d'Open Food Facts ou code à rattacher. */
+  private async resolve(code: string): Promise<void> {
     let lookup: BarcodeLookup;
     try {
       lookup = await firstValueFrom(this.foods.lookupBarcode({ code }));
     } catch {
+      this.lines.update((lines) => lines.filter((l) => !(l.barcode === code && l.pending)));
       scanFeedback('invalid');
       this.last.set({ outcome: 'invalid', text: `Code ${code} illisible ou erroné` });
       return;
     }
-    this.lines.update((lines) => addScan(lines, lookup, this.defaultLocation()));
-    const line = this.lines()[0];
+    this.lines.update((lines) => resolveLine(lines, code, lookup, this.defaultLocation()));
+    const line = this.lines().find((l) => l.barcode === lookup.barcode);
+    if (!line) {
+      return;
+    }
     if (lookup.product) {
-      scanFeedback('known');
       this.last.set({ outcome: 'known', text: `${lookup.product.name} × ${line.count}` });
     } else {
       scanFeedback('unknown');

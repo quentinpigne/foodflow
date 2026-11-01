@@ -354,7 +354,6 @@ export class AddLotDialog {
         lookup = await firstValueFrom(this.foods.lookupBarcode({ code }));
       }
       if (lookup.product) {
-        scanFeedback('known');
         this.scanning.set(false);
         await this.choose({ kind: 'product', product: lookup.product });
         if (lookup.location_id) {

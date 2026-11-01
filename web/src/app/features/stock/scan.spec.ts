@@ -4,7 +4,15 @@ import { BarcodeLookup } from '../../api/models/barcode-lookup';
 import { Lot } from '../../api/models/lot';
 import { Product } from '../../api/models/product';
 import { ProductDraft } from '../../api/models/product-draft';
-import { EMPTY_INVENTORY, EntryLine, addAgain, addScan, assignScan } from './scan';
+import {
+  EMPTY_INVENTORY,
+  EntryLine,
+  addAgain,
+  addScan,
+  assignScan,
+  pendingLine,
+  resolveLine,
+} from './scan';
 
 const panzani: Product = {
   id: 'panzani',
@@ -90,6 +98,23 @@ describe('R-STK-51 R-STK-53 mise en stock par scan', () => {
     lines = addScan(lines, { barcode: '96385074' }, null);
     lines = addScan(lines, known, null);
     expect(lines.map((l) => l.barcode)).toEqual(['3017620422003', '96385074']);
+  });
+});
+
+describe('R-STK-50 ligne affichée dès la lecture', () => {
+  it('les lectures faites pendant la recherche s’ajoutent à la ligne en attente', () => {
+    let lines = [pendingLine(known.barcode, 'frigo')];
+    lines = addAgain(lines, known.barcode) ?? lines;
+    expect(lines).toHaveLength(1);
+    expect(lines[0]).toMatchObject({ pending: true, count: 2, product: null });
+
+    const resolved = resolveLine(lines, known.barcode, known, 'frigo');
+    expect(resolved[0]).toMatchObject({ product: panzani, count: 2, quantity: '500 g' });
+    expect(resolved[0].pending).toBeUndefined();
+  });
+
+  it('une ligne retirée pendant la recherche ne revient pas', () => {
+    expect(resolveLine([], known.barcode, known, 'frigo')).toEqual([]);
   });
 });
 

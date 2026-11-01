@@ -26,6 +26,8 @@ export interface EntryLine {
   /** Code inconnu : brouillon d'Open Food Facts à valider (R-ALI-60), et ce qu'a répondu le service. */
   draft?: ProductDraft | null;
   offStatus?: OffStatus | null;
+  /** Code lu dont la recherche (base, puis Open Food Facts) n'a pas encore répondu. */
+  pending?: boolean;
 }
 
 /** Ligne proposée pour un code lu (R-STK-53). */
@@ -56,6 +58,41 @@ export function addAgain(lines: EntryLine[], barcode: string): EntryLine[] | nul
   return existing
     ? [{ ...existing, count: existing.count + 1 }, ...lines.filter((l) => l !== existing)]
     : null;
+}
+
+/**
+ * Ligne affichée dès la lecture d'un nouveau code, avant la réponse de la recherche (R-STK-50) : les
+ * lectures suivantes du même code s'y ajoutent.
+ */
+export function pendingLine(barcode: string, defaultLocation: string | null): EntryLine {
+  return {
+    barcode,
+    product: null,
+    tracking: 'QUANTITY',
+    count: 1,
+    location: defaultLocation,
+    quantity: '',
+    expiryKind: 'USE_BY',
+    expiryDate: null,
+    pending: true,
+  };
+}
+
+/**
+ * Complète la ligne en attente du code lu avec la réponse de la recherche, en gardant le nombre de
+ * lectures. Rien ne change si la ligne a été retirée entre-temps.
+ */
+export function resolveLine(
+  lines: EntryLine[],
+  code: string,
+  lookup: BarcodeLookup,
+  defaultLocation: string | null,
+): EntryLine[] {
+  return lines.map((l) =>
+    l.barcode === code && l.pending
+      ? { ...newLine(lookup, l.location ?? defaultLocation), count: l.count }
+      : l,
+  );
 }
 
 /**
