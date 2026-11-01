@@ -4,21 +4,19 @@ name: foodflow
 
 services:
   foodflow:
-    # Chaque image est étiquetée par son commit, pour pouvoir revenir à la précédente.
-    image: foodflow:${FOODFLOW_VERSION:-latest}
-    build:
-      context: ..
-      dockerfile: deploy/Dockerfile
+    # Construite et publiée par la CI, étiquetée par son commit, pour pouvoir revenir à la précédente.
+    image: ghcr.io/quentinpigne/foodflow:${FOODFLOW_VERSION:-latest}
     restart: unless-stopped
+    # Utilisateur de l'hôte propriétaire du dossier de données (1000 : premier utilisateur d'Ubuntu), au lieu
+    # de l'utilisateur foodflow (uid 10001) de l'image : l'application n'écrit que dans /data.
+    user: ${FOODFLOW_UID:-1000}:${FOODFLOW_GID:-1000}
     # Réseau local seulement : rien n'est exposé sur Internet. HTTPS à venir (ADR-0009, Q16).
     ports:
       - ${FOODFLOW_PORT:-3100}:3100
     environment:
       TZ: ${TZ:-Europe/Paris}
       RUST_LOG: ${RUST_LOG:-info}
+    # Tout l'état : foodflow.db, backups/, images/ (et plus tard certs/, vapid/). Dossier de l'hôte, défini
+    # dans deploy/.env, appartenant à l'utilisateur ci-dessus (cf. deploy/README.md).
     volumes:
-      - data:/data
-
-volumes:
-  # Tout l'état : foodflow.db, backups/, images/.
-  data:
+      - ${FOODFLOW_DATA_PATH:?définir FOODFLOW_DATA_PATH dans deploy/.env}:/data

@@ -238,7 +238,11 @@ sur le port **3100** (Cashflow garde le 3000 sur le Mac), plus :
 
 ### Déploiement
 
-Comme Cashflow (ADR-0018 de Cashflow) : image Docker `linux/amd64`, déployée sur ubuntu01 par
-`deploy/deploy.sh`, volume `/data` (`foodflow.db`, `images/`, `backups/`, `certs/`, `vapid/`). En plus :
+Comme Cashflow (ADR-0018 de Cashflow) : image Docker `linux/amd64` construite par la CI et publiée sur
+`ghcr.io/quentinpigne/foodflow` (étiquettes `<commit>` et `latest`) pour un push sur `main` vert ; déployée
+sur ubuntu01 par `deploy/deploy.sh`, qui télécharge l'image du commit, sauvegarde la base et relance.
+Dossier de l'hôte monté sur `/data` (`foodflow.db`, `images/`, `backups/`, puis `certs/`, `vapid/`),
+conteneur lancé avec l'uid:gid de son propriétaire (`FOODFLOW_UID`/`FOODFLOW_GID`, 1000 par défaut) au lieu
+de l'utilisateur `foodflow` (10001) de l'image. Guide : `deploy/README.md`. En plus :
 renouvellement du certificat Let's Encrypt par un outil ACME planifié sur ubuntu01 (challenge DNS-01),
 qui écrit dans `certs/` ; le binaire recharge le certificat quand le fichier change (ADR-0009).

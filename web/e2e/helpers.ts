@@ -1,4 +1,4 @@
-import { Page, expect } from '@playwright/test';
+import { Locator, Page, expect } from '@playwright/test';
 
 export const PASSWORD = 'demo-foodflow';
 /** Date du jour du serveur de test (e2e/serve.sh) : le navigateur vit à la même date. */
@@ -10,6 +10,20 @@ export async function login(page: Page): Promise<void> {
   await page.getByLabel('Mot de passe').fill(PASSWORD);
   await page.getByRole('button', { name: 'Se connecter' }).click();
   await expect(page.getByRole('heading', { name: 'À consommer en priorité' })).toBeVisible();
+}
+
+/**
+ * Ouvre un onglet et renvoie son panneau. Le clic est répété tant que l'onglet n'est pas sélectionné (un
+ * clic pendant l'animation de l'onglet précédent peut se perdre), et les vérifications visent le panneau :
+ * celui qu'on quitte peut rester dans la page le temps de son animation, voire au-delà sur la CI.
+ */
+export async function openTab(page: Page, name: string): Promise<Locator> {
+  const tab = page.getByRole('tab', { name });
+  await expect(async () => {
+    await tab.click();
+    await expect(tab).toHaveAttribute('aria-selected', 'true', { timeout: 1_000 });
+  }).toPass();
+  return page.getByRole('tabpanel', { name });
 }
 
 export function isMobile(page: Page): boolean {

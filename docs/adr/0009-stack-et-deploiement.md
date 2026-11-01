@@ -43,7 +43,13 @@ deux applications.
 ## Décision
 
 - **Stack identique à Cashflow**, avec les mêmes règles de code et les mêmes vérifications avant livraison.
-  Binaire `foodflow`, volume `/data` avec `foodflow.db`.
+  Binaire `foodflow`, dossier `/data` avec `foodflow.db`.
+- **Livraison identique à Cashflow** (ADR-0018 de Cashflow, précisé le 2026-11-01) : la CI publie l'image sur
+  `ghcr.io`, étiquetée par son commit, pour un push sur `main` dont tous les contrôles sont passés ; le
+  serveur ne construit rien, il télécharge l'image (`deploy/deploy.sh`). Les données sont un **dossier de
+  l'hôte** monté sur `/data`, et le conteneur tourne avec l'uid et le gid de son propriétaire (1000 par
+  défaut, le premier utilisateur d'Ubuntu) : le dossier se sauvegarde et s'inspecte depuis l'hôte, sans
+  problème de droits.
 - **PWA** (`@angular/service-worker`) pour l'installation sur le téléphone et le **mode magasin hors
   connexion** : la liste de courses en cours est gardée sur l'appareil, les articles cochés hors ligne
   sont envoyés au retour du réseau.

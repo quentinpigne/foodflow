@@ -1,6 +1,6 @@
 import { Page, expect, test } from '@playwright/test';
 
-import { isMobile, login } from './helpers';
+import { isMobile, login, openTab } from './helpers';
 
 /** La carte du dîner de samedi : le gratin, pas ses restes. */
 function gratinDinner(page: Page) {
@@ -86,10 +86,10 @@ test('foyer : membres et semaine type (PLA-01, PLA-02)', async ({ page }) => {
   await page.goto('/foyer');
   await expect(page.getByText('Lou')).toBeVisible();
   await expect(page.getByText('0,6 éq. adulte')).toBeVisible();
-  await page.getByRole('tab', { name: 'Semaine type' }).click();
-  await expect(page.getByRole('heading', { name: 'Dîner' })).toBeVisible();
-  await page.getByRole('tab', { name: 'Repas habituels' }).click();
-  await expect(page.getByLabel('Nom').first()).toHaveValue('Bol de lait');
+  const week = await openTab(page, 'Semaine type');
+  await expect(week.getByRole('heading', { name: 'Dîner' })).toBeVisible();
+  const habits = await openTab(page, 'Repas habituels');
+  await expect(habits.getByLabel('Nom').first()).toHaveValue('Bol de lait');
 });
 
 test('bilan : prévu et réel, critère par critère (NUT-04)', async ({ page }) => {
