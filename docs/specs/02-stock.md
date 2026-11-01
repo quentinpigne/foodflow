@@ -142,6 +142,9 @@ puis on valide le tout. L'inventaire d'un emplacement se fait de la même façon
   code-barres** (douchette USB ou Bluetooth, qui tape le code puis Entrée) ; on peut aussi le taper.
   Un code dont la clé est fausse (R-ALI-41) est refusé avec un signal distinct, sans rien ajouter.
   La caméra ignore un même code relu dans les 2 secondes ; avec un lecteur, chaque lecture compte.
+  Le moyen de scan (caméra ou lecteur) est un **réglage de l'appareil**, gardé dans son navigateur (par
+  défaut : la caméra sur un écran tactile, le lecteur ailleurs) ; en mode caméra, elle démarre dès
+  l'ouverture du scan, sans second geste.
 - **R-STK-51** — **Mise en stock par scan** : chaque lecture d'un produit connu ajoute **un
   conditionnement** à sa ligne (trois paquets de pâtes scannés : une ligne « × 3 »). Le nombre se
   corrige à la main. Rien n'entre en stock avant la validation (ADR-0005).

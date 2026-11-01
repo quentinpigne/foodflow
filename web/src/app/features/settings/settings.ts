@@ -22,6 +22,7 @@ import { confirm } from '../../shared/confirm-dialog';
 import { AiSettings } from './ai-settings';
 import { OffSettings } from './off-settings';
 import { PhotoSettings } from './photo-settings';
+import { ScanSettings } from './scan-settings';
 import { FrDatePipe } from '../../shared/date.pipe';
 import { LocationsStore } from '../../shared/stores';
 
@@ -46,6 +47,7 @@ interface LocationDraft {
     AiSettings,
     OffSettings,
     PhotoSettings,
+    ScanSettings,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
@@ -121,6 +123,7 @@ interface LocationDraft {
       <app-ai-settings />
       <app-photo-settings />
       <app-off-settings />
+      <app-scan-settings />
 
       <section class="card">
         <h2 class="widget-title">Péremption</h2>

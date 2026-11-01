@@ -3,11 +3,13 @@ import {
   Component,
   DestroyRef,
   ElementRef,
+  afterNextRender,
   inject,
   output,
   signal,
   viewChild,
 } from '@angular/core';
+import { RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -15,14 +17,23 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 
 import { Detector, ReaderInput, RepeatFilter, createDetector } from '../core/barcode';
+import { ScanDevice } from '../core/scan-device';
 
 /**
- * Lecture de codes-barres en rafale (R-STK-50) : caméra du téléphone, lecteur de code-barres (reconnu à sa
- * frappe rapide, où que soit la page) ou saisie du code.
+ * Lecture de codes-barres en rafale (R-STK-50), selon le moyen réglé pour l'appareil : la caméra démarre
+ * dès l'affichage ; le lecteur de code-barres est reconnu à sa frappe rapide, où que soit la page. Le code
+ * peut toujours être tapé.
  */
 @Component({
   selector: 'app-barcode-scanner',
-  imports: [FormsModule, MatButtonModule, MatFormFieldModule, MatIconModule, MatInputModule],
+  imports: [
+    FormsModule,
+    RouterLink,
+    MatButtonModule,
+    MatFormFieldModule,
+    MatIconModule,
+    MatInputModule,
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: { '(document:keydown)': 'onKey($event)' },
   template: `
@@ -37,10 +48,12 @@ import { Detector, ReaderInput, RepeatFilter, createDetector } from '../core/bar
         <p class="error">{{ error() }}</p>
       }
       <div class="controls">
-        <button mat-stroked-button type="button" (click)="toggleCamera()">
-          <mat-icon>{{ camera() ? 'videocam_off' : 'photo_camera' }}</mat-icon>
-          {{ camera() ? 'Arrêter la caméra' : 'Caméra' }}
-        </button>
+        @if (device.mode() === 'camera') {
+          <button mat-stroked-button type="button" (click)="toggleCamera()">
+            <mat-icon>{{ camera() ? 'videocam_off' : 'photo_camera' }}</mat-icon>
+            {{ camera() ? 'Arrêter la caméra' : 'Relancer la caméra' }}
+          </button>
+        }
         <form class="manual" (ngSubmit)="submitManual()">
           <mat-form-field subscriptSizing="dynamic">
             <mat-label>Code-barres</mat-label>
@@ -58,7 +71,14 @@ import { Detector, ReaderInput, RepeatFilter, createDetector } from '../core/bar
           </mat-form-field>
         </form>
       </div>
-      <p class="muted hint">Un lecteur de code-barres branché scanne directement, sans clic.</p>
+      <p class="muted hint">
+        {{
+          device.mode() === 'camera'
+            ? 'Scan par la caméra de cet appareil.'
+            : 'Lecteur de code-barres prêt : scanner directement, sans clic.'
+        }}
+        <a routerLink="/reglages">Changer</a>
+      </p>
     </div>
   `,
   styles: `
@@ -111,6 +131,7 @@ import { Detector, ReaderInput, RepeatFilter, createDetector } from '../core/bar
 })
 export class BarcodeScanner {
   readonly scanned = output<string>();
+  protected readonly device = inject(ScanDevice);
 
   private readonly video = viewChild<ElementRef<HTMLVideoElement>>('video');
   protected readonly camera = signal(false);
@@ -125,6 +146,12 @@ export class BarcodeScanner {
 
   constructor() {
     inject(DestroyRef).onDestroy(() => this.stop());
+    // En mode caméra, elle démarre dès l'ouverture du scan, sans second clic.
+    afterNextRender(() => {
+      if (this.device.mode() === 'camera') {
+        void this.toggleCamera();
+      }
+    });
   }
 
   /** Lecteur de code-barres : il tape comme un clavier ; ignoré quand on saisit dans un champ. */
