@@ -7,12 +7,14 @@ use foodflow_domain::{Amount, Date, DomainError, Measure};
 
 use super::foods::{self, FoodInput, FoodQuery};
 use super::groups::{self, FoodGroupInput};
+use super::off::{self, OffSettings, OffStatus};
 use super::products::{self, ProductInput};
 use super::stock::{
     self, AdjustInput, CheckInput, ConsumeInput, DateInput, InventoryEntry, InventoryInput, LotBatchInput, LotInput,
     LotOrigin, MoveInput, TrackingModeInput, WasteInput,
 };
 use super::{locations, seed};
+use crate::clients::off::StaticFacts;
 use crate::db::groups::Settings;
 use crate::db::{self, Db};
 use crate::error::AppError;
@@ -355,6 +357,7 @@ async fn product(db: &Db, food: FoodId, name: &str, barcode: &str, package: i64)
         package_amount: Some(Amount::from_raw(package)),
         package_units: None,
         nutrient_basis: None,
+        off_payload: None,
     };
     products::create(db, &input).await.unwrap()
 }
@@ -379,14 +382,15 @@ async fn r_stk_50_52_53_barcode_lookup() {
     let pantry = location(&db, LocationKind::Pantry).await;
     let panzani = product(&db, pasta, "Panzani spaghetti", "3017620422003", 500_000).await;
     let barilla = product(&db, pasta, "Barilla penne", "96385074", 500_000).await;
+    let facts = StaticFacts::default();
 
-    let invalid = products::lookup_barcode(&db, "3017620422004").await;
+    let invalid = products::lookup_barcode(&db, &facts, "3017620422004").await;
     assert!(matches!(invalid, Err(AppError::Domain(DomainError::InvalidBarcode))), "R-STK-50");
-    let unknown = products::lookup_barcode(&db, "036000291452").await.unwrap();
+    let unknown = products::lookup_barcode(&db, &facts, "036000291452").await.unwrap();
     assert!(unknown.product.is_none(), "R-STK-52");
 
     // Sans lot : aucun emplacement proposé, DLC par défaut.
-    let first = products::lookup_barcode(&db, "3017 6204 2200 3").await.unwrap();
+    let first = products::lookup_barcode(&db, &facts, "3017 6204 2200 3").await.unwrap();
     assert_eq!(first.barcode, "3017620422003");
     assert_eq!(first.product.unwrap().id, panzani);
     assert_eq!(first.location_id, None);
@@ -396,11 +400,11 @@ async fn r_stk_50_52_53_barcode_lookup() {
     let bb =
         LotInput { expiry_kind: ExpiryKind::BestBefore, ..product_lot(panzani, pantry, 500_000, Some("2027-03-01")) };
     lot(&db, &bb).await;
-    let other = products::lookup_barcode(&db, "96385074").await.unwrap();
+    let other = products::lookup_barcode(&db, &facts, "96385074").await.unwrap();
     assert_eq!(other.product.unwrap().id, barilla);
     assert_eq!(other.location_id, Some(pantry), "emplacement du dernier lot de l'aliment");
     assert_eq!(other.expiry_kind, Some(ExpiryKind::UseBy));
-    let again = products::lookup_barcode(&db, "3017620422003").await.unwrap();
+    let again = products::lookup_barcode(&db, &facts, "3017620422003").await.unwrap();
     assert_eq!(again.location_id, Some(pantry));
     assert_eq!(again.expiry_kind, Some(ExpiryKind::BestBefore), "nature du dernier lot du produit");
 
@@ -408,7 +412,7 @@ async fn r_stk_50_52_53_barcode_lookup() {
     let fruits = group(&db, "Fruits", Settings { shelf_life_days: Some(7), ..Settings::default() }).await;
     let apple = food(&db, fruits, "Pomme", Settings::default()).await;
     product(&db, apple, "Pommes en filet", "40123455", 1_000_000).await;
-    let apples = products::lookup_barcode(&db, "40123455").await.unwrap();
+    let apples = products::lookup_barcode(&db, &facts, "40123455").await.unwrap();
     assert_eq!(apples.expiry_kind, Some(ExpiryKind::None));
 }
 
@@ -470,4 +474,102 @@ async fn r_stk_55_scan_inventory() {
     assert_eq!(detail.movements[0].batch_id, Some(batch));
     let rice_detail = stock::get(&db, rice_lot, d(TODAY)).await.unwrap();
     assert_eq!(rice_detail.movements.len(), 1, "lot non scanné inchangé");
+}
+
+// ===================================================================== Open Food Facts (ALI-08)
+
+const SPAGHETTI: &str = r#"{"product":{"product_name_fr":"Spaghetti","brands":"Panzani","quantity":"500 g",
+    "categories_tags":["en:pastas","en:spaghetti"],"nutriments":{"energy-kcal_100g":359,"proteins_100g":12.5}}}"#;
+const PENNE: &str = r#"{"product":{"product_name":"Penne rigate","brands":"Barilla","quantity":"1 kg",
+    "categories_tags":["en:pastas","en:spaghetti"]}}"#;
+const FUSILLI: &str = r#"{"product":{"product_name":"Fusilli n°34","quantity":"500 g",
+    "categories_tags":["en:pastas","en:dry-pastas","en:fusilli"],
+    "categories_tags_fr":["pâtes alimentaires","Pâtes sèches","Fusilli"]}}"#;
+
+fn sheets(entries: &[(&str, &str)]) -> StaticFacts {
+    StaticFacts {
+        sheets: entries.iter().map(|(code, json)| ((*code).to_owned(), (*json).to_owned())).collect(),
+        ..StaticFacts::default()
+    }
+}
+
+/// Code inconnu : brouillon tiré d'Open Food Facts, rattachement proposé d'après le nom ; rien n'est créé
+/// avant validation (R-ALI-60, ADR-0005).
+#[tokio::test]
+async fn r_ali_60_draft_from_open_food_facts() {
+    let (db, _dir) = setup().await;
+    let g = group(&db, "Pâtes", Settings::default()).await;
+    let spaghetti = food(&db, g, "Spaghetti", Settings::default()).await;
+    let facts = sheets(&[("3017620422003", SPAGHETTI)]);
+
+    let lookup = products::lookup_barcode(&db, &facts, "3017620422003").await.unwrap();
+    assert!(lookup.product.is_none());
+    assert_eq!(lookup.off_status, Some(OffStatus::Found));
+    let draft = lookup.draft.unwrap();
+    assert_eq!(draft.name.as_deref(), Some("Spaghetti"));
+    assert_eq!(draft.brand.as_deref(), Some("Panzani"));
+    assert_eq!(draft.package_measure, Some(Measure::Mass));
+    assert_eq!(draft.package_amount, Some(Amount::from_raw(500_000)));
+    assert_eq!(draft.proposed_food_id, Some(spaghetti));
+    let query = products::ProductQuery { q: None, barcode: Some("3017620422003".into()) };
+    assert!(products::search(&db, &query).await.unwrap().is_empty(), "aucun produit créé");
+
+    // Absent, injoignable, désactivé.
+    let absent = products::lookup_barcode(&db, &facts, "96385074").await.unwrap();
+    assert_eq!(absent.off_status, Some(OffStatus::NotFound));
+    let down = StaticFacts { fail: true, ..StaticFacts::default() };
+    let unavailable = products::lookup_barcode(&db, &down, "96385074").await.unwrap();
+    assert_eq!(unavailable.off_status, Some(OffStatus::Unavailable));
+    off::update_settings(&db, &OffSettings { enabled: false }).await.unwrap();
+    let silent = sheets(&[("3017620422003", SPAGHETTI)]);
+    let disabled = products::lookup_barcode(&db, &silent, "3017620422003").await.unwrap();
+    assert_eq!(disabled.off_status, Some(OffStatus::Disabled));
+    assert!(silent.asked.lock().unwrap().is_empty(), "rien n'est envoyé (ADR-0007)");
+}
+
+/// Le brouillon validé garde sa fiche : le produit ne déclenche plus d'appel (R-ALI-61) ; sa catégorie
+/// est mémorisée et proposée pour le produit suivant de la même catégorie (R-ALI-62).
+#[tokio::test]
+async fn r_ali_61_62_validated_draft() {
+    let (db, _dir) = setup().await;
+    let g = group(&db, "Féculents", Settings::default()).await;
+    let pasta = food(&db, g, "Pâtes sèches", Settings::default()).await;
+    let facts = sheets(&[("3017620422003", SPAGHETTI), ("96385074", PENNE)]);
+
+    let draft = products::lookup_barcode(&db, &facts, "3017620422003").await.unwrap().draft.unwrap();
+    assert_eq!(draft.proposed_food_id, None, "« Spaghetti » ne ressemble à aucun aliment");
+    let input = ProductInput {
+        food_id: Some(pasta),
+        group_id: None,
+        name: draft.name.clone().unwrap(),
+        brand: draft.brand.clone(),
+        barcode: Some("3017620422003".into()),
+        stock_measure: None,
+        package_amount: draft.package_amount,
+        package_units: None,
+        nutrient_basis: Some(draft.nutrient_basis),
+        off_payload: Some(draft.off_payload.clone()),
+    };
+    let id = products::create(&db, &input).await.unwrap();
+
+    let known = products::lookup_barcode(&db, &facts, "3017620422003").await.unwrap();
+    assert_eq!(known.product.unwrap().id, id);
+    assert_eq!(facts.asked.lock().unwrap().len(), 1, "produit connu : plus d'appel (R-ALI-61)");
+    let mappings = db::products::off_mappings(&db.read).await.unwrap();
+    assert_eq!(mappings, vec![("en:spaghetti".to_owned(), Some(pasta), None)]);
+
+    let next = products::lookup_barcode(&db, &facts, "96385074").await.unwrap().draft.unwrap();
+    assert_eq!(next.proposed_food_id, Some(pasta), "R-ALI-62");
+    assert_eq!(next.proposed_name.as_deref(), Some("Pâtes sèches"));
+}
+
+/// Sans catégorie mémorisée ni nom ressemblant, une catégorie en français propose l'aliment (R-ALI-60).
+#[tokio::test]
+async fn r_ali_60_proposal_from_french_categories() {
+    let (db, _dir) = setup().await;
+    let g = group(&db, "Féculents", Settings::default()).await;
+    let pasta = food(&db, g, "Pâtes sèches", Settings::default()).await;
+    let facts = sheets(&[("3017620422003", FUSILLI)]);
+    let draft = products::lookup_barcode(&db, &facts, "3017620422003").await.unwrap().draft.unwrap();
+    assert_eq!(draft.proposed_food_id, Some(pasta));
 }

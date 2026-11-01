@@ -14,13 +14,14 @@ pub struct CreatedProduct {
     pub id: ProductId,
 }
 
-/// Lecture d'un code-barres : produit connu ou non, valeurs proposées pour ses lots (R-STK-50, R-STK-53).
+/// Lecture d'un code-barres : produit connu, ou brouillon d'Open Food Facts pour un code inconnu ; valeurs
+/// proposées pour ses lots (R-STK-50, R-STK-53, R-ALI-60).
 #[utoipa::path(
     get, operation_id = "lookupBarcode", path = "/barcodes/{code}", tag = "foods", params(("code" = String, Path)),
     responses((status = 200, body = BarcodeLookup), (status = 422, body = Problem))
 )]
 pub async fn lookup(State(state): State<AppState>, Path(code): Path<String>) -> AppResult<Json<BarcodeLookup>> {
-    Ok(Json(products::lookup_barcode(&state.db, &code).await?))
+    Ok(Json(products::lookup_barcode(&state.db, state.off.as_ref(), &code).await?))
 }
 
 /// Recherche de produits, par code-barres ou par nom (ALI-05, ALI-06).

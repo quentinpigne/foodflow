@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "INSERT INTO off_category_mapping (off_category, food_id, group_id, updated_at) VALUES (?, ?, ?, ?)\n         ON CONFLICT (off_category) DO UPDATE\n             SET food_id = excluded.food_id, group_id = excluded.group_id, updated_at = excluded.updated_at",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 4
+    },
+    "nullable": []
+  },
+  "hash": "ca0cc2e4e701d9f50ac603a11c093a2645900e41d40faf49f05b1ce2fb3ade15"
+}

@@ -13,6 +13,12 @@ export interface ProductInput {
   group_id?: (FoodGroupId | null);
   name: string;
   nutrient_basis?: (NutrientBasis | null);
+
+  /**
+   * Fiche d'Open Food Facts du brouillon validé (R-ALI-60, R-ALI-61) : gardée, ses valeurs
+   * nutritionnelles reprises, sa catégorie mémorisée (R-ALI-62). Seulement à la création.
+   */
+  off_payload?: (string | null);
   package_amount?: (Amount | null);
   package_units?: (number | null);
   stock_measure?: (Measure | null);

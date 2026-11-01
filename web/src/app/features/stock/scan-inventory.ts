@@ -79,8 +79,10 @@ import { EMPTY_INVENTORY, InventoryScan, assignScan } from './scan';
       @if (last(); as l) {
         <p class="last" [class]="l.outcome">
           {{ l.text }}
-          @if (l.outcome === 'unknown' && l.code) {
-            <button mat-button (click)="attach(l.code)">Rattacher</button>
+          @if (l.outcome === 'unknown' && l.lookup; as lookup) {
+            <button mat-button (click)="attach(lookup)">
+              {{ lookup.draft ? 'Vérifier et créer' : 'Rattacher' }}
+            </button>
           }
         </p>
       }
@@ -230,9 +232,11 @@ export class ScanInventoryPage {
   protected readonly foundAmounts = signal<Record<string, string>>({});
   /** Produits lus pendant la séance, pour les lots trouvés. */
   private readonly products = signal<Record<string, BarcodeLookup>>({});
-  protected readonly last = signal<{ outcome: ScanOutcome; text: string; code?: string } | null>(
-    null,
-  );
+  protected readonly last = signal<{
+    outcome: ScanOutcome;
+    text: string;
+    lookup?: BarcodeLookup;
+  } | null>(null);
   protected readonly busy = signal(false);
 
   protected readonly lots = rxResource({
@@ -316,8 +320,10 @@ export class ScanInventoryPage {
       scanFeedback('unknown');
       this.last.set({
         outcome: 'unknown',
-        text: `Code ${lookup.barcode} inconnu`,
-        code: lookup.barcode,
+        text: lookup.draft?.name
+          ? `${lookup.draft.name} : nouveau produit, d’après Open Food Facts`
+          : `Code ${lookup.barcode} inconnu`,
+        lookup,
       });
       return;
     }
@@ -352,13 +358,17 @@ export class ScanInventoryPage {
     scanFeedback('known');
   }
 
-  protected async attach(code: string): Promise<void> {
-    const ref = this.dialog.open(AttachBarcodeDialog, { data: { barcode: code }, width: '30rem' });
+  /** Code inconnu : brouillon d'Open Food Facts à valider, ou rattachement à la main (R-STK-52). */
+  protected async attach(lookup: BarcodeLookup): Promise<void> {
+    const ref = this.dialog.open(AttachBarcodeDialog, {
+      data: { barcode: lookup.barcode, draft: lookup.draft, offStatus: lookup.off_status },
+      width: '32rem',
+    });
     if (!(await firstValueFrom(ref.afterClosed()))) {
       return;
     }
     this.version.bump();
-    this.record(await firstValueFrom(this.foods.lookupBarcode({ code })));
+    this.record(await firstValueFrom(this.foods.lookupBarcode({ code: lookup.barcode })));
   }
 
   protected setAmount(id: string, value: string): void {

@@ -172,3 +172,69 @@ pub async fn lot_count(db: impl SqliteExecutor<'_>, id: ProductId) -> anyhow::Re
         .fetch_one(db)
         .await?)
 }
+
+/// Garde la fiche brute d'Open Food Facts d'un produit et sa date (R-ALI-61).
+pub async fn set_off_payload(db: impl SqliteExecutor<'_>, id: ProductId, payload: &str) -> anyhow::Result<()> {
+    let id = id.to_string();
+    let now = timestamp();
+    sqlx::query!("UPDATE product SET off_payload = ?, off_fetched_at = ? WHERE id = ?", payload, now, id)
+        .execute(db)
+        .await?;
+    Ok(())
+}
+
+/// Valeur d'un nutriment d'un produit, pour 100 g ou 100 mL, avec sa source (`OFF`, `MANUAL`).
+pub async fn set_nutrient(
+    db: impl SqliteExecutor<'_>,
+    id: ProductId,
+    code: &str,
+    value: i64,
+    source: &str,
+) -> anyhow::Result<()> {
+    let id = id.to_string();
+    sqlx::query!(
+        "INSERT INTO product_nutrient (product_id, nutrient_code, value, estimated, source) VALUES (?, ?, ?, 0, ?)
+         ON CONFLICT (product_id, nutrient_code) DO UPDATE SET value = excluded.value, source = excluded.source",
+        id,
+        code,
+        value,
+        source
+    )
+    .execute(db)
+    .await?;
+    Ok(())
+}
+
+/// Rattachements mémorisés des catégories d'Open Food Facts (R-ALI-62).
+pub async fn off_mappings(
+    db: impl SqliteExecutor<'_>,
+) -> anyhow::Result<Vec<(String, Option<FoodId>, Option<FoodGroupId>)>> {
+    let rows = sqlx::query!("SELECT off_category, food_id, group_id FROM off_category_mapping").fetch_all(db).await?;
+    rows.into_iter()
+        .map(|r| Ok((r.off_category, opt_id_from_db(r.food_id.as_deref())?, opt_id_from_db(r.group_id.as_deref())?)))
+        .collect()
+}
+
+/// Mémorise le rattachement validé d'une catégorie d'Open Food Facts (R-ALI-62).
+pub async fn set_off_mapping(
+    db: impl SqliteExecutor<'_>,
+    category: &str,
+    food: Option<FoodId>,
+    group: Option<FoodGroupId>,
+) -> anyhow::Result<()> {
+    let food = food.map(|f| f.to_string());
+    let group = group.map(|g| g.to_string());
+    let now = timestamp();
+    sqlx::query!(
+        "INSERT INTO off_category_mapping (off_category, food_id, group_id, updated_at) VALUES (?, ?, ?, ?)
+         ON CONFLICT (off_category) DO UPDATE
+             SET food_id = excluded.food_id, group_id = excluded.group_id, updated_at = excluded.updated_at",
+        category,
+        food,
+        group,
+        now
+    )
+    .execute(db)
+    .await?;
+    Ok(())
+}

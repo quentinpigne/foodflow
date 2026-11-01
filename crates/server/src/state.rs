@@ -3,6 +3,7 @@
 use std::sync::Arc;
 
 use crate::clients::ai::AiClient;
+use crate::clients::off::ProductFacts;
 use crate::clients::photos::PhotoSearch;
 use crate::clients::web::Fetcher;
 use crate::clock::Clock;
@@ -24,4 +25,6 @@ pub struct AppState {
     pub ai: Arc<dyn AiClient>,
     /// Photos libres des recettes (R-REC-73), cherchées seulement si elles sont activées dans les réglages.
     pub photos: Arc<dyn PhotoSearch>,
+    /// Fiches d'Open Food Facts (R-ALI-60), demandées seulement si le service est activé dans les réglages.
+    pub off: Arc<dyn ProductFacts>,
 }

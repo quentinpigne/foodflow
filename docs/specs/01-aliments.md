@@ -143,8 +143,12 @@ stockées **pour 100 g** ou **pour 100 mL** (la **base nutritionnelle** de l'ali
 
 - **R-ALI-60** — Scanner un code-barres inconnu, si Open Food Facts est activé (ADR-0007), interroge
   Open Food Facts et produit un **brouillon de produit** : nom, marque, conditionnement, valeurs pour
-  100 g ou 100 mL, catégories. Le brouillon propose un aliment ou une famille de rattachement ;
-  le produit n'est créé qu'après validation (ADR-0005).
+  100 g ou 100 mL, catégories. Le brouillon propose un aliment ou une famille de rattachement : la
+  catégorie mémorisée la plus précise (R-ALI-62), sinon l'aliment ou la famille dont le nom correspond à
+  celui du produit, puis à l'une de ses catégories en français, de la plus précise à la plus générale ;
+  le produit n'est créé qu'après validation (ADR-0005). Le conditionnement lu n'est repris que s'il est
+  dans la mesure de stock de l'aliment choisi. Un code déjà lu pendant une séance de scan n'est pas
+  redemandé (2026-11-01).
 - **R-ALI-61** — Un produit créé depuis Open Food Facts garde la réponse brute et sa date ; il ne
   déclenche plus d'appel, sauf demande explicite d'actualisation, qui ne remplace pas les valeurs
   modifiées à la main.

@@ -41,7 +41,7 @@ import { parseQuantity } from '../../core/quantity';
 import { BarcodeScanner } from '../../shared/barcode-scanner';
 import { LocationsStore } from '../../shared/stores';
 import { AttachBarcodeDialog } from './attach-barcode';
-import { EntryLine, addScan, newLine } from './scan';
+import { EntryLine, addAgain, addScan, newLine } from './scan';
 
 const DRAFT_KEY = 'foodflow.scan-entry';
 
@@ -109,9 +109,29 @@ const DRAFT_KEY = 'foodflow.scan-entry';
                     }
                   </div>
                   <div class="muted">{{ p.attached_to }}</div>
+                } @else if (line.draft; as d) {
+                  <div class="title">
+                    {{ d.name ?? 'Produit sans nom' }}
+                    @if (d.brand) {
+                      <span class="muted">· {{ d.brand }}</span>
+                    }
+                  </div>
+                  <div class="muted">
+                    Nouveau produit, d’après Open Food Facts
+                    @if (d.proposed_name) {
+                      · {{ d.proposed_name }}
+                    }
+                  </div>
                 } @else {
                   <div class="title">Code inconnu</div>
-                  <div class="muted">{{ line.barcode }}</div>
+                  <div class="muted">
+                    {{ line.barcode }}
+                    @if (line.offStatus === 'NOT_FOUND') {
+                      · absent d’Open Food Facts
+                    } @else if (line.offStatus === 'UNAVAILABLE') {
+                      · Open Food Facts injoignable
+                    }
+                  </div>
                 }
               </div>
               <div class="count">
@@ -138,9 +158,15 @@ const DRAFT_KEY = 'foodflow.scan-entry';
             </div>
 
             @if (!line.product) {
-              <button mat-stroked-button (click)="attach(i, line)">
-                <mat-icon>link</mat-icon>Rattacher à un aliment ou un produit
-              </button>
+              @if (line.draft) {
+                <button mat-flat-button (click)="attach(i, line)">
+                  <mat-icon>check</mat-icon>Vérifier et créer le produit
+                </button>
+              } @else {
+                <button mat-stroked-button (click)="attach(i, line)">
+                  <mat-icon>link</mat-icon>Rattacher à un aliment ou un produit
+                </button>
+              }
             } @else {
               <div class="fields">
                 <mat-form-field subscriptSizing="dynamic" class="location">
@@ -369,6 +395,17 @@ export class ScanEntryPage {
   }
 
   protected async onScan(code: string): Promise<void> {
+    const again = addAgain(this.lines(), code);
+    if (again) {
+      this.lines.set(again);
+      const line = again[0];
+      scanFeedback(line.product ? 'known' : 'unknown');
+      this.last.set({
+        outcome: line.product ? 'known' : 'unknown',
+        text: `${line.product?.name ?? line.draft?.name ?? 'Code ' + code} × ${line.count}`,
+      });
+      return;
+    }
     let lookup: BarcodeLookup;
     try {
       lookup = await firstValueFrom(this.foods.lookupBarcode({ code }));
@@ -384,7 +421,12 @@ export class ScanEntryPage {
       this.last.set({ outcome: 'known', text: `${lookup.product.name} × ${line.count}` });
     } else {
       scanFeedback('unknown');
-      this.last.set({ outcome: 'unknown', text: `Code ${lookup.barcode} inconnu : à rattacher` });
+      this.last.set({
+        outcome: 'unknown',
+        text: lookup.draft?.name
+          ? `${lookup.draft.name} : nouveau produit, à valider`
+          : `Code ${lookup.barcode} inconnu : à rattacher`,
+      });
     }
   }
 
@@ -404,8 +446,8 @@ export class ScanEntryPage {
   /** Rattache un code inconnu, puis relit le code pour proposer les lots du produit (R-STK-52). */
   protected async attach(index: number, line: EntryLine): Promise<void> {
     const ref = this.dialog.open(AttachBarcodeDialog, {
-      data: { barcode: line.barcode },
-      width: '30rem',
+      data: { barcode: line.barcode, draft: line.draft, offStatus: line.offStatus },
+      width: '32rem',
     });
     if (!(await firstValueFrom(ref.afterClosed()))) {
       return;

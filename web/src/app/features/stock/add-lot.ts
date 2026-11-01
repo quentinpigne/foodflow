@@ -23,6 +23,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { RouterLink } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 
 import { ExpiryKind } from '../../api/models/expiry-kind';
@@ -38,7 +39,10 @@ import { EXPIRY_KIND_LABELS, PRESENCE_LABELS } from '../../core/labels';
 import { Layout } from '../../core/layout';
 import { parseMoney } from '../../core/money';
 import { UNITS, bestUnit, defaultUnit, formatIn, parseQuantity } from '../../core/quantity';
+import { BarcodeScanner } from '../../shared/barcode-scanner';
 import { ItemPicker, StockItem, itemName } from '../../shared/item-picker';
+import { scanFeedback } from '../../core/barcode';
+import { AttachBarcodeDialog } from './attach-barcode';
 import { GroupsStore, LocationsStore } from '../../shared/stores';
 
 export interface AddLotData {
@@ -49,8 +53,10 @@ export interface AddLotData {
 @Component({
   selector: 'app-add-lot-dialog',
   imports: [
+    BarcodeScanner,
     FormsModule,
     ItemPicker,
+    RouterLink,
     MatButtonModule,
     MatCheckboxModule,
     MatDatepickerModule,
@@ -79,6 +85,17 @@ export interface AddLotData {
           </div>
         } @else {
           <app-item-picker (picked)="choose($event)" />
+          <div class="scan-row">
+            <button mat-stroked-button type="button" (click)="scanning.set(!scanning())">
+              <mat-icon>barcode_scanner</mat-icon>{{ scanning() ? 'Fermer le scan' : 'Scanner' }}
+            </button>
+            <a mat-button routerLink="/stock/scan" (click)="ref.close()"
+              >Ranger plusieurs produits</a
+            >
+          </div>
+          @if (scanning()) {
+            <app-barcode-scanner (scanned)="scanPick($event)" />
+          }
         }
 
         <mat-form-field>
@@ -233,6 +250,12 @@ export interface AddLotData {
     .unit {
       width: 7rem;
     }
+    .scan-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.5rem;
+    }
     .picked {
       display: flex;
       align-items: center;
@@ -251,7 +274,8 @@ export interface AddLotData {
 })
 export class AddLotDialog {
   private readonly data = inject<AddLotData>(MAT_DIALOG_DATA);
-  private readonly ref = inject(MatDialogRef<AddLotDialog>);
+  protected readonly ref = inject(MatDialogRef<AddLotDialog>);
+  private readonly dialog = inject(MatDialog);
   private readonly api = inject(StockService);
   private readonly foods = inject(FoodsService);
   private readonly version = inject(DataVersion);
@@ -265,6 +289,7 @@ export class AddLotDialog {
   protected readonly presenceLabels = PRESENCE_LABELS;
 
   protected readonly item = signal<StockItem | null>(this.data.item ?? null);
+  protected readonly scanning = signal(false);
   protected readonly measure = signal<Measure>('MASS');
   protected readonly tracking = signal<TrackingMode>('QUANTITY');
   protected readonly location = signal<string | null>(null);
@@ -309,6 +334,39 @@ export class AddLotDialog {
     const item = this.item();
     if (item) {
       void this.choose(item);
+    }
+  }
+
+  /** Choisit le produit par son code-barres (R-STK-50) ; un code inconnu se rattache d'abord (R-STK-52). */
+  protected async scanPick(code: string): Promise<void> {
+    this.error.set(null);
+    try {
+      let lookup = await firstValueFrom(this.foods.lookupBarcode({ code }));
+      if (!lookup.product) {
+        scanFeedback('unknown');
+        const ref = this.dialog.open(AttachBarcodeDialog, {
+          data: { barcode: lookup.barcode, draft: lookup.draft, offStatus: lookup.off_status },
+          width: '32rem',
+        });
+        if (!(await firstValueFrom(ref.afterClosed()))) {
+          return;
+        }
+        lookup = await firstValueFrom(this.foods.lookupBarcode({ code }));
+      }
+      if (lookup.product) {
+        scanFeedback('known');
+        this.scanning.set(false);
+        await this.choose({ kind: 'product', product: lookup.product });
+        if (lookup.location_id) {
+          this.location.set(lookup.location_id);
+        }
+        if (lookup.expiry_kind) {
+          this.expiryKind.set(lookup.expiry_kind);
+        }
+      }
+    } catch {
+      scanFeedback('invalid');
+      this.error.set(`Code ${code} illisible ou erroné.`);
     }
   }
 

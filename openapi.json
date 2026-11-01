@@ -499,7 +499,7 @@
         "tags": [
           "foods"
         ],
-        "summary": "Lecture d'un code-barres : produit connu ou non, valeurs proposées pour ses lots (R-STK-50, R-STK-53).",
+        "summary": "Lecture d'un code-barres : produit connu, ou brouillon d'Open Food Facts pour un code inconnu ; valeurs\nproposées pour ses lots (R-STK-50, R-STK-53, R-ALI-60).",
         "operationId": "lookupBarcode",
         "parameters": [
           {
@@ -3920,6 +3920,54 @@
         }
       }
     },
+    "/api/v1/settings/off": {
+      "get": {
+        "tags": [
+          "system"
+        ],
+        "summary": "Open Food Facts, activé par défaut (ADR-0007, R-ALI-60).",
+        "operationId": "getOffSettings",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OffSettings"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "system"
+        ],
+        "operationId": "updateOffSettings",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OffSettings"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {},
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/settings/photos": {
       "get": {
         "tags": [
@@ -4331,6 +4379,17 @@
             "type": "string",
             "description": "Code nettoyé et vérifié (R-ALI-41)."
           },
+          "draft": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/ProductDraft",
+                "description": "Brouillon de produit tiré d'Open Food Facts, à valider (R-ALI-60)."
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
           "expiry_kind": {
             "oneOf": [
               {
@@ -4347,6 +4406,17 @@
               {
                 "$ref": "#/components/schemas/LocationId",
                 "description": "Emplacement du dernier lot du produit, sinon de son aliment."
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "off_status": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/OffStatus",
+                "description": "Code inconnu : ce qu'a donné Open Food Facts (`None` pour un produit connu)."
               },
               {
                 "type": "null"
@@ -5095,6 +5165,22 @@
               "string",
               "null"
             ]
+          }
+        }
+      },
+      "DraftNutrient": {
+        "type": "object",
+        "required": [
+          "code",
+          "value"
+        ],
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "value": {
+            "type": "integer",
+            "format": "int64"
           }
         }
       },
@@ -7548,6 +7634,27 @@
           "OTHER"
         ]
       },
+      "OffSettings": {
+        "type": "object",
+        "required": [
+          "enabled"
+        ],
+        "properties": {
+          "enabled": {
+            "type": "boolean"
+          }
+        }
+      },
+      "OffStatus": {
+        "type": "string",
+        "description": "Ce qu'a donné Open Food Facts pour un code inconnu.",
+        "enum": [
+          "DISABLED",
+          "FOUND",
+          "NOT_FOUND",
+          "UNAVAILABLE"
+        ]
+      },
       "Period": {
         "type": "string",
         "enum": [
@@ -7863,6 +7970,105 @@
           }
         }
       },
+      "ProductDraft": {
+        "type": "object",
+        "description": "Brouillon de produit (R-ALI-60) : rien n'est créé avant validation (ADR-0005).",
+        "required": [
+          "nutrient_basis",
+          "nutrients",
+          "off_payload"
+        ],
+        "properties": {
+          "brand": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "category": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Catégorie la plus précise (`en:spaghetti`)."
+          },
+          "name": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "nutrient_basis": {
+            "$ref": "#/components/schemas/NutrientBasis"
+          },
+          "nutrients": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DraftNutrient"
+            }
+          },
+          "off_payload": {
+            "type": "string",
+            "description": "Fiche brute, renvoyée à la création du produit pour être gardée (R-ALI-61)."
+          },
+          "package_amount": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/Amount"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "package_measure": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/Measure",
+                "description": "Mesure du conditionnement lu ; il ne vaut que si elle est celle de l'aliment choisi."
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "package_units": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int64"
+          },
+          "proposed_food_id": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/FoodId",
+                "description": "Rattachement proposé : catégorie mémorisée (R-ALI-62), sinon d'après le nom."
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "proposed_group_id": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/FoodGroupId"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "proposed_name": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Nom de l'aliment ou chemin de la famille proposés."
+          }
+        }
+      },
       "ProductId": {
         "type": "string",
         "format": "uuid"
@@ -7917,6 +8123,13 @@
                 "type": "null"
               }
             ]
+          },
+          "off_payload": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Fiche d'Open Food Facts du brouillon validé (R-ALI-60, R-ALI-61) : gardée, ses valeurs\nnutritionnelles reprises, sa catégorie mémorisée (R-ALI-62). Seulement à la création."
           },
           "package_amount": {
             "oneOf": [

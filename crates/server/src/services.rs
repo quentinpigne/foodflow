@@ -19,6 +19,7 @@ pub mod images;
 pub mod locations;
 pub mod meal_validation;
 pub mod meals;
+pub mod off;
 pub mod photos;
 pub mod products;
 pub mod recipe_import;

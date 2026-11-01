@@ -114,8 +114,9 @@ async fn main() -> anyhow::Result<()> {
             let fetcher = Arc::new(clients::web::HttpFetcher::new()?);
             let ai = Arc::new(clients::ai::HttpAiClient::new()?);
             let photos = Arc::new(clients::photos::PixabayClient::new()?);
+            let off = Arc::new(clients::off::OffClient::new()?);
             serve(
-                AppState { db, clock, data, limiter: Arc::default(), secure_cookies, fetcher, ai, photos },
+                AppState { db, clock, data, limiter: Arc::default(), secure_cookies, fetcher, ai, photos, off },
                 addr,
                 web_dir,
             )

@@ -24,6 +24,7 @@ pub const TABLES: &[&str] = &[
     "unit",
     "product",
     "product_nutrient",
+    "off_category_mapping",
     "location",
     "recipe",
     "recipe_tag",

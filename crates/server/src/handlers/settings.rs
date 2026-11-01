@@ -3,6 +3,7 @@ use axum::extract::State;
 use axum::http::StatusCode;
 
 use crate::error::{AppResult, Problem};
+use crate::services::off::{self, OffSettings};
 use crate::services::photos::{self, PhotoSettings, PhotoSettingsInput};
 use crate::services::settings::{self, AppSettings};
 use crate::state::AppState;
@@ -34,5 +35,20 @@ pub async fn update_photos(
     Json(input): Json<PhotoSettingsInput>,
 ) -> AppResult<StatusCode> {
     photos::update_settings(&state.db, &input).await?;
+    Ok(StatusCode::NO_CONTENT)
+}
+
+/// Open Food Facts, activé par défaut (ADR-0007, R-ALI-60).
+#[utoipa::path(get, operation_id = "getOffSettings", path = "/settings/off", tag = "system", responses((status = 200, body = OffSettings)))]
+pub async fn off(State(state): State<AppState>) -> AppResult<Json<OffSettings>> {
+    Ok(Json(off::get_settings(&state.db.read).await?))
+}
+
+#[utoipa::path(
+    put, operation_id = "updateOffSettings", path = "/settings/off", tag = "system", request_body = OffSettings,
+    responses((status = 204), (status = 422, body = Problem))
+)]
+pub async fn update_off(State(state): State<AppState>, Json(input): Json<OffSettings>) -> AppResult<StatusCode> {
+    off::update_settings(&state.db, &input).await?;
     Ok(StatusCode::NO_CONTENT)
 }

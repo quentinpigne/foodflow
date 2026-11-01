@@ -3,7 +3,9 @@
 import { BarcodeLookup } from '../../api/models/barcode-lookup';
 import { ExpiryKind } from '../../api/models/expiry-kind';
 import { Lot } from '../../api/models/lot';
+import { OffStatus } from '../../api/models/off-status';
 import { Product } from '../../api/models/product';
+import { ProductDraft } from '../../api/models/product-draft';
 import { TrackingMode } from '../../api/models/tracking-mode';
 import { quantityInput } from '../../core/quantity';
 
@@ -21,6 +23,9 @@ export interface EntryLine {
   expiryKind: ExpiryKind;
   /** `AAAA-MM-JJ`, ou `null` : à compléter (R-COU-51). */
   expiryDate: string | null;
+  /** Code inconnu : brouillon d'Open Food Facts à valider (R-ALI-60), et ce qu'a répondu le service. */
+  draft?: ProductDraft | null;
+  offStatus?: OffStatus | null;
 }
 
 /** Ligne proposée pour un code lu (R-STK-53). */
@@ -37,7 +42,20 @@ export function newLine(lookup: BarcodeLookup, defaultLocation: string | null): 
       : '',
     expiryKind: lookup.expiry_kind ?? 'USE_BY',
     expiryDate: null,
+    draft: lookup.draft ?? null,
+    offStatus: lookup.off_status ?? null,
   };
+}
+
+/**
+ * Lecture d'un code déjà présent : un conditionnement de plus, sans redemander le code au serveur (ni à
+ * Open Food Facts). `null` si le code n'a pas encore de ligne.
+ */
+export function addAgain(lines: EntryLine[], barcode: string): EntryLine[] | null {
+  const existing = lines.find((l) => l.barcode === barcode);
+  return existing
+    ? [{ ...existing, count: existing.count + 1 }, ...lines.filter((l) => l !== existing)]
+    : null;
 }
 
 /**
@@ -49,11 +67,7 @@ export function addScan(
   lookup: BarcodeLookup,
   defaultLocation: string | null,
 ): EntryLine[] {
-  const existing = lines.find((l) => l.barcode === lookup.barcode);
-  if (existing) {
-    return [{ ...existing, count: existing.count + 1 }, ...lines.filter((l) => l !== existing)];
-  }
-  return [newLine(lookup, defaultLocation), ...lines];
+  return addAgain(lines, lookup.barcode) ?? [newLine(lookup, defaultLocation), ...lines];
 }
 
 /** Inventaire par scan en cours (R-STK-55). */

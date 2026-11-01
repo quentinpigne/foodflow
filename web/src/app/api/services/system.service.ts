@@ -13,6 +13,8 @@ import { StrictHttpResponse } from '../strict-http-response';
 import { AppSettings } from '../models/app-settings';
 import { exportAll } from '../fn/system/export-all';
 import { ExportAll$Params } from '../fn/system/export-all';
+import { getOffSettings } from '../fn/system/get-off-settings';
+import { GetOffSettings$Params } from '../fn/system/get-off-settings';
 import { getPhotoSettings } from '../fn/system/get-photo-settings';
 import { GetPhotoSettings$Params } from '../fn/system/get-photo-settings';
 import { getSettings } from '../fn/system/get-settings';
@@ -20,10 +22,13 @@ import { GetSettings$Params } from '../fn/system/get-settings';
 import { health } from '../fn/system/health';
 import { Health } from '../models/health';
 import { Health$Params } from '../fn/system/health';
+import { OffSettings } from '../models/off-settings';
 import { PhotoSettings } from '../models/photo-settings';
 import { systemInfo } from '../fn/system/system-info';
 import { SystemInfo } from '../models/system-info';
 import { SystemInfo$Params } from '../fn/system/system-info';
+import { updateOffSettings } from '../fn/system/update-off-settings';
+import { UpdateOffSettings$Params } from '../fn/system/update-off-settings';
 import { updatePhotoSettings } from '../fn/system/update-photo-settings';
 import { UpdatePhotoSettings$Params } from '../fn/system/update-photo-settings';
 import { updateSettings } from '../fn/system/update-settings';
@@ -166,6 +171,68 @@ export class SystemService extends BaseService {
    */
   updateSettings(params: UpdateSettings$Params, context?: HttpContext): Observable<void> {
     const resp = this.updateSettings$Response(params, context);
+    return resp.pipe(
+      map((r: StrictHttpResponse<void>): void => r.body)
+    );
+  }
+
+  /** Path part for operation `getOffSettings()` */
+  static readonly GetOffSettingsPath = '/api/v1/settings/off';
+
+  /**
+   * Open Food Facts, activé par défaut (ADR-0007, R-ALI-60).
+   *
+   *
+   *
+   * This method provides access to the full `HttpResponse`, allowing access to response headers.
+   * To access only the response body, use `getOffSettings()` instead.
+   *
+   * This method doesn't expect any request body.
+   */
+  getOffSettings$Response(params?: GetOffSettings$Params, context?: HttpContext): Observable<StrictHttpResponse<OffSettings>> {
+    const obs = getOffSettings(this.http, this.rootUrl, params, context);
+    return obs;
+  }
+
+  /**
+   * Open Food Facts, activé par défaut (ADR-0007, R-ALI-60).
+   *
+   *
+   *
+   * This method provides access only to the response body.
+   * To access the full response (for headers, for example), `getOffSettings$Response()` instead.
+   *
+   * This method doesn't expect any request body.
+   */
+  getOffSettings(params?: GetOffSettings$Params, context?: HttpContext): Observable<OffSettings> {
+    const resp = this.getOffSettings$Response(params, context);
+    return resp.pipe(
+      map((r: StrictHttpResponse<OffSettings>): OffSettings => r.body)
+    );
+  }
+
+  /** Path part for operation `updateOffSettings()` */
+  static readonly UpdateOffSettingsPath = '/api/v1/settings/off';
+
+  /**
+   * This method provides access to the full `HttpResponse`, allowing access to response headers.
+   * To access only the response body, use `updateOffSettings()` instead.
+   *
+   * This method sends `application/json` and handles request body of type `application/json`.
+   */
+  updateOffSettings$Response(params: UpdateOffSettings$Params, context?: HttpContext): Observable<StrictHttpResponse<void>> {
+    const obs = updateOffSettings(this.http, this.rootUrl, params, context);
+    return obs;
+  }
+
+  /**
+   * This method provides access only to the response body.
+   * To access the full response (for headers, for example), `updateOffSettings$Response()` instead.
+   *
+   * This method sends `application/json` and handles request body of type `application/json`.
+   */
+  updateOffSettings(params: UpdateOffSettings$Params, context?: HttpContext): Observable<void> {
+    const resp = this.updateOffSettings$Response(params, context);
     return resp.pipe(
       map((r: StrictHttpResponse<void>): void => r.body)
     );

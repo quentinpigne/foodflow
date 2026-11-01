@@ -131,6 +131,7 @@ Liste de référence, fournie par une migration.
 |---|---|---|
 | `off_category` | texte | PK (`en:semi-skimmed-milks`) |
 | `food_id` / `group_id` | `Id` ? | exactement un des deux (R-ALI-62) |
+| `updated_at` | `Timestamp` | dernier rattachement validé |
 
 ## Stock — spec 02
 

@@ -1,0 +1,50 @@
+{
+  "db_name": "SQLite",
+  "query": "SELECT off_category, food_id, group_id FROM off_category_mapping",
+  "describe": {
+    "columns": [
+      {
+        "name": "off_category",
+        "ordinal": 0,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "off_category_mapping",
+            "name": "off_category"
+          }
+        }
+      },
+      {
+        "name": "food_id",
+        "ordinal": 1,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "off_category_mapping",
+            "name": "food_id"
+          }
+        }
+      },
+      {
+        "name": "group_id",
+        "ordinal": 2,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "off_category_mapping",
+            "name": "group_id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Right": 0
+    },
+    "nullable": [
+      false,
+      true,
+      true
+    ]
+  },
+  "hash": "c34a66ca5039f72ad875425b1d12658ba041211ecdd24d82ac40bfae02e29f23"
+}

@@ -3,7 +3,9 @@
 
 import { ExpiryKind } from '../models/expiry-kind';
 import { LocationId } from '../models/location-id';
+import { OffStatus } from '../models/off-status';
 import { Product } from '../models/product';
+import { ProductDraft } from '../models/product-draft';
 import { TrackingMode } from '../models/tracking-mode';
 
 /**
@@ -16,8 +18,10 @@ export interface BarcodeLookup {
    * Code nettoyé et vérifié (R-ALI-41).
    */
   barcode: string;
+  draft?: (ProductDraft | null);
   expiry_kind?: (ExpiryKind | null);
   location_id?: (LocationId | null);
+  off_status?: (OffStatus | null);
   product?: (Product | null);
   tracking_mode?: (TrackingMode | null);
 }

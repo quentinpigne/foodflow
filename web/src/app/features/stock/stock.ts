@@ -38,7 +38,9 @@ import { fold } from '../../core/text';
       <div class="page-header">
         <h1>Stock</h1>
         <a mat-button routerLink="/stock/inventaire"><mat-icon>checklist</mat-icon>Inventaire</a>
-        <a mat-button routerLink="/stock/scan"><mat-icon>barcode_scanner</mat-icon>Ranger</a>
+        <a mat-stroked-button routerLink="/stock/scan"
+          ><mat-icon>barcode_scanner</mat-icon>Scanner</a
+        >
         <button mat-flat-button (click)="addLot.open()"><mat-icon>add</mat-icon>Ajouter</button>
       </div>
 

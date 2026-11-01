@@ -141,6 +141,10 @@ export type { GetSettings$Params as GetSettings$Params } from './fn/system/get-s
 export { getSettings as getSettings } from './fn/system/get-settings';
 export type { UpdateSettings$Params as UpdateSettings$Params } from './fn/system/update-settings';
 export { updateSettings as updateSettings } from './fn/system/update-settings';
+export type { GetOffSettings$Params as GetOffSettings$Params } from './fn/system/get-off-settings';
+export { getOffSettings as getOffSettings } from './fn/system/get-off-settings';
+export type { UpdateOffSettings$Params as UpdateOffSettings$Params } from './fn/system/update-off-settings';
+export { updateOffSettings as updateOffSettings } from './fn/system/update-off-settings';
 export type { GetPhotoSettings$Params as GetPhotoSettings$Params } from './fn/system/get-photo-settings';
 export { getPhotoSettings as getPhotoSettings } from './fn/system/get-photo-settings';
 export type { UpdatePhotoSettings$Params as UpdatePhotoSettings$Params } from './fn/system/update-photo-settings';

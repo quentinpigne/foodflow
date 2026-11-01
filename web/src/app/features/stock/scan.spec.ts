@@ -3,7 +3,8 @@ import { describe, expect, it } from 'vitest';
 import { BarcodeLookup } from '../../api/models/barcode-lookup';
 import { Lot } from '../../api/models/lot';
 import { Product } from '../../api/models/product';
-import { EMPTY_INVENTORY, EntryLine, addScan, assignScan } from './scan';
+import { ProductDraft } from '../../api/models/product-draft';
+import { EMPTY_INVENTORY, EntryLine, addAgain, addScan, assignScan } from './scan';
 
 const panzani: Product = {
   id: 'panzani',
@@ -64,6 +65,24 @@ describe('R-STK-51 R-STK-53 mise en stock par scan', () => {
     expect(lines[0].product).toBeNull();
     expect(lines[0].location).toBe('frigo');
     expect(lines[0].expiryKind).toBe('USE_BY');
+  });
+
+  it('un code déjà lu s’ajoute sans nouvelle recherche', () => {
+    const lines = addScan([], known, null);
+    expect(addAgain(lines, '3017620422003')?.[0].count).toBe(2);
+    expect(addAgain(lines, '96385074')).toBeNull();
+  });
+
+  it('un code inconnu garde le brouillon d’Open Food Facts', () => {
+    const draft: ProductDraft = {
+      name: 'Spaghetti',
+      nutrient_basis: 'PER_100_G',
+      nutrients: [],
+      off_payload: '{}',
+    };
+    const lines = addScan([], { barcode: '96385074', off_status: 'FOUND', draft }, null);
+    expect(lines[0].draft?.name).toBe('Spaghetti');
+    expect(lines[0].offStatus).toBe('FOUND');
   });
 
   it('la dernière ligne lue remonte en tête', () => {

@@ -100,6 +100,7 @@ async fn product(
         package_amount: Some(Amount::from_raw(package)),
         package_units: None,
         nutrient_basis: None,
+        off_payload: None,
     };
     products::create(db, &input).await.map_err(|e| anyhow!("produit {name} : {e}"))
 }

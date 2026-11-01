@@ -15,4 +15,5 @@ pub fn protected() -> OpenApiRouter<AppState> {
         .routes(routes!(system::export))
         .routes(routes!(settings::get, settings::update))
         .routes(routes!(settings::photos, settings::update_photos))
+        .routes(routes!(settings::off, settings::update_off))
 }

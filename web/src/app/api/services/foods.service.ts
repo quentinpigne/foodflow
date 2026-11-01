@@ -81,7 +81,8 @@ export class FoodsService extends BaseService {
   static readonly LookupBarcodePath = '/api/v1/barcodes/{code}';
 
   /**
-   * Lecture d'un code-barres : produit connu ou non, valeurs proposées pour ses lots (R-STK-50, R-STK-53).
+   * Lecture d'un code-barres : produit connu, ou brouillon d'Open Food Facts pour un code inconnu ; valeurs
+   * proposées pour ses lots (R-STK-50, R-STK-53, R-ALI-60).
    *
    *
    *
@@ -96,7 +97,8 @@ export class FoodsService extends BaseService {
   }
 
   /**
-   * Lecture d'un code-barres : produit connu ou non, valeurs proposées pour ses lots (R-STK-50, R-STK-53).
+   * Lecture d'un code-barres : produit connu, ou brouillon d'Open Food Facts pour un code inconnu ; valeurs
+   * proposées pour ses lots (R-STK-50, R-STK-53, R-ALI-60).
    *
    *
    *

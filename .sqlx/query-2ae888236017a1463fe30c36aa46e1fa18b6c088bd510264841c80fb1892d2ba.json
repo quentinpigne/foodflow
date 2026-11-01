@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "UPDATE product SET off_payload = ?, off_fetched_at = ? WHERE id = ?",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 3
+    },
+    "nullable": []
+  },
+  "hash": "2ae888236017a1463fe30c36aa46e1fa18b6c088bd510264841c80fb1892d2ba"
+}

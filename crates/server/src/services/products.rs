@@ -11,7 +11,9 @@ use serde::{Deserialize, Serialize};
 use utoipa::{IntoParams, ToSchema};
 
 use super::catalog::Catalog;
+use super::off::{self, OffStatus, ProductDraft};
 use super::{clean, required};
+use crate::clients::off::ProductFacts;
 use crate::db::products::{ProductFields, ProductRow};
 use crate::db::{self, Db};
 use crate::error::{AppError, AppResult};
@@ -45,6 +47,10 @@ pub struct ProductInput {
     pub package_amount: Option<Amount>,
     pub package_units: Option<i64>,
     pub nutrient_basis: Option<NutrientBasis>,
+    /// Fiche d'Open Food Facts du brouillon validé (R-ALI-60, R-ALI-61) : gardée, ses valeurs
+    /// nutritionnelles reprises, sa catégorie mémorisée (R-ALI-62). Seulement à la création.
+    #[serde(default)]
+    pub off_payload: Option<String>,
 }
 
 #[derive(Debug, Deserialize, IntoParams)]
@@ -115,20 +121,29 @@ pub struct BarcodeLookup {
     /// Nature de péremption du dernier lot du produit ; sinon `NONE` si l'aliment a une durée de
     /// conservation sans date, `USE_BY` sinon.
     pub expiry_kind: Option<ExpiryKind>,
+    /// Code inconnu : ce qu'a donné Open Food Facts (`None` pour un produit connu).
+    pub off_status: Option<OffStatus>,
+    /// Brouillon de produit tiré d'Open Food Facts, à valider (R-ALI-60).
+    pub draft: Option<ProductDraft>,
 }
 
-/// Lecture d'un code-barres pour la mise en stock ou l'inventaire par scan (R-STK-50, R-STK-53).
-pub async fn lookup_barcode(db: &Db, code: &str) -> AppResult<BarcodeLookup> {
+/// Lecture d'un code-barres pour la mise en stock ou l'inventaire par scan (R-STK-50, R-STK-53) ; un code
+/// inconnu est cherché dans Open Food Facts si le service est activé (R-ALI-60).
+pub async fn lookup_barcode(db: &Db, facts: &dyn ProductFacts, code: &str) -> AppResult<BarcodeLookup> {
     let code = barcode::validate(code)?;
     let mut conn = db.read.acquire().await?;
     let catalog = Catalog::load(&mut conn).await?;
     let Some(row) = catalog.products.values().find(|p| p.barcode.as_deref() == Some(code.as_str())) else {
+        drop(conn);
+        let (status, draft) = off::draft(db, &catalog, facts, &code).await?;
         return Ok(BarcodeLookup {
             barcode: code,
             product: None,
             tracking_mode: None,
             location_id: None,
             expiry_kind: None,
+            off_status: Some(status),
+            draft,
         });
     };
     let settings = catalog.product_settings(row);
@@ -148,6 +163,8 @@ pub async fn lookup_barcode(db: &Db, code: &str) -> AppResult<BarcodeLookup> {
         tracking_mode: Some(settings.tracking_mode),
         location_id: own.or(food).map(|(location, _)| location),
         expiry_kind: Some(expiry_kind),
+        off_status: None,
+        draft: None,
     })
 }
 
@@ -209,6 +226,9 @@ pub async fn create(db: &Db, input: &ProductInput) -> AppResult<ProductId> {
     let fields = fields(&mut tx, input, &name, code.as_deref(), None).await?;
     let id = ProductId::new();
     db::products::insert(&mut *tx, id, &fields).await?;
+    if let Some(payload) = input.off_payload.as_deref() {
+        off::apply(&mut tx, id, payload, input.food_id, input.group_id).await?;
+    }
     // Un aliment Ciqual masqué devient visible dès qu'on l'utilise (R-ALI-52).
     if let Some(food) = input.food_id {
         db::foods::unhide(&mut *tx, food).await?;
